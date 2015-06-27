@@ -2,39 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="577515dd-6dcf-4c15-856e-80264bf6b35d" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/resources/public/.gitignore" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/zuehlke/carrera/javapilot/services/PilotCommandInterface.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/zuehlke/carrera/javapilot/services/PilotToRaceTrackConnector.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/zuehlke/carrera/javapilot/services/RacetrackToPilotConnector.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/zuehlke/carrera/javapilot/rest/SimulatorResource.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/zuehlke/carrera/javapilot/services/SimulatorService.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/zuehlke/carrera/javapilot/config/StompWebSocketConfig.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/resources/public/commons/angular-stomp.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/resources/public/css/app.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/resources/public/bower.json" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/resources/public/commons/carreraRest.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/resources/public/module.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/resources/public/commons/module.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/resources/public/simulator/module.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/resources/public/simulator/simulator.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/resources/public/simulator/simulatorCtrl.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/resources/public/commons/stomp.js" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_zuehlke_carrera_carrera_clientapi_1_1_2.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_zuehlke_carrera_carrera_simulib_0_9_0.xml" afterPath="" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/main/java/com/zuehlke/carrera/javapilot/KobayashiApp.java" afterPath="$PROJECT_DIR$/src/main/java/com/zuehlke/carrera/javapilot/PilotApplication.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/main/java/com/zuehlke/carrera/javapilot/akka/KobayashiActor.java" afterPath="$PROJECT_DIR$/src/main/java/com/zuehlke/carrera/javapilot/akka/JavaPilotActor.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/main/java/com/zuehlke/carrera/javapilot/akka/KobayashiTopology.java" afterPath="$PROJECT_DIR$/src/main/java/com/zuehlke/carrera/javapilot/akka/PilotTopology.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/main/java/com/zuehlke/carrera/javapilot/config/KobayashiConfig.java" afterPath="$PROJECT_DIR$/src/main/java/com/zuehlke/carrera/javapilot/config/PilotConfig.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/main/java/com/zuehlke/carrera/javapilot/config/KobayashiProperties.java" afterPath="$PROJECT_DIR$/src/main/java/com/zuehlke/carrera/javapilot/config/PilotProperties.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/main/java/com/zuehlke/carrera/javapilot/services/KobayashiService.java" afterPath="$PROJECT_DIR$/src/main/java/com/zuehlke/carrera/javapilot/services/PilotService.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/java/com/zuehlke/carrera/javapilot/akka/KobayashiActorTest.java" afterPath="$PROJECT_DIR$/src/test/java/com/zuehlke/carrera/javapilot/akka/KobayashiActorTest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/zuehlke/carrera/javapilot/akka/experimental/PowerUpUntilPenalty.java" afterPath="$PROJECT_DIR$/src/main/java/com/zuehlke/carrera/javapilot/akka/experimental/PowerUpUntilPenalty.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/zuehlke/carrera/javapilot/rest/RestApiController.java" afterPath="$PROJECT_DIR$/src/main/java/com/zuehlke/carrera/javapilot/rest/RestApiController.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/resources/application.yml" afterPath="$PROJECT_DIR$/src/main/resources/application.yml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/carrera.kobayashi.iml" afterPath="$PROJECT_DIR$/carrera.kobayashi.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/resources/public/index.html" afterPath="$PROJECT_DIR$/src/main/resources/public/index.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pom.xml" afterPath="$PROJECT_DIR$/pom.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="starterkit.iws" />
@@ -946,6 +913,10 @@
   </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Now with an embedded simulator &#10;(connected mode not yet supported)" />
+    <option name="LAST_COMMIT_MESSAGE" value="Now with an embedded simulator &#10;(connected mode not yet supported)" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
