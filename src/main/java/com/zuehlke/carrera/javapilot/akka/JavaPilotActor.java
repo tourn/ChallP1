@@ -5,7 +5,7 @@ import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.japi.Creator;
 import com.zuehlke.carrera.javapilot.akka.experimental.ThresholdConfiguration;
-import com.zuehlke.carrera.javapilot.config.KobayashiProperties;
+import com.zuehlke.carrera.javapilot.config.PilotProperties;
 import com.zuehlke.carrera.javapilot.services.EndpointAnnouncement;
 import com.zuehlke.carrera.javapilot.services.PilotToRelayConnection;
 import com.zuehlke.carrera.relayapi.messages.*;
@@ -17,10 +17,10 @@ import java.util.Map;
 /**
  *  Central actor responsible for driving the car. All data gets here and all decisions are finally made here.
  */
-public class KobayashiActor extends UntypedActor {
+public class JavaPilotActor extends UntypedActor {
 
-    private final Logger LOGGER = LoggerFactory.getLogger(KobayashiActor.class);
-    private final KobayashiProperties properties;
+    private final Logger LOGGER = LoggerFactory.getLogger(JavaPilotActor.class);
+    private final PilotProperties properties;
 
     private ActorRef sensorEntryPoint;
     private ActorRef velocityEntryPoint;
@@ -28,7 +28,7 @@ public class KobayashiActor extends UntypedActor {
 
     private PilotToRelayConnection relayConnection;
 
-    public KobayashiActor(KobayashiProperties properties) {
+    public JavaPilotActor(PilotProperties properties) {
 
         this.properties = properties;
 
@@ -36,21 +36,21 @@ public class KobayashiActor extends UntypedActor {
     }
 
     private void createTopology() {
-        Map<String, ActorRef> entryPoints = new KobayashiTopology(getSelf(), getContext().system()).create();
+        Map<String, ActorRef> entryPoints = new PilotTopology(getSelf(), getContext().system()).create();
 
-        this.sensorEntryPoint = entryPoints.get(KobayashiTopology.SENSOR_ENTRYPOINT);
-        this.velocityEntryPoint = entryPoints.get(KobayashiTopology.VELOCITY_ENTRYPOINT);
-        this.penaltyEntryPoint = entryPoints.get(KobayashiTopology.PENALTY_ENTRYPOINT);
+        this.sensorEntryPoint = entryPoints.get(PilotTopology.SENSOR_ENTRYPOINT);
+        this.velocityEntryPoint = entryPoints.get(PilotTopology.VELOCITY_ENTRYPOINT);
+        this.penaltyEntryPoint = entryPoints.get(PilotTopology.PENALTY_ENTRYPOINT);
     }
 
 
-    public static Props props ( KobayashiProperties properties ) {
-        return Props.create(new Creator<KobayashiActor>() {
+    public static Props props ( PilotProperties properties ) {
+        return Props.create(new Creator<JavaPilotActor>() {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public KobayashiActor create() throws Exception {
-                return new KobayashiActor( properties );
+            public JavaPilotActor create() throws Exception {
+                return new JavaPilotActor( properties );
             }
         });
     }
@@ -90,8 +90,11 @@ public class KobayashiActor extends UntypedActor {
 
             } else if (message instanceof String) {
 
+                // simply ignore this if there is no connection.
                 if ("ENSURE_CONNECTION".equals(message)) {
-                    relayConnection.ensureConnection();
+                    if (relayConnection != null) {
+                        relayConnection.ensureConnection();
+                    }
                 }
             } else {
                 unhandled(message);

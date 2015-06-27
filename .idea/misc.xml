@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="EntryPointsManager">
+    <entry_points version="2.0" />
+  </component>
   <component name="MavenProjectsManager">
     <option name="originalFiles">
       <list>
@@ -19,19 +22,6 @@
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_6" assert-keyword="true" jdk-15="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
-  </component>
-  <component name="ValidationConfiguration">
-    <option name="VALIDATORS">
-      <map>
-        <entry key="EJB Validator" value="true" />
-        <entry key="Hibernate Validator" value="true" />
-        <entry key="JPA Validator" value="true" />
-        <entry key="Jasper Validator" value="true" />
-        <entry key="Spring Model Validator" value="false" />
-        <entry key="Spring Web Flow" value="true" />
-        <entry key="Web Xml Validator" value="true" />
-      </map>
-    </option>
   </component>
   <component name="masterDetails">
     <states>

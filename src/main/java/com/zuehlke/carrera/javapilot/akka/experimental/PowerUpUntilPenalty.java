@@ -5,6 +5,7 @@ import akka.actor.Props;
 import akka.actor.UntypedActor;
 import com.zuehlke.carrera.javapilot.akka.PowerAction;
 import com.zuehlke.carrera.relayapi.messages.PenaltyMessage;
+import com.zuehlke.carrera.relayapi.messages.RaceStartMessage;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import com.zuehlke.carrera.timeseries.FloatingHistory;
 import org.apache.commons.lang.StringUtils;
@@ -19,7 +20,7 @@ public class PowerUpUntilPenalty extends UntypedActor {
 
     private int currentPower = 0;
 
-    private long lastIncrease;
+    private long lastIncrease = 0;
 
     private int maxPower = 180; // Max for this phase;
 
@@ -54,9 +55,20 @@ public class PowerUpUntilPenalty extends UntypedActor {
         } else if ( message instanceof PenaltyMessage) {
             handlePenaltyMessage ( (PenaltyMessage) message );
 
+        } else if ( message instanceof RaceStartMessage) {
+            handleRaceStart();
+
         } else {
             unhandled(message);
         }
+    }
+
+    private void handleRaceStart() {
+        currentPower = 0;
+        lastIncrease = 0;
+        maxPower = 180; // Max for this phase;
+        probing = true;
+        gyrozHistory = new FloatingHistory(8);
     }
 
     private void handlePenaltyMessage(PenaltyMessage message) {

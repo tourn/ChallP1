@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  *      creates the complete topology and provides a Map of well-defined entry-points
  */
-public class KobayashiTopology {
+public class PilotTopology {
 
     public static final String SENSOR_ENTRYPOINT = "SENSOR_ENTRYPOINT";
     public static final String VELOCITY_ENTRYPOINT = "VELOCITY_ENTRYPOINT";
@@ -20,7 +20,7 @@ public class KobayashiTopology {
     private final ActorRef kobayashi;
     private final Map<String, ActorRef> entryPoints = new HashMap<>();
 
-    public KobayashiTopology(ActorRef kobayashi, ActorSystem system ) {
+    public PilotTopology(ActorRef kobayashi, ActorSystem system) {
         this.kobayashi = kobayashi;
         this.system = system;
     }

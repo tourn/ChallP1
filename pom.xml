@@ -24,7 +24,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <start-class>com.zuehlke.carrera.javapilot.KobayashiApp</start-class>
+        <start-class>com.zuehlke.carrera.javapilot.PilotApplication</start-class>
         <java.version>1.8</java.version>
     </properties>
 
@@ -34,13 +34,13 @@
         <dependency>
             <groupId>com.zuehlke.carrera</groupId>
             <artifactId>carrera.clientapi</artifactId>
-            <version>1.1.2</version>
+            <version>1.1.4</version>
         </dependency>
 
         <dependency>
             <groupId>com.zuehlke.carrera</groupId>
             <artifactId>carrera.simulib</artifactId>
-            <version>0.9.0</version>
+            <version>0.9.1</version>
         </dependency>
 
 
@@ -73,6 +73,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
         </dependency>
 
         <dependency>

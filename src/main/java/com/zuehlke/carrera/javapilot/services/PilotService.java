@@ -2,17 +2,15 @@ package com.zuehlke.carrera.javapilot.services;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
-import com.zuehlke.carrera.javapilot.akka.KobayashiActor;
-import com.zuehlke.carrera.javapilot.config.KobayashiProperties;
+import com.zuehlke.carrera.javapilot.akka.JavaPilotActor;
+import com.zuehlke.carrera.javapilot.config.PilotProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 /**
@@ -20,25 +18,34 @@ import javax.annotation.PreDestroy;
  */
 @Service
 @EnableScheduling
-public class KobayashiService {
+public class PilotService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(KobayashiService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PilotService.class);
 
-    private final KobayashiProperties settings;
+    private final PilotProperties settings;
 
     private final ActorSystem system;
     private final ActorRef pilotActor;
     private final String endPointUrl;
 
+    private final SimulatorService simulatorService;
+
     @Autowired
-    public KobayashiService(KobayashiProperties settings, EndpointService endpointService){
+    public PilotService(PilotProperties settings, EndpointService endpointService,
+                        SimulatorService simulatorService ){
         this.settings = settings;
+        this.simulatorService = simulatorService;
         this.endPointUrl = endpointService.getHttpEndpoint();
         system = ActorSystem.create(settings.getName());
-        pilotActor = system.actorOf(KobayashiActor.props(settings));
+        pilotActor = system.actorOf(JavaPilotActor.props(settings));
+        simulatorService.registerPilot(pilotActor);
+
+        pilotActor.tell(new PilotToRaceTrackConnector(simulatorService.getSystem()), ActorRef.noSender());
     }
 
-    @PostConstruct
+
+
+    //@PostConstruct
     public void connectToRelay () {
         PilotToRelayConnection pilotToRelayConnection = new PilotToRelayStompConnection(
                 settings.getRelayUrl(),

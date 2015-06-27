@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * Simulator Settings
  */
 @ConfigurationProperties(prefix="javapilot") // loaded from /resources/application.yml
-public class KobayashiProperties {
+public class PilotProperties {
     private String relayUrl;
     private String name;
     private String accessCode;

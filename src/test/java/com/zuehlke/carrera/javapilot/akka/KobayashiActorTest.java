@@ -3,9 +3,8 @@ package com.zuehlke.carrera.javapilot.akka;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
-import com.zuehlke.carrera.javapilot.config.KobayashiProperties;
+import com.zuehlke.carrera.javapilot.config.PilotProperties;
 import com.zuehlke.carrera.javapilot.services.PilotToRelayConnection;
-import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import com.zuehlke.carrera.relayapi.messages.PowerControl;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -21,11 +20,11 @@ public class KobayashiActorTest {
     @Ignore
     public void testThresholdConfiguration () throws InterruptedException {
 
-        KobayashiProperties properties = new KobayashiProperties();
+        PilotProperties properties = new PilotProperties();
 
         ActorSystem system = ActorSystem.create("testSystem");
 
-        ActorRef pilot = system.actorOf(KobayashiActor.props(properties));
+        ActorRef pilot = system.actorOf(JavaPilotActor.props(properties));
 
         Thread.sleep(1000);
 

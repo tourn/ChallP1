@@ -3,15 +3,18 @@ package com.zuehlke.carrera.javapilot;
 
 import com.zuehlke.carrera.relayapi.messages.TrainingRequest;
 import com.zuehlke.carrera.relayapi.messages.TrainingResponse;
+import com.zuehlke.carrera.simulator.config.SimulatorProperties;
 import org.apache.commons.cli.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +22,9 @@ import java.util.List;
 @Configuration
 @ComponentScan
 @EnableAutoConfiguration
-public class KobayashiApp implements CommandLineRunner{
+@EnableConfigurationProperties({SimulatorProperties.class})  // loaded from classpath:/application.yml
+@EnableWebSocketMessageBroker
+public class PilotApplication implements CommandLineRunner{
 
     @Value("${javapilot.trainingUrl}")
     private String relayTrainingUrl;
@@ -37,7 +42,7 @@ public class KobayashiApp implements CommandLineRunner{
      */
     public static void main(String[] args) {
 
-        SpringApplication.run(KobayashiApp.class, args);
+        SpringApplication.run(PilotApplication.class, args);
 
     }
 
