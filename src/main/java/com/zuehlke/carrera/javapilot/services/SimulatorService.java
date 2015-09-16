@@ -5,6 +5,8 @@ import com.zuehlke.carrera.relayapi.messages.*;
 import com.zuehlke.carrera.simulator.config.SimulatorProperties;
 import com.zuehlke.carrera.simulator.model.PilotInterface;
 import com.zuehlke.carrera.simulator.model.RaceTrackSimulatorSystem;
+import com.zuehlke.carrera.simulator.model.akka.communication.NewsInterface;
+import com.zuehlke.carrera.simulator.model.akka.communication.StompNewsInterface;
 import com.zuehlke.carrera.simulator.model.racetrack.TrackDesign;
 import com.zuehlke.carrera.simulator.model.racetrack.TrackInfo;
 import com.zuehlke.carrera.simulator.model.racetrack.TrackSection;
@@ -13,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -23,6 +27,7 @@ import java.util.List;
  * Manages the racetrack simulator instance.
  */
 @Service
+@EnableScheduling
 public class SimulatorService {
 
     private static final Logger LOG = LoggerFactory.getLogger(SimulatorService.class);
@@ -36,25 +41,24 @@ public class SimulatorService {
     private final RacetrackToPilotConnector pilotInterface;
 
     @Autowired
-    public SimulatorService(SimulatorProperties settings,
-                            SimpMessagingTemplate simpMessagingTemplate){
+    public SimulatorService ( SimulatorProperties settings,
+                            SimpMessagingTemplate simpMessagingTemplate ){
         this.settings = settings;
-        RacetrackToPilotConnector connector = new RacetrackToPilotConnector();
-        this.pilotInterface = connector;
+        this.pilotInterface =  new RacetrackToPilotConnector ();
         this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
     @PostConstruct
-    public void init(){
+    public void init () {
 
         raceTrackSimulatorSystem = new RaceTrackSimulatorSystem(
                 settings.getName(),
                 pilotInterface,
-                simpMessagingTemplate,
+                new StompNewsInterface(simpMessagingTemplate),
                 new NormalDistribution(settings.getTickPeriod(), settings.getSigma()),
                 settings);
 
-        raceTrackSimulatorSystem.startClock();
+        //raceTrackSimulatorSystem.startClock();
     }
 
     public void registerPilot(ActorRef pilot ) {
@@ -122,6 +126,11 @@ public class SimulatorService {
         raceTrackSimulatorSystem.reset();
     }
 
+    @Scheduled(fixedRate = 2000)
+    public void ensureConnection() {
+        raceTrackSimulatorSystem.ensureConnection(settings.getRabbitUrl());
+    }
+
     public TrackInfo selectDesign(String trackDesign) {
 
         // will return the trackdesign and discard it, since we need the complete info.
@@ -131,4 +140,5 @@ public class SimulatorService {
 
         return trackInfo;
     }
+
 }

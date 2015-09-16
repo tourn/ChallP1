@@ -22,11 +22,11 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
-        <module name="carrera.kobayashi" />
+        <module name="fnf.starterkit" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="carrera.kobayashi" target="1.8" />
+      <module name="fnf.starterkit" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

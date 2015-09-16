@@ -31,8 +31,13 @@ public class RacetrackToPilotConnector implements PilotInterface, PilotCommandIn
     }
 
     @Override
-    public void send(RoundPassedMessage message) {
+    public void send(RoundTimeMessage message) {
         sendMessage(message);
+    }
+
+    @Override
+    public void ensureConnection(String url) {
+        // don't need this in local mode
     }
 
     @Override

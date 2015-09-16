@@ -29,19 +29,19 @@ public class PowerUpUntilPenalty extends UntypedActor {
     private FloatingHistory gyrozHistory = new FloatingHistory(8);
 
     /**
-     * @param kobayashi The central pilot actor = kobayashi
+     * @param pilotActor The central pilot actor
      * @param duration the period between two increases
      * @return the actor props
      */
-    public static Props props( ActorRef kobayashi, int duration ) {
+    public static Props props( ActorRef pilotActor, int duration ) {
         return Props.create(
-                PowerUpUntilPenalty.class, () -> new PowerUpUntilPenalty( kobayashi, duration ));
+                PowerUpUntilPenalty.class, () -> new PowerUpUntilPenalty(pilotActor, duration ));
     }
     private final int duration;
 
-    public PowerUpUntilPenalty(ActorRef kobayashi, int duration) {
+    public PowerUpUntilPenalty(ActorRef pilotActor, int duration) {
         lastIncrease = System.currentTimeMillis();
-        this.kobayashi = kobayashi;
+        this.kobayashi = pilotActor;
         this.duration = duration;
     }
 

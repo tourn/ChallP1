@@ -88,6 +88,9 @@ public class JavaPilotActor extends UntypedActor {
             } else if ( message instanceof ThresholdConfiguration) {
                 sensorEntryPoint.forward(message, getContext());
 
+            } else if ( message instanceof RoundTimeMessage ) {
+                handleRoundTime((RoundTimeMessage) message);
+
             } else if (message instanceof String) {
 
                 // simply ignore this if there is no connection.
@@ -104,6 +107,10 @@ public class JavaPilotActor extends UntypedActor {
             e.printStackTrace();
         }
 
+    }
+
+    private void handleRoundTime(RoundTimeMessage message) {
+        LOGGER.info ( "Round Time in ms: " + message.getRoundDuration());
     }
 
     private void handlePenaltyMessage(PenaltyMessage message) {

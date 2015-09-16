@@ -28,18 +28,18 @@ public class PilotService {
     private final ActorRef pilotActor;
     private final String endPointUrl;
 
-    private final SimulatorService simulatorService;
-
     @Autowired
     public PilotService(PilotProperties settings, EndpointService endpointService,
                         SimulatorService simulatorService ){
         this.settings = settings;
-        this.simulatorService = simulatorService;
         this.endPointUrl = endpointService.getHttpEndpoint();
         system = ActorSystem.create(settings.getName());
         pilotActor = system.actorOf(JavaPilotActor.props(settings));
+
+        // Simulator learns about the pilot
         simulatorService.registerPilot(pilotActor);
 
+        // Pilot learns about the simulator
         pilotActor.tell(new PilotToRaceTrackConnector(simulatorService.getSystem()), ActorRef.noSender());
     }
 
@@ -76,5 +76,15 @@ public class PilotService {
         LOGGER.info("Shutting down the actor system.");
         system.shutdown();
 
+    }
+
+    public void registerConnection(PilotToRelayConnection pilot) {
+        if ( pilot != null ) {
+            pilotActor.tell(pilot, ActorRef.noSender());
+        }
+    }
+
+    public ActorRef getPilotActor() {
+        return pilotActor;
     }
 }

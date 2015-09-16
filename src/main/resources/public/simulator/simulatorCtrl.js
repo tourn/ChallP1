@@ -29,19 +29,19 @@ angular.module('simulator')
             height: 800
         };
 
-        $scope.selectedSpec = {description: 'Gyro Z', coord: { vector: 'gyr', axis: 2 },
+        $scope.selectedSpec = {description: 'Gyro Z', coord: { vector: 'g', axis: 2 },
             range: { lower: -8000, upper: 8000}};
 
         $scope.displaySpecifications = [
-            {description: 'Acceleration X', coord: { vector: 'acc', axis: 0 }},
-            {description: 'Acceleration Y', coord: { vector: 'acc', axis: 1 }},
-            {description: 'Acceleration Z', coord: { vector: 'acc', axis: 2 }},
-            {description: 'Gyro X', coord: { vector: 'gyr', axis: 0 }},
-            {description: 'Gyro Y', coord: { vector: 'gyr', axis: 1 }},
+            {description: 'Acceleration X', coord: { vector: 'a', axis: 0 }},
+            {description: 'Acceleration Y', coord: { vector: 'a', axis: 1 }},
+            {description: 'Acceleration Z', coord: { vector: 'a', axis: 2 }},
+            {description: 'Gyro X', coord: { vector: 'g', axis: 0 }},
+            {description: 'Gyro Y', coord: { vector: 'g', axis: 1 }},
             $scope.selectedSpec,
-            {description: 'Magnetic X', coord:  { vector: 'mag', axis: 0 }},
-            {description: 'Magnetic Y', coord:  { vector: 'mag', axis: 1 }},
-            {description: 'Magnetic Z', coord:  { vector: 'mag', axis: 2 }}
+            {description: 'Magnetic X', coord:  { vector: 'm', axis: 0 }},
+            {description: 'Magnetic Y', coord:  { vector: 'm', axis: 1 }},
+            {description: 'Magnetic Z', coord:  { vector: 'm', axis: 2 }}
         ];
 
 
@@ -62,7 +62,7 @@ angular.module('simulator')
 
         $scope.ngStompClient = {};
         $scope.recentTime = null;
-        $scope.recentNews = { event : { acc: [0,1,2], gyr: [3,4,5], mag: [6,7,8]},
+        $scope.recentNews = { event : { a: [0,1,2], g: [3,4,5], m: [6,7,8]},
             position: { poxX: 0, posY: 0 }};
 
         $scope.newsWorking = false;

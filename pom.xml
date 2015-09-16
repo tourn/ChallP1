@@ -5,8 +5,8 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>carrera.starterkit</artifactId>
-    <groupId>com.zuehlke.carrera</groupId>
+    <artifactId>fnf.starterkit</artifactId>
+    <groupId>com.zuehlke.fastandfurious</groupId>
     <version>1.0-SNAPSHOT</version>
 
 
@@ -32,15 +32,15 @@
 
 
         <dependency>
-            <groupId>com.zuehlke.carrera</groupId>
-            <artifactId>carrera.clientapi</artifactId>
-            <version>1.1.4</version>
+            <groupId>com.zuehlke.fastandfurious</groupId>
+            <artifactId>fnf.clientapi</artifactId>
+            <version>1.1.7-SNAPSHOT</version>
         </dependency>
 
         <dependency>
-            <groupId>com.zuehlke.carrera</groupId>
-            <artifactId>carrera.simulib</artifactId>
-            <version>0.9.1</version>
+            <groupId>com.zuehlke.fastandfurious</groupId>
+            <artifactId>fnf.simulib</artifactId>
+            <version>0.9.4-SNAPSHOT</version>
         </dependency>
 
 
