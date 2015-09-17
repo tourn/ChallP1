@@ -16,7 +16,7 @@ To install the starter kit, do the following:
   $ git clone https://github.com/FastAndFurious/AkkaStarterKit
   $ cd AkkaStarterKit
   $ mvn clean install
-  java -jar target/fnf.starterkit-1.0-SNAPSHOT.jar  <options>
+  $ java -jar target/fnf.starterkit-1.0-SNAPSHOT.jar  <options>
 ```
  This starts a web application on your computer. Point your browser to http://localhost:8089 to access the simulator
 
