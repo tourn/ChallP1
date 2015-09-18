@@ -9,7 +9,6 @@ If you want to use a different technology, this starterkit still provides you wi
   - maven 2 installed
   - git installed
   - rabbitmq installed (for remote connections)
-  - mongodb installed (for race data storage)
 
 To install the starter kit, do the following:
 
