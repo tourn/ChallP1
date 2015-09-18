@@ -8,7 +8,8 @@ If you want to use a different technology, this starterkit still provides you wi
   - JAVA_HOME environment variable points to the Java installation directory
   - maven 2 installed
   - git installed
-  - rabbitmq installed
+  - rabbitmq installed (for remote connections)
+  - mongodb installed (for race data storage)
 
 To install the starter kit, do the following:
 
