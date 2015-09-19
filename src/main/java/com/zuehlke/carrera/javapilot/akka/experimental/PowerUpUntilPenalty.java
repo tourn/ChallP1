@@ -79,13 +79,14 @@ public class PowerUpUntilPenalty extends UntypedActor {
     }
 
     /**
-     * Strategy: increase without
-     * @param message
+     * Strategy: increase quickly when standing still to overcome haptic friction
+     * then increase slowly. Probing phase will be ended by the first penalty
+     * @param message the sensor event coming in
      */
     private void handleSensorEvent(SensorEvent message) {
 
-        gyrozHistory.shift(message.getG()[2]);
-        // show (gyrz);
+        double gyrz = gyrozHistory.shift(message.getG()[2]);
+         show ((int)gyrz);
 
         if (probing) {
             if (iAmStillStanding()) {
