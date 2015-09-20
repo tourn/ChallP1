@@ -18,6 +18,18 @@ To install the starter kit, do the following:
   $ mvn clean install
   $ java -jar target/fnf.starterkit-1.0-SNAPSHOT.jar  <options>
 ```
+
+When building against the snapshots of clientapi and simulib, make sure you build those prior to the above so you have them in your local maven cache. To do just that, do the following
+
+```shell
+  $ git clone https://github.com/FastAndFurious/fnf.clientapi
+  $ cd fnf.clientapi
+  $ mvn clean install
+  $ git clone https://github.com/FastAndFurious/fnf.simulib
+  $ cd fnf.simulib
+  $ mvn clean install
+```
+
  This starts a web application on your computer. Point your browser to http://localhost:8089 to access the simulator.
 
   **command line options for the executable jar file:** 
