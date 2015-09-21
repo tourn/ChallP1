@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="f6565c51-7a67-48f8-9821-c3ace32e14ea" name="Default" comment="pubil">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/resources/public.zip" />
+    <list default="true" id="f6565c51-7a67-48f8-9821-c3ace32e14ea" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="fnf.starterkit.iws" />
@@ -783,7 +782,8 @@
     <MESSAGE value="splittable on rabbit protocol" />
     <MESSAGE value="Last RaceType reference" />
     <MESSAGE value="show gyro z on stdout" />
-    <option name="LAST_COMMIT_MESSAGE" value="show gyro z on stdout" />
+    <MESSAGE value="pubil" />
+    <option name="LAST_COMMIT_MESSAGE" value="pubil" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
