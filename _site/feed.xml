@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>ChallP1</title>
+    <description>Log fuer das Challenge Projekt 1 an der HSR</description>
+    <link>https://tourn.github.io/ChallP1/</link>
+    <atom:link href="https://tourn.github.io/ChallP1/feed.xml" rel="self" type="application/rss+xml" />
+    
+      <item>
+        <title>Willkommen</title>
+        <description>&lt;p&gt;Folgende Erfolge lassen sich bereits festhalten:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Kickoff-Event überstanden&lt;/li&gt;
+  &lt;li&gt;Entwicklungsumgebung eingerichtet&lt;/li&gt;
+  &lt;li&gt;Log mit Jekyll auf die Beine gestellt&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        <pubDate>Mon, 21 Sep 2015 00:00:00 +0200</pubDate>
+        <link>https://tourn.github.io/ChallP1/2015/09/21/willkommen/</link>
+        <guid isPermaLink="true">https://tourn.github.io/ChallP1/2015/09/21/willkommen/</guid>
+      </item>
+    
+  </channel>
+</rss>
