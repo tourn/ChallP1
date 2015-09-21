@@ -2,7 +2,6 @@ package com.zuehlke.carrera.javapilot.rest;
 
 import com.zuehlke.carrera.relayapi.messages.RaceStartMessage;
 import com.zuehlke.carrera.relayapi.messages.RaceStopMessage;
-import com.zuehlke.carrera.relayapi.messages.RaceType;
 import com.zuehlke.carrera.simulator.model.racetrack.TrackInfo;
 import com.zuehlke.carrera.javapilot.services.SimulatorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +22,7 @@ public class SimulatorResource {
 
     @RequestMapping(value="/startRace", method = RequestMethod.POST)
     public void startRace() {
-        simulatorService.fireRaceStartEvent(new RaceStartMessage("local", RaceType.TRAINING, "", 0L, "", false));
+        simulatorService.fireRaceStartEvent(new RaceStartMessage("local", "TRAINING", "", 0L, "", false));
     }
 
     @RequestMapping(value="/stopRace", method = RequestMethod.POST)
