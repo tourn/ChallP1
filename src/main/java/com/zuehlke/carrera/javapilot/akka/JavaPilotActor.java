@@ -25,6 +25,7 @@ public class JavaPilotActor extends UntypedActor {
     private ActorRef sensorEntryPoint;
     private ActorRef velocityEntryPoint;
     private ActorRef penaltyEntryPoint;
+    private ActorRef roundTimeEntryPoint;
 
     private PilotToRelayConnection relayConnection;
 
@@ -41,6 +42,7 @@ public class JavaPilotActor extends UntypedActor {
         this.sensorEntryPoint = entryPoints.get(PilotTopology.SENSOR_ENTRYPOINT);
         this.velocityEntryPoint = entryPoints.get(PilotTopology.VELOCITY_ENTRYPOINT);
         this.penaltyEntryPoint = entryPoints.get(PilotTopology.PENALTY_ENTRYPOINT);
+        this.roundTimeEntryPoint = entryPoints.get(PilotTopology.ROUNDTIME_ENTRYPOINT);
     }
 
 
@@ -111,6 +113,7 @@ public class JavaPilotActor extends UntypedActor {
 
     private void handleRoundTime(RoundTimeMessage message) {
         LOGGER.info ( "Round Time in ms: " + message.getRoundDuration());
+        roundTimeEntryPoint.forward(message, getContext());
     }
 
     private void handlePenaltyMessage(PenaltyMessage message) {

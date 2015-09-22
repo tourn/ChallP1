@@ -15,6 +15,7 @@ public class PilotTopology {
     public static final String SENSOR_ENTRYPOINT = "SENSOR_ENTRYPOINT";
     public static final String VELOCITY_ENTRYPOINT = "VELOCITY_ENTRYPOINT";
     public static final String PENALTY_ENTRYPOINT = "PENALTY_ENTRYPOINT";
+    public static final String ROUNDTIME_ENTRYPOINT = "ROUNDTIME_ENTRYPOINT";
 
     private final ActorSystem system;
     private final ActorRef kobayashi;
@@ -32,6 +33,7 @@ public class PilotTopology {
         entryPoints.put(PENALTY_ENTRYPOINT, initialProcessor);
         entryPoints.put(SENSOR_ENTRYPOINT, initialProcessor);
         entryPoints.put(VELOCITY_ENTRYPOINT, initialProcessor);
+        entryPoints.put(ROUNDTIME_ENTRYPOINT, initialProcessor);
 
         return entryPoints;
     }
