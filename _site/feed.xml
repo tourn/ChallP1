@@ -1,10 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>ChallP1</title>
+    <title>POWER OVERWHELMING - ChallP1 @ HSR</title>
     <description>Log fuer das Challenge Projekt 1 an der HSR</description>
-    <link>https://tourn.github.io/ChallP1/</link>
-    <atom:link href="https://tourn.github.io/ChallP1/feed.xml" rel="self" type="application/rss+xml" />
+    <link>https://tourn.github.io/ChallP1/ChallP1/</link>
+    <atom:link href="https://tourn.github.io/ChallP1/ChallP1/feed.xml" rel="self" type="application/rss+xml" />
+    
+      <item>
+        <title>Stundenreport</title>
+        <description>&lt;h2 id=&quot;section&quot;&gt;22.9&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Entwicklungsumgebungen einrichten&lt;/li&gt;
+  &lt;li&gt;In Beispielcode einlesen&lt;/li&gt;
+  &lt;li&gt;Einlesen in Akka, Machine Learning, …&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        <pubDate>Tue, 22 Sep 2015 00:00:00 +0200</pubDate>
+        <link>https://tourn.github.io/ChallP1/ChallP1/2015/09/22/stundenreport/</link>
+        <guid isPermaLink="true">https://tourn.github.io/ChallP1/ChallP1/2015/09/22/stundenreport/</guid>
+      </item>
     
       <item>
         <title>Willkommen</title>
@@ -17,8 +32,8 @@
 &lt;/ul&gt;
 </description>
         <pubDate>Mon, 21 Sep 2015 00:00:00 +0200</pubDate>
-        <link>https://tourn.github.io/ChallP1/2015/09/21/willkommen/</link>
-        <guid isPermaLink="true">https://tourn.github.io/ChallP1/2015/09/21/willkommen/</guid>
+        <link>https://tourn.github.io/ChallP1/ChallP1/2015/09/21/willkommen/</link>
+        <guid isPermaLink="true">https://tourn.github.io/ChallP1/ChallP1/2015/09/21/willkommen/</guid>
       </item>
     
   </channel>
