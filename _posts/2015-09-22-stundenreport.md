@@ -10,3 +10,4 @@ summary:    Stundenreport
 * Entwicklungsumgebungen einrichten
 * In Beispielcode einlesen
 * Einlesen in Akka, Machine Learning, ...
+* Testing some things
