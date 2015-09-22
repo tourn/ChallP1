@@ -8,3 +8,4 @@ permalink: /report/
 * Entwicklungsumgebungen einrichten
 * In Beispielcode einlesen
 * Einlesen in Akka, Machine Learning, ...
+* Einfache Kurvenerkennung implementieren
