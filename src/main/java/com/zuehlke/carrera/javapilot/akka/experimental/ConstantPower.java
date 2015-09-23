@@ -3,9 +3,10 @@ package com.zuehlke.carrera.javapilot.akka.experimental;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
-import com.sun.tools.internal.jxc.ap.Const;
-import com.zuehlke.carrera.javapilot.akka.JavaPilotActor;
+//import com.sun.tools.internal.jxc.ap.Const;
 import com.zuehlke.carrera.javapilot.akka.PowerAction;
+import com.zuehlke.carrera.javapilot.akka.experimental.trackanalyzer.TrackAnalyzer;
+import com.zuehlke.carrera.relayapi.messages.RoundTimeMessage;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
 import com.zuehlke.carrera.timeseries.FloatingHistory;
@@ -32,6 +33,9 @@ public class ConstantPower extends UntypedActor {
     private State state = State.STRAIGHT;
     private FloatingHistory gyroZ = new FloatingHistory(8);
     private static double TURN_THRESHOLD = 1000;
+    private static long previousTimestamp = 0;
+    private static int roundCounter = 0;
+    private static TrackAnalyzer trackAnalyzer = new TrackAnalyzer();
 
     public ConstantPower(ActorRef pilot, int power) {
         this.pilot = pilot;
@@ -48,14 +52,23 @@ public class ConstantPower extends UntypedActor {
         if ( message instanceof SensorEvent ) {
             handleSensorEvent((SensorEvent) message);
         } else if ( message instanceof VelocityMessage) {
-                handleVelocityMessage((VelocityMessage) message);
+            handleVelocityMessage((VelocityMessage) message);
+        } else if ( message instanceof RoundTimeMessage) {
+            handleRoundTimeMessage((RoundTimeMessage) message);
         } else {
             unhandled(message);
         }
     }
 
     private void handleVelocityMessage(VelocityMessage message) {
-        // ignore for now
+        trackAnalyzer.addTrackVelocitiesToRound(message.getVelocity(),message.getTimeStamp());
+    }
+
+    private void handleRoundTimeMessage(RoundTimeMessage message) {
+        trackAnalyzer.newRound(message.getTimestamp());
+        trackAnalyzer.printRound(roundCounter);
+        roundCounter++;
+        //LOGGER.info("Round Nr. "+roundCounter);
     }
 
     private void handleSensorEvent(SensorEvent event) {
@@ -66,17 +79,26 @@ public class ConstantPower extends UntypedActor {
             case STRAIGHT:
                 if(gyroZ.currentMean() > TURN_THRESHOLD){
                     state = State.TURN_RIGHT;
+                    trackAnalyzer.addTrackSectionToRound("RIGHT TURN", event.getTimeStamp());
+                    LOGGER.info("("+(event.getTimeStamp()-previousTimestamp)+"ms)");
                     LOGGER.info("RIGHT TURN");
+                    previousTimestamp = event.getTimeStamp();
                 } else if( Math.abs(gyroZ.currentMean()) > TURN_THRESHOLD){
                     state = State.TURN_LEFT;
+                    trackAnalyzer.addTrackSectionToRound("LEFT TURN", event.getTimeStamp());
+                    LOGGER.info("("+(event.getTimeStamp()-previousTimestamp)+"ms)");
                     LOGGER.info("LEFT TURN");
+                    previousTimestamp = event.getTimeStamp();
                 }
                 break;
             case TURN_LEFT:
             case TURN_RIGHT:
                 if(Math.abs(gyroZ.currentMean()) < TURN_THRESHOLD){
                     state = State.STRAIGHT;
+                    trackAnalyzer.addTrackSectionToRound("GOING STRAIGHT", event.getTimeStamp());
+                    LOGGER.info("("+(event.getTimeStamp()-previousTimestamp)+"ms)");
                     LOGGER.info("GOING STRAIGHT");
+                    previousTimestamp = event.getTimeStamp();
                 }
         }
     }

@@ -29,7 +29,7 @@ public class PilotTopology {
 
     public Map<String, ActorRef> create() {
 
-        ActorRef initialProcessor = system.actorOf(ConstantPower.props(kobayashi, 100));
+        ActorRef initialProcessor = system.actorOf(ConstantPower.props(kobayashi, 120));
 
         entryPoints.put(PENALTY_ENTRYPOINT, initialProcessor);
         entryPoints.put(SENSOR_ENTRYPOINT, initialProcessor);
