@@ -4,8 +4,10 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import com.zuehlke.carrera.javapilot.akka.PowerAction;
+import com.zuehlke.carrera.javapilot.services.EndpointAnnouncement;
 import com.zuehlke.carrera.relayapi.messages.PenaltyMessage;
 import com.zuehlke.carrera.relayapi.messages.RaceStartMessage;
+import com.zuehlke.carrera.relayapi.messages.RoundTimeMessage;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import com.zuehlke.carrera.timeseries.FloatingHistory;
 import org.apache.commons.lang.StringUtils;
@@ -54,13 +56,24 @@ public class PowerUpUntilPenalty extends UntypedActor {
 
         } else if ( message instanceof PenaltyMessage) {
             handlePenaltyMessage ( (PenaltyMessage) message );
-
         } else if ( message instanceof RaceStartMessage) {
             handleRaceStart();
-
+        } else if (message instanceof RoundTimeMessage) {
+            handleRoundTime();
+        } else if(message instanceof EndpointAnnouncement){
+            handleEndpoint();
         } else {
+
             unhandled(message);
         }
+    }
+
+    private void handleEndpoint(){
+        System.out.println("ROUND");
+    }
+
+    private void handleRoundTime(){
+        System.out.println("ROUNDTIME");
     }
 
     private void handleRaceStart() {
