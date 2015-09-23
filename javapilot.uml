@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>com.zuehlke.carrera.javapilot</OriginalElement>
+  <nodes>
+    <node x="202.0" y="891.0">com.zuehlke.carrera.javapilot.akka.Observable</node>
+    <node x="0.0" y="441.0">com.zuehlke.carrera.javapilot.PilotApplication</node>
+    <node x="0.0" y="974.5">com.zuehlke.carrera.javapilot.akka.PowerAction</node>
+    <node x="1102.8333333333335" y="82.0">com.zuehlke.carrera.javapilot.akka.PilotTopology</node>
+    <node x="497.0" y="902.96875">com.zuehlke.carrera.javapilot.show</node>
+    <node x="103.0" y="1189.0">com.zuehlke.carrera.javapilot.akka.experimental</node>
+    <node x="523.875" y="0.0">com.zuehlke.carrera.javapilot.config</node>
+    <node x="826.0" y="333.0">com.zuehlke.carrera.javapilot.akka.JavaPilotActor</node>
+    <node x="433.0" y="549.0">com.zuehlke.carrera.javapilot.akka.KobayashiActorTest</node>
+    <node x="677.0" y="573.5">com.zuehlke.carrera.javapilot.rest</node>
+    <node x="622.25" y="166.5">com.zuehlke.carrera.javapilot.services</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="com.zuehlke.carrera.javapilot.services" target="com.zuehlke.carrera.javapilot.services">
+      <point x="0.0" y="0.0" />
+      <point x="701.75" y="140.5" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="com.zuehlke.carrera.javapilot.akka.experimental" target="com.zuehlke.carrera.javapilot.akka.Observable">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="com.zuehlke.carrera.javapilot.akka.KobayashiActorTest" target="com.zuehlke.carrera.javapilot.config">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="com.zuehlke.carrera.javapilot.PilotApplication" target="com.zuehlke.carrera.javapilot.config">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="com.zuehlke.carrera.javapilot.akka.experimental" target="com.zuehlke.carrera.javapilot.akka.PowerAction">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="com.zuehlke.carrera.javapilot.akka.JavaPilotActor" target="com.zuehlke.carrera.javapilot.config">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="com.zuehlke.carrera.javapilot.akka.JavaPilotActor" target="com.zuehlke.carrera.javapilot.akka.PilotTopology">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="com.zuehlke.carrera.javapilot.akka.JavaPilotActor" target="com.zuehlke.carrera.javapilot.services">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="com.zuehlke.carrera.javapilot.services" target="com.zuehlke.carrera.javapilot.config">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="com.zuehlke.carrera.javapilot.PilotApplication" target="com.zuehlke.carrera.javapilot.services">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="com.zuehlke.carrera.javapilot.show" target="com.zuehlke.carrera.javapilot.show">
+      <point x="0.0" y="0.0" />
+      <point x="566.5" y="876.96875" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="com.zuehlke.carrera.javapilot.rest" target="com.zuehlke.carrera.javapilot.services">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="com.zuehlke.carrera.javapilot.akka.experimental" target="com.zuehlke.carrera.javapilot.akka.experimental">
+      <point x="0.0" y="0.0" />
+      <point x="201.5" y="1163.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="com.zuehlke.carrera.javapilot.akka.KobayashiActorTest" target="com.zuehlke.carrera.javapilot.services">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="0.47219983883964545" x="743.0" y="610.5" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Methods</Category>
+    <Category>Fields</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

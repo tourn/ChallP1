@@ -62,7 +62,7 @@ public class PowerUpUntilPenalty extends UntypedActor {
             handleRoundTime();
         } else if(message instanceof EndpointAnnouncement){
             handleEndpoint();
-        } else {
+       } else {
 
             unhandled(message);
         }
