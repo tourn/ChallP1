@@ -71,7 +71,6 @@ public class PilotApplication implements CommandLineRunner{
      * @param args runtime arguments
      */
     public static void main(String[] args) {
-
         SpringApplication.run(PilotApplication.class, args);
     }
 

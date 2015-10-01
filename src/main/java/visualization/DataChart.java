@@ -1,42 +1,3 @@
-/* ===========================================================
- * JFreeChart : a free chart library for the Java(tm) platform
- * ===========================================================
- *
- * (C) Copyright 2000-2004, by Object Refinery Limited and Contributors.
- *
- * Project Info:  http://www.jfree.org/jfreechart/index.html
- *
- * This library is free software; you can redistribute it and/or modify it under the terms
- * of the GNU Lesser General Public License as published by the Free Software Foundation;
- * either version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License along with this
- * library; if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
- * Boston, MA 02111-1307, USA.
- *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
- *
- * --------------------
- * DynamicDataDemo.java
- * --------------------
- * (C) Copyright 2002-2004, by Object Refinery Limited.
- *
- * Original Author:  David Gilbert (for Object Refinery Limited).
- * Contributor(s):   -;
- *
- * $Id: DynamicDataDemo.java,v 1.12 2004/05/07 16:09:03 mungady Exp $
- *
- * Changes
- * -------
- * 28-Mar-2002 : Version 1 (DG);
- *
- */
-
 package visualization;
 
         import java.awt.BorderLayout;
@@ -46,6 +7,7 @@ package visualization;
         import javax.swing.JButton;
         import javax.swing.JPanel;
 
+        import com.zuehlke.carrera.relayapi.messages.SensorEvent;
         import org.jfree.chart.ChartFactory;
         import org.jfree.chart.ChartPanel;
         import org.jfree.chart.JFreeChart;
@@ -55,18 +17,15 @@ package visualization;
         import org.jfree.data.time.TimeSeries;
         import org.jfree.data.time.TimeSeriesCollection;
         import org.jfree.data.xy.XYDataset;
+        import org.jfree.data.xy.XYSeries;
+        import org.jfree.data.xy.XYSeriesCollection;
         import org.jfree.ui.ApplicationFrame;
         import org.jfree.ui.RefineryUtilities;
 
-/**
- * A demonstration application showing a time series chart where you can dynamically add
- * (random) data by clicking on a button.
- *
- */
 public class DataChart extends ApplicationFrame implements ActionListener{
 
     /** The time series data. */
-    private TimeSeries series;
+    private XYSeries series;
 
     /** The most recent value added. */
     private double lastValue = 100.0;
@@ -79,21 +38,16 @@ public class DataChart extends ApplicationFrame implements ActionListener{
     public DataChart(final String title) {
 
         super(title);
-        this.series = new TimeSeries("Random Data", Millisecond.class);
-        final TimeSeriesCollection dataset = new TimeSeriesCollection(this.series);
+        this.series = new XYSeries("Sensor Z");
+        final XYSeriesCollection dataset = new XYSeriesCollection(this.series);
         final JFreeChart chart = createChart(dataset);
 
         final ChartPanel chartPanel = new ChartPanel(chart);
-        final JButton button = new JButton("Add New Data Item");
-        button.setActionCommand("ADD_DATA");
-        button.addActionListener(this);
 
         final JPanel content = new JPanel(new BorderLayout());
         content.add(chartPanel);
-        content.add(button, BorderLayout.SOUTH);
-        chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
+        chartPanel.setPreferredSize(new java.awt.Dimension(600, 900));
         setContentPane(content);
-
     }
 
     /**
@@ -105,7 +59,7 @@ public class DataChart extends ApplicationFrame implements ActionListener{
      */
     private JFreeChart createChart(final XYDataset dataset) {
         final JFreeChart result = ChartFactory.createTimeSeriesChart(
-                "Dynamic Data Demo",
+                "Sensor Data",
                 "Time",
                 "Value",
                 dataset,
@@ -118,7 +72,7 @@ public class DataChart extends ApplicationFrame implements ActionListener{
         axis.setAutoRange(true);
         axis.setFixedAutoRange(60000.0);  // 60 seconds
         axis = plot.getRangeAxis();
-        axis.setRange(0.0, 200.0);
+        axis.setRange(-5000, 5000);
         return result;
     }
 
@@ -139,11 +93,10 @@ public class DataChart extends ApplicationFrame implements ActionListener{
      * @param e  the action event.
      */
     public void actionPerformed(final ActionEvent e) {
-            final double factor = 0.90 + 0.2 * Math.random();
-            this.lastValue = this.lastValue * factor;
-            final Millisecond now = new Millisecond();
-            System.out.println("Now = " + now.toString());
-            this.series.add(new Millisecond(), this.lastValue);
+    }
+
+    public void insertSensorData(SensorEvent message){
+        this.series.add(message.getTimeStamp(), message.getG()[2]);
     }
 
     /**

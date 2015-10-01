@@ -9,9 +9,10 @@ import com.zuehlke.carrera.javapilot.config.PilotProperties;
 import com.zuehlke.carrera.javapilot.services.EndpointAnnouncement;
 import com.zuehlke.carrera.javapilot.services.PilotToRelayConnection;
 import com.zuehlke.carrera.relayapi.messages.*;
+import org.jfree.ui.RefineryUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import visualization.ThreadWrapper;
+import visualization.DataChart;
 
 import java.util.Map;
 
@@ -27,12 +28,19 @@ public class JavaPilotActor extends UntypedActor {
     private ActorRef velocityEntryPoint;
     private ActorRef penaltyEntryPoint;
     private ActorRef roundTimeEntryPoint;
+    private DataChart demo;
 
     private PilotToRelayConnection relayConnection;
 
     public JavaPilotActor(PilotProperties properties) {
 
-        new Thread(new ThreadWrapper()).start();
+        System.setProperty("java.awt.headless", "false");
+
+        demo = new DataChart("Sensor Data");
+        demo.pack();
+        RefineryUtilities.centerFrameOnScreen(demo);
+        demo.setVisible(true);
+
         this.properties = properties;
 
         createTopology();
@@ -72,6 +80,7 @@ public class JavaPilotActor extends UntypedActor {
                 handleRaceStop((RaceStopMessage) message);
 
             } else if (message instanceof SensorEvent) {
+                demo.insertSensorData((SensorEvent) message);
                 handleSensorEvent((SensorEvent) message);
 
             } else if (message instanceof VelocityMessage) {
