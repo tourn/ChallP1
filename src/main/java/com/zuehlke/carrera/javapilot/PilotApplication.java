@@ -19,6 +19,7 @@ import com.zuehlke.carrera.relayapi.messages.TrainingResponse;
 import com.zuehlke.carrera.simulator.config.SimulatorProperties;
 import com.zuehlke.carrera.simulator.model.RaceTrackSimulatorSystem;
 import org.apache.commons.cli.*;
+import org.jfree.ui.RefineryUtilities;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -72,7 +73,6 @@ public class PilotApplication implements CommandLineRunner{
     public static void main(String[] args) {
 
         SpringApplication.run(PilotApplication.class, args);
-
     }
 
     @Override

@@ -11,11 +11,12 @@ import com.zuehlke.carrera.javapilot.services.PilotToRelayConnection;
 import com.zuehlke.carrera.relayapi.messages.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import visualization.ThreadWrapper;
 
 import java.util.Map;
 
 /**
- *  Central actor responsible for driving the car. All data gets here and all decisions are finally made here.
+ * Central actor responsible for driving the car. All data gets here and all decisions are finally made here.
  */
 public class JavaPilotActor extends UntypedActor {
 
@@ -31,9 +32,10 @@ public class JavaPilotActor extends UntypedActor {
 
     public JavaPilotActor(PilotProperties properties) {
 
+        new Thread(new ThreadWrapper()).start();
         this.properties = properties;
 
-        createTopology ();
+        createTopology();
     }
 
     private void createTopology() {
@@ -46,13 +48,13 @@ public class JavaPilotActor extends UntypedActor {
     }
 
 
-    public static Props props ( PilotProperties properties ) {
+    public static Props props(PilotProperties properties) {
         return Props.create(new Creator<JavaPilotActor>() {
             private static final long serialVersionUID = 1L;
 
             @Override
             public JavaPilotActor create() throws Exception {
-                return new JavaPilotActor( properties );
+                return new JavaPilotActor(properties);
             }
         });
     }
@@ -84,13 +86,13 @@ public class JavaPilotActor extends UntypedActor {
             } else if (message instanceof PowerAction) {
                 handlePowerAction(((PowerAction) message).getPowerValue());
 
-            } else if (message instanceof PenaltyMessage ) {
-                handlePenaltyMessage ((PenaltyMessage) message );
+            } else if (message instanceof PenaltyMessage) {
+                handlePenaltyMessage((PenaltyMessage) message);
 
-            } else if ( message instanceof ThresholdConfiguration) {
+            } else if (message instanceof ThresholdConfiguration) {
                 sensorEntryPoint.forward(message, getContext());
 
-            } else if ( message instanceof RoundTimeMessage ) {
+            } else if (message instanceof RoundTimeMessage) {
                 handleRoundTime((RoundTimeMessage) message);
 
             } else if (message instanceof String) {
@@ -104,7 +106,7 @@ public class JavaPilotActor extends UntypedActor {
             } else {
                 unhandled(message);
             }
-        } catch ( Exception e ) {
+        } catch (Exception e) {
             LOGGER.error("Caught exception: " + e.getMessage());
             e.printStackTrace();
         }
@@ -112,7 +114,7 @@ public class JavaPilotActor extends UntypedActor {
     }
 
     private void handleRoundTime(RoundTimeMessage message) {
-        LOGGER.info ( "Round Time in ms: " + message.getRoundDuration());
+        LOGGER.info("Round Time in ms: " + message.getRoundDuration());
         roundTimeEntryPoint.forward(message, getContext());
     }
 
@@ -122,22 +124,23 @@ public class JavaPilotActor extends UntypedActor {
 
     /**
      * Action request from the processing topology
+     *
      * @param powerValue the new power value to be requested on the track
      */
     private void handlePowerAction(int powerValue) {
         long now = System.currentTimeMillis();
-            relayConnection.send(new PowerControl(powerValue, properties.getName(),
-                    properties.getAccessCode(), now));
+        relayConnection.send(new PowerControl(powerValue, properties.getName(),
+                properties.getAccessCode(), now));
     }
 
     private void handleEndpointAnnouncement(EndpointAnnouncement message) {
-        if ( relayConnection != null ) {
+        if (relayConnection != null) {
             relayConnection.announce(message.getUrl());
         }
     }
 
     private void handleVelocityMessage(VelocityMessage message) {
-        if ( message.getVelocity() == -999 ) {
+        if (message.getVelocity() == -999) {
             handleSample(message);
         } else {
             velocityEntryPoint.forward(message, getContext());
@@ -145,7 +148,7 @@ public class JavaPilotActor extends UntypedActor {
     }
 
     private void handleSensorEvent(SensorEvent message) {
-        if ( isSample ( message ) ) {
+        if (isSample(message)) {
             handleSample(message);
         } else {
             sensorEntryPoint.forward(message, getContext());
@@ -153,29 +156,31 @@ public class JavaPilotActor extends UntypedActor {
     }
 
     private boolean isSample(SensorEvent message) {
-        return (( message.getM()[0] == 111.0f)
-                && ( message.getM()[1] == 112.0f )
-                && ( message.getM()[2] == 113.0f ));
+        return ((message.getM()[0] == 111.0f)
+                && (message.getM()[1] == 112.0f)
+                && (message.getM()[2] == 113.0f));
     }
 
     /**
      * log the receipt and answer with a Speedcontrol of 0;
+     *
      * @param message the sample event
      */
     private void handleSample(SensorEvent message) {
         LOGGER.info("received sample SensorEvent: " + message.toString());
         long now = System.currentTimeMillis();
-        relayConnection.send (new PowerControl(0, properties.getName(), properties.getAccessCode(), now));
+        relayConnection.send(new PowerControl(0, properties.getName(), properties.getAccessCode(), now));
     }
 
     /**
      * log the receipt and answer with a Speedcontrol of 0;
+     *
      * @param message the sample velocity
      */
     private void handleSample(VelocityMessage message) {
         LOGGER.info("received sample velocity message: " + message.toString());
         long now = System.currentTimeMillis();
-        relayConnection.send (new PowerControl(0, properties.getName(), properties.getAccessCode(), now));
+        relayConnection.send(new PowerControl(0, properties.getName(), properties.getAccessCode(), now));
     }
 
 
