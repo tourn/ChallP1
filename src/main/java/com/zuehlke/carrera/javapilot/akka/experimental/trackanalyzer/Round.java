@@ -11,9 +11,11 @@ public class Round {
     private ArrayList<TrackVelocity> trackVelocities;
     private long startRoundTimeStamp;
     private long endRoundTimeStamp;
+    private int pilotPower;
 
-    public Round(long startRoundTimeStamp){
+    public Round(long startRoundTimeStamp,int pilotPower){
         this.startRoundTimeStamp = startRoundTimeStamp;
+        this.pilotPower = pilotPower;
         trackSections = new ArrayList<TrackSection>();
         trackVelocities = new ArrayList<TrackVelocity>();
     }
@@ -21,10 +23,14 @@ public class Round {
     public void addTrackSection(TrackSection trackSection){
         trackSections.add(trackSection);
     }
+    public void addTrackSection(String direction, long timeStamp){
+        trackSections.add(new TrackSection(direction,timeStamp));
+    }
 
     public void addTrackVelocity(TrackVelocity trackVelocity){
         trackVelocities.add(trackVelocity);
     }
+    public void addTrackVelocity(double velocity, long timeStamp) { trackVelocities.add(new TrackVelocity(velocity,timeStamp)); }
 
     public void setEndRoundTimeStamp(long endRoundTimeStamp){
         this.endRoundTimeStamp = endRoundTimeStamp;
@@ -40,6 +46,10 @@ public class Round {
 
     public long getRoundTime(){
         return endRoundTimeStamp-startRoundTimeStamp;
+    }
+
+    public long getStartRoundTimeStamp(){
+        return startRoundTimeStamp;
     }
 
     public int getCountOfTrackSections(){

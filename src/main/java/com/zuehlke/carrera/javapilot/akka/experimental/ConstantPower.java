@@ -65,8 +65,9 @@ public class ConstantPower extends UntypedActor {
     }
 
     private void handleRoundTimeMessage(RoundTimeMessage message) {
-        trackAnalyzer.newRound(message.getTimestamp());
-        trackAnalyzer.printRound(roundCounter);
+        trackAnalyzer.newRound(message.getTimestamp(),power);
+        trackAnalyzer.printLastRound();
+        //trackAnalyzer.calculateTrack();
         roundCounter++;
         //LOGGER.info("Round Nr. "+roundCounter);
     }

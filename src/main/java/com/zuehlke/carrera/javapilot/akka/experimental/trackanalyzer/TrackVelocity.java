@@ -15,8 +15,10 @@ public class TrackVelocity {
     public double getVelocity(){
         return velocity;
     }
-
     public long getTimeStamp(){
         return timeStamp;
     }
+
+    public void setVelocity(double velocity) { this.velocity = velocity; }
+    public void setTimeStamp(long timeStamp) { this.timeStamp = timeStamp; }
 }

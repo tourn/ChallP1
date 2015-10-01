@@ -13,8 +13,14 @@ public class TrackSection {
         this.direction = direction;
         this.timeStamp = timeStamp;
     }
+    public void setDirection(String direction){
+        this.direction = direction;
+    }
     public void setDuration(long duration){
         this.duration = duration;
+    }
+    public void setTimeStamp(long timeStamp){
+        this.timeStamp = timeStamp;
     }
 
     public String getDirection(){
