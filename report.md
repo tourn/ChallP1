@@ -16,3 +16,6 @@ permalink: /report/
 ### 1.10.15
 * Vorgehen besprochen
 * Grundidee erarbeitet und aufgeteilt
+* Visualisierungs Framework eingebunden (JFreeChart)
+* Android App zu Steuerung des Simulators
+* TrackAnalyzer verbessert
