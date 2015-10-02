@@ -8,11 +8,14 @@ package visualization;
         import javax.swing.JPanel;
 
         import com.zuehlke.carrera.relayapi.messages.SensorEvent;
+        import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
         import org.jfree.chart.ChartFactory;
         import org.jfree.chart.ChartPanel;
         import org.jfree.chart.JFreeChart;
         import org.jfree.chart.axis.ValueAxis;
         import org.jfree.chart.plot.XYPlot;
+        import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
+        import org.jfree.chart.renderer.xy.XYItemRenderer;
         import org.jfree.data.time.Millisecond;
         import org.jfree.data.time.TimeSeries;
         import org.jfree.data.time.TimeSeriesCollection;
@@ -26,12 +29,11 @@ public class DataChart extends ApplicationFrame implements ActionListener{
 
     /** The time series data. */
     private XYSeries series;
-
-    /** The most recent value added. */
-    private double lastValue = 100.0;
+    private XYSeries speedSeries;
+    private XYPlot plot;
+    private XYSeriesCollection speeddata;
 
     /**
-     * Constructs a new demonstration application.
      *
      * @param title  the frame title.
      */
@@ -39,7 +41,9 @@ public class DataChart extends ApplicationFrame implements ActionListener{
 
         super(title);
         this.series = new XYSeries("Sensor Z");
+        this.speedSeries = new XYSeries("Speed");
         final XYSeriesCollection dataset = new XYSeriesCollection(this.series);
+        speeddata = new XYSeriesCollection(this.speedSeries);
         final JFreeChart chart = createChart(dataset);
 
         final ChartPanel chartPanel = new ChartPanel(chart);
@@ -67,25 +71,19 @@ public class DataChart extends ApplicationFrame implements ActionListener{
                 true,
                 false
         );
-        final XYPlot plot = result.getXYPlot();
+        plot = result.getXYPlot();
         ValueAxis axis = plot.getDomainAxis();
         axis.setAutoRange(true);
         axis.setFixedAutoRange(60000.0);  // 60 seconds
         axis = plot.getRangeAxis();
         axis.setRange(-5000, 5000);
+
+        plot.setDataset(1, speeddata);
+        plot.setRenderer(1, new StandardXYItemRenderer());
+
         return result;
     }
 
-    // ****************************************************************************
-    // * JFREECHART DEVELOPER GUIDE                                               *
-    // * The JFreeChart Developer Guide, written by David Gilbert, is available   *
-    // * to purchase from Object Refinery Limited:                                *
-    // *                                                                          *
-    // * http://www.object-refinery.com/jfreechart/guide.html                     *
-    // *                                                                          *
-    // * Sales are used to provide funding for the JFreeChart project - please    *
-    // * support us so that we can continue developing free software.             *
-    // ****************************************************************************
 
     /**
      * Handles a click on the button by adding new (random) data.
@@ -95,13 +93,13 @@ public class DataChart extends ApplicationFrame implements ActionListener{
     public void actionPerformed(final ActionEvent e) {
     }
 
+    public void insertSpeedData(VelocityMessage message){
+        this.speedSeries.add(message.getTimeStamp(), message.getVelocity()*10);
+        System.out.println(message.getTimeStamp() + " " + message.getVelocity());
+    }
+
     public void insertSensorData(SensorEvent message){
         this.series.add(message.getTimeStamp(), message.getG()[2]);
     }
 
-    /**
-     * Starting point for the demonstration application.
-     *
-     * @param args  ignored.
-     */
 }
