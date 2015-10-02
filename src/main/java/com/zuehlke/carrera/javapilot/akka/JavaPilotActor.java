@@ -28,7 +28,7 @@ public class JavaPilotActor extends UntypedActor {
     private ActorRef velocityEntryPoint;
     private ActorRef penaltyEntryPoint;
     private ActorRef roundTimeEntryPoint;
-    private DataChart demo;
+    private DataChart visualizer;
 
     private PilotToRelayConnection relayConnection;
 
@@ -36,10 +36,10 @@ public class JavaPilotActor extends UntypedActor {
 
         System.setProperty("java.awt.headless", "false");
 
-        demo = new DataChart("Sensor Data");
-        demo.pack();
-        RefineryUtilities.centerFrameOnScreen(demo);
-        demo.setVisible(true);
+        visualizer = new DataChart("Sensor Data");
+        visualizer.pack();
+        RefineryUtilities.centerFrameOnScreen(visualizer);
+        visualizer.setVisible(true);
 
         this.properties = properties;
 
@@ -80,11 +80,11 @@ public class JavaPilotActor extends UntypedActor {
                 handleRaceStop((RaceStopMessage) message);
 
             } else if (message instanceof SensorEvent) {
-                demo.insertSensorData((SensorEvent) message);
+                visualizer.insertSensorData((SensorEvent) message);
                 handleSensorEvent((SensorEvent) message);
 
             } else if (message instanceof VelocityMessage) {
-                demo.insertSpeedData((VelocityMessage) message);
+                visualizer.insertSpeedData((VelocityMessage) message);
                 handleVelocityMessage((VelocityMessage) message);
 
             } else if (message instanceof PilotToRelayConnection) {
