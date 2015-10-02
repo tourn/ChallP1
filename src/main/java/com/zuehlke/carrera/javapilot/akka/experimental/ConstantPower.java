@@ -12,6 +12,7 @@ import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
 import com.zuehlke.carrera.timeseries.FloatingHistory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import visualization.DataChart;
 
 /**
  *  A very simple actor that determines the power value by a configurable Threshold on any of the 10 observables
@@ -36,14 +37,16 @@ public class ConstantPower extends UntypedActor {
     private static long previousTimestamp = 0;
     private static int roundCounter = 0;
     private static TrackAnalyzer trackAnalyzer = new TrackAnalyzer();
+    private final DataChart visualizer;
 
-    public ConstantPower(ActorRef pilot, int power) {
+    public ConstantPower(ActorRef pilot, int power, DataChart visualizer) {
+        this.visualizer = visualizer;
         this.pilot = pilot;
         this.power = power;
     }
 
-    public static Props props ( ActorRef pilot, int power ) {
-        return Props.create( ConstantPower.class, ()->new ConstantPower( pilot, power ));
+    public static Props props ( DataChart visualizer, ActorRef pilot, int power ) {
+        return Props.create( ConstantPower.class, ()->new ConstantPower( pilot, power, visualizer ));
     }
 
     @Override
@@ -62,10 +65,11 @@ public class ConstantPower extends UntypedActor {
 
     private void handleVelocityMessage(VelocityMessage message) {
         trackAnalyzer.addTrackVelocitiesToRound(message.getVelocity(),message.getTimeStamp());
+        visualizer.insertSpeedData(message);
     }
 
     private void handleRoundTimeMessage(RoundTimeMessage message) {
-        trackAnalyzer.newRound(message.getTimestamp(),power);
+        trackAnalyzer.newRound(message.getTimestamp(), power);
         trackAnalyzer.printLastRound();
         //trackAnalyzer.calculateTrack();
         roundCounter++;
@@ -74,7 +78,7 @@ public class ConstantPower extends UntypedActor {
 
     private void handleSensorEvent(SensorEvent event) {
         pilot.tell(new PowerAction(power), getSelf());
-
+        visualizer.insertSensorData(event);
         gyroZ.shift(event.getG()[2]);
         switch(state){
             case STRAIGHT:

@@ -4,6 +4,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import com.zuehlke.carrera.javapilot.akka.experimental.ConstantPower;
 import com.zuehlke.carrera.javapilot.akka.experimental.PowerUpUntilPenalty;
+import visualization.DataChart;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,22 +21,21 @@ public class PilotTopology {
 
     private final ActorSystem system;
     private final ActorRef kobayashi;
+    private final DataChart visualizer;
     private final Map<String, ActorRef> entryPoints = new HashMap<>();
 
-    public PilotTopology(ActorRef kobayashi, ActorSystem system) {
+    public PilotTopology(DataChart visualizer, ActorRef kobayashi, ActorSystem system) {
+        this.visualizer = visualizer;
         this.kobayashi = kobayashi;
         this.system = system;
     }
 
     public Map<String, ActorRef> create() {
-
-        ActorRef initialProcessor = system.actorOf(ConstantPower.props(kobayashi, 120));
-
+        ActorRef initialProcessor = system.actorOf(ConstantPower.props(visualizer, kobayashi, 120));
         entryPoints.put(PENALTY_ENTRYPOINT, initialProcessor);
         entryPoints.put(SENSOR_ENTRYPOINT, initialProcessor);
         entryPoints.put(VELOCITY_ENTRYPOINT, initialProcessor);
         entryPoints.put(ROUNDTIME_ENTRYPOINT, initialProcessor);
-
         return entryPoints;
     }
 

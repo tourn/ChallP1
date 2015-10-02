@@ -47,7 +47,7 @@ public class JavaPilotActor extends UntypedActor {
     }
 
     private void createTopology() {
-        Map<String, ActorRef> entryPoints = new PilotTopology(getSelf(), getContext().system()).create();
+        Map<String, ActorRef> entryPoints = new PilotTopology(visualizer, getSelf(), getContext().system()).create();
 
         this.sensorEntryPoint = entryPoints.get(PilotTopology.SENSOR_ENTRYPOINT);
         this.velocityEntryPoint = entryPoints.get(PilotTopology.VELOCITY_ENTRYPOINT);
@@ -80,11 +80,9 @@ public class JavaPilotActor extends UntypedActor {
                 handleRaceStop((RaceStopMessage) message);
 
             } else if (message instanceof SensorEvent) {
-                visualizer.insertSensorData((SensorEvent) message);
                 handleSensorEvent((SensorEvent) message);
 
             } else if (message instanceof VelocityMessage) {
-                visualizer.insertSpeedData((VelocityMessage) message);
                 handleVelocityMessage((VelocityMessage) message);
 
             } else if (message instanceof PilotToRelayConnection) {
