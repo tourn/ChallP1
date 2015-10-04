@@ -17,5 +17,5 @@ permalink: /report/
 * Vorgehen besprochen
 * Grundidee erarbeitet und aufgeteilt
 * Visualisierungs Framework eingebunden (JFreeChart)
-* Android App zu Steuerung des Simulators
+* [Android App](https://github.com/tourn/ChallP1-CarreraRemote/releases/tag/0.1) zur Steuerung des Simulators
 * TrackAnalyzer verbessert
