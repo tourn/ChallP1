@@ -104,6 +104,7 @@ public class TrackAnalyzer {
                 if(i<round.getCountOfTrackSections()-1){
                     if(round.getTrackSections().get(i).getDirection().equals(round.getTrackSections().get(i+1).getDirection())){
                         round.getTrackSections().remove(i+1);
+                        i--;
                     }
                 }
             }
@@ -138,6 +139,7 @@ public class TrackAnalyzer {
                 if(i<round.getCountOfTrackSections()-1){
                     if(round.getTrackSections().get(i).getDirection().equals(round.getTrackSections().get(i+1).getDirection())){
                         round.getTrackSections().remove(i+1);
+                        i--;
                     }
                 }
             }
@@ -154,16 +156,16 @@ public class TrackAnalyzer {
             }
         }
 
-        /*
+        int xxx = 1;
         for(Iterator<Round> roundIterator = tempRoundList.iterator(); roundIterator.hasNext(); ) {
             Round round = roundIterator.next();
             printTrack(round);
-            LOGGER.info("" + round.getCountOfTrackSections());
+            LOGGER.info("RoundNr."+ xxx++ +", #TS: " + round.getCountOfTrackSections());
         }
         for(Iterator<Round> roundIterator = tempRoundList.iterator(); roundIterator.hasNext(); ) {
             Round round = roundIterator.next();
             printRound(round);
-        }*/
+        }
 
         //TODO: Check that all rounds have the same count of TrackSections
         int trackSectionCounter = tempRoundList.get(0).getCountOfTrackSections();
