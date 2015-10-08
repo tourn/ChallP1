@@ -4,8 +4,7 @@ package visualization;
         import java.awt.event.ActionEvent;
         import java.awt.event.ActionListener;
 
-        import javax.swing.JButton;
-        import javax.swing.JPanel;
+        import javax.swing.*;
 
         import com.zuehlke.carrera.relayapi.messages.SensorEvent;
         import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
@@ -48,10 +47,28 @@ public class DataChart extends ApplicationFrame{
 
         final ChartPanel chartPanel = new ChartPanel(chart);
 
-        final JPanel content = new JPanel(new BorderLayout());
-        content.add(chartPanel);
+        JPanel container = new JPanel();
+        container.setLayout(new BoxLayout(container, BoxLayout.X_AXIS));
+
+        JPanel panel1 = new JPanel();
+        JPanel panel2 = new JPanel();
+
         chartPanel.setPreferredSize(new java.awt.Dimension(600, 900));
-        setContentPane(content);
+        panel1.add(chartPanel);
+
+        Object rowData[][] = { { "Row1-Column1", "Row1-Column2", "Row1-Column3" },
+                { "Row2-Column1", "Row2-Column2", "Row2-Column3" } };
+        Object columnNames[] = { "Column One", "Column Two", "Column Three" };
+        JTable table = new JTable(rowData, columnNames);
+
+        table.setPreferredSize(new java.awt.Dimension(900,900));
+
+        panel2.add(table);
+
+        container.add(panel1);
+        container.add(panel2);
+
+        setContentPane(container);
     }
 
     /**
