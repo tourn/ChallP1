@@ -25,7 +25,7 @@ package visualization;
         import org.jfree.ui.ApplicationFrame;
         import org.jfree.ui.RefineryUtilities;
 
-public class DataChart extends ApplicationFrame implements ActionListener{
+public class DataChart extends ApplicationFrame{
 
     /** The time series data. */
     private XYSeries series;
@@ -84,18 +84,8 @@ public class DataChart extends ApplicationFrame implements ActionListener{
         return result;
     }
 
-
-    /**
-     * Handles a click on the button by adding new (random) data.
-     *
-     * @param e  the action event.
-     */
-    public void actionPerformed(final ActionEvent e) {
-    }
-
     public void insertSpeedData(VelocityMessage message){
         this.speedSeries.add(message.getTimeStamp(), message.getVelocity()*10);
-        System.out.println(message.getTimeStamp() + " " + message.getVelocity());
     }
 
     public void insertSensorData(SensorEvent message){

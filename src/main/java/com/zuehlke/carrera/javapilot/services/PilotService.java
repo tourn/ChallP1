@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 /**
@@ -30,7 +31,7 @@ public class PilotService {
 
     @Autowired
     public PilotService(PilotProperties settings, EndpointService endpointService,
-                        SimulatorService simulatorService ){
+                        SimulatorService simulatorService, DataVisService dataVisService){
         this.settings = settings;
         this.endPointUrl = endpointService.getHttpEndpoint();
         system = ActorSystem.create(settings.getName());
@@ -41,9 +42,10 @@ public class PilotService {
 
         // Pilot learns about the simulator
         pilotActor.tell(new PilotToRaceTrackConnector(simulatorService.getSystem()), ActorRef.noSender());
+
+        // Pilot learns about the visualizer
+        pilotActor.tell(new PilotToVisualConnector(dataVisService.getVisualizer()), ActorRef.noSender());
     }
-
-
 
     //@PostConstruct
     public void connectToRelay () {

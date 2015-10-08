@@ -133,7 +133,6 @@ public class PilotApplication implements CommandLineRunner{
     }
 
     private void connectWithProtocol(Protocol protocol, Function function ) {
-
         switch ( protocol ) {
             case rabbit:
                 // if not "only simulator", then connect the pilot

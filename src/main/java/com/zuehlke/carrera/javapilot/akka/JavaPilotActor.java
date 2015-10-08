@@ -8,6 +8,7 @@ import com.zuehlke.carrera.javapilot.akka.experimental.ThresholdConfiguration;
 import com.zuehlke.carrera.javapilot.config.PilotProperties;
 import com.zuehlke.carrera.javapilot.services.EndpointAnnouncement;
 import com.zuehlke.carrera.javapilot.services.PilotToRelayConnection;
+import com.zuehlke.carrera.javapilot.services.PilotToVisualConnection;
 import com.zuehlke.carrera.relayapi.messages.*;
 import org.jfree.ui.RefineryUtilities;
 import org.slf4j.Logger;
@@ -28,18 +29,12 @@ public class JavaPilotActor extends UntypedActor {
     private ActorRef velocityEntryPoint;
     private ActorRef penaltyEntryPoint;
     private ActorRef roundTimeEntryPoint;
-    private DataChart visualizer;
 
     private PilotToRelayConnection relayConnection;
 
+    private PilotToVisualConnection visualConnection;
+
     public JavaPilotActor(PilotProperties properties) {
-
-        System.setProperty("java.awt.headless", "false");
-
-        visualizer = new DataChart("Sensor Data");
-        visualizer.pack();
-        RefineryUtilities.centerFrameOnScreen(visualizer);
-        visualizer.setVisible(true);
 
         this.properties = properties;
 
@@ -47,7 +42,9 @@ public class JavaPilotActor extends UntypedActor {
     }
 
     private void createTopology() {
-        Map<String, ActorRef> entryPoints = new PilotTopology(visualizer, getSelf(), getContext().system()).create();
+
+
+        Map<String, ActorRef> entryPoints = new PilotTopology(getSelf(), getContext().system()).create();
 
         this.sensorEntryPoint = entryPoints.get(PilotTopology.SENSOR_ENTRYPOINT);
         this.velocityEntryPoint = entryPoints.get(PilotTopology.VELOCITY_ENTRYPOINT);
@@ -73,6 +70,9 @@ public class JavaPilotActor extends UntypedActor {
 
         try {
 
+            if(message instanceof PilotToVisualConnection){
+                this.visualConnection = (PilotToVisualConnection) message;
+            }
             if (message instanceof RaceStartMessage) {
                 handleRaceStart((RaceStartMessage) message);
 
@@ -80,6 +80,7 @@ public class JavaPilotActor extends UntypedActor {
                 handleRaceStop((RaceStopMessage) message);
 
             } else if (message instanceof SensorEvent) {
+                visualConnection.send((SensorEvent)message);
                 handleSensorEvent((SensorEvent) message);
 
             } else if (message instanceof VelocityMessage) {

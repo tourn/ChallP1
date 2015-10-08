@@ -38,16 +38,14 @@ public class TrackLearner extends UntypedActor {
     private static long previousTimestamp = 0;
     private static int roundCounter = 0;
     private static TrackAnalyzer trackAnalyzer = new TrackAnalyzer();
-    private final DataChart visualizer;
 
-    public TrackLearner(ActorRef pilot, int power, DataChart visualizer) {
-        this.visualizer = visualizer;
+    public TrackLearner(ActorRef pilot, int power) {
         this.pilot = pilot;
         this.power = power;
     }
 
-    public static Props props ( DataChart visualizer, ActorRef pilot, int power ) {
-        return Props.create( TrackLearner.class, ()->new TrackLearner( pilot, power, visualizer ));
+    public static Props props ( ActorRef pilot, int power ) {
+        return Props.create( TrackLearner.class, ()->new TrackLearner( pilot, power));
     }
 
     @Override
@@ -66,7 +64,6 @@ public class TrackLearner extends UntypedActor {
 
     private void handleVelocityMessage(VelocityMessage message) {
         trackAnalyzer.addTrackVelocitiesToRound(message.getVelocity(),message.getTimeStamp());
-        visualizer.insertSpeedData(message);
     }
 
     private void handleRoundTimeMessage(RoundTimeMessage message) {
@@ -79,7 +76,6 @@ public class TrackLearner extends UntypedActor {
 
     private void handleSensorEvent(SensorEvent event) {
         pilot.tell(new PowerAction(power), getSelf());
-        visualizer.insertSensorData(event);
         gyroZ.shift(event.getG()[2]);
         switch(state){
             case STRAIGHT:

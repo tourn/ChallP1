@@ -20,17 +20,15 @@ public class PilotTopology {
 
     private final ActorSystem system;
     private final ActorRef kobayashi;
-    private final DataChart visualizer;
     private final Map<String, ActorRef> entryPoints = new HashMap<>();
 
-    public PilotTopology(DataChart visualizer, ActorRef kobayashi, ActorSystem system) {
-        this.visualizer = visualizer;
+    public PilotTopology(ActorRef kobayashi, ActorSystem system) {
         this.kobayashi = kobayashi;
         this.system = system;
     }
 
     public Map<String, ActorRef> create() {
-        ActorRef initialProcessor = system.actorOf(TrackLearner.props(visualizer, kobayashi, 120));
+        ActorRef initialProcessor = system.actorOf(TrackLearner.props(kobayashi, 120));
         entryPoints.put(PENALTY_ENTRYPOINT, initialProcessor);
         entryPoints.put(SENSOR_ENTRYPOINT, initialProcessor);
         entryPoints.put(VELOCITY_ENTRYPOINT, initialProcessor);
