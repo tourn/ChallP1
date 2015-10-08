@@ -12,6 +12,30 @@ public class Track {
     private List<Position> checkpoints = new ArrayList<>();
     private Position car = null;
 
+    public List<TrackSection> getSections() {
+        return sections;
+    }
+
+    public void setSections(List<TrackSection> sections) {
+        this.sections = sections;
+    }
+
+    public List<Position> getCheckpoints() {
+        return checkpoints;
+    }
+
+    public void setCheckpoints(List<Position> checkpoints) {
+        this.checkpoints = checkpoints;
+    }
+
+    public Position getCar() {
+        return car;
+    }
+
+    public void setCar(Position car) {
+        this.car = car;
+    }
+
     public class Position{
         private TrackSection section;
         private long durationOffset;
