@@ -2,8 +2,7 @@ package com.zuehlke.carrera.javapilot.akka;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
-import com.zuehlke.carrera.javapilot.akka.experimental.ConstantPower;
-import com.zuehlke.carrera.javapilot.akka.experimental.PowerUpUntilPenalty;
+import ch.trq.carrera.javapilot.akka.TrackLearner;
 import visualization.DataChart;
 
 import java.util.HashMap;
@@ -31,7 +30,7 @@ public class PilotTopology {
     }
 
     public Map<String, ActorRef> create() {
-        ActorRef initialProcessor = system.actorOf(ConstantPower.props(visualizer, kobayashi, 120));
+        ActorRef initialProcessor = system.actorOf(TrackLearner.props(visualizer, kobayashi, 120));
         entryPoints.put(PENALTY_ENTRYPOINT, initialProcessor);
         entryPoints.put(SENSOR_ENTRYPOINT, initialProcessor);
         entryPoints.put(VELOCITY_ENTRYPOINT, initialProcessor);

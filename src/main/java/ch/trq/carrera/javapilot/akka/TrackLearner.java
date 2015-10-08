@@ -1,11 +1,12 @@
-package com.zuehlke.carrera.javapilot.akka.experimental;
+package ch.trq.carrera.javapilot.akka;
 
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 //import com.sun.tools.internal.jxc.ap.Const;
 import com.zuehlke.carrera.javapilot.akka.PowerAction;
-import com.zuehlke.carrera.javapilot.akka.experimental.trackanalyzer.TrackAnalyzer;
+import com.zuehlke.carrera.javapilot.akka.experimental.ThresholdConfiguration;
+import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackAnalyzer;
 import com.zuehlke.carrera.relayapi.messages.RoundTimeMessage;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
@@ -17,13 +18,13 @@ import visualization.DataChart;
 /**
  *  A very simple actor that determines the power value by a configurable Threshold on any of the 10 observables
  */
-public class ConstantPower extends UntypedActor {
+public class TrackLearner extends UntypedActor {
 
     private ThresholdConfiguration configuration;
     private int power;
     private ActorRef pilot;
 
-    private final Logger LOGGER = LoggerFactory.getLogger(ConstantPower.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(TrackLearner.class);
 
     enum State{
         STRAIGHT,
@@ -39,14 +40,14 @@ public class ConstantPower extends UntypedActor {
     private static TrackAnalyzer trackAnalyzer = new TrackAnalyzer();
     private final DataChart visualizer;
 
-    public ConstantPower(ActorRef pilot, int power, DataChart visualizer) {
+    public TrackLearner(ActorRef pilot, int power, DataChart visualizer) {
         this.visualizer = visualizer;
         this.pilot = pilot;
         this.power = power;
     }
 
     public static Props props ( DataChart visualizer, ActorRef pilot, int power ) {
-        return Props.create( ConstantPower.class, ()->new ConstantPower( pilot, power, visualizer ));
+        return Props.create( TrackLearner.class, ()->new TrackLearner( pilot, power, visualizer ));
     }
 
     @Override
