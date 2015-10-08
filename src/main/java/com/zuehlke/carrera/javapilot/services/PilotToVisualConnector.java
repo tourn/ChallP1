@@ -23,7 +23,7 @@ public class PilotToVisualConnector implements PilotToVisualConnection{
 
     @Override
     public void initializeTrack(Track track) {
-        //TODO
+        dataChart.initDataTable(track);
     }
 
     @Override

@@ -3,9 +3,12 @@ package visualization;
         import java.awt.BorderLayout;
         import java.awt.event.ActionEvent;
         import java.awt.event.ActionListener;
+        import java.util.stream.IntStream;
+        import java.util.stream.LongStream;
 
         import javax.swing.*;
 
+        import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
         import com.zuehlke.carrera.relayapi.messages.SensorEvent;
         import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
         import org.jfree.chart.ChartFactory;
@@ -18,6 +21,7 @@ package visualization;
         import org.jfree.data.time.Millisecond;
         import org.jfree.data.time.TimeSeries;
         import org.jfree.data.time.TimeSeriesCollection;
+        import org.jfree.data.time.TimeSeriesTableModel;
         import org.jfree.data.xy.XYDataset;
         import org.jfree.data.xy.XYSeries;
         import org.jfree.data.xy.XYSeriesCollection;
@@ -26,6 +30,8 @@ package visualization;
 
 public class DataChart extends ApplicationFrame{
 
+    private final JPanel panel2;
+    private JTable table;
     /** The time series data. */
     private XYSeries series;
     private XYSeries speedSeries;
@@ -51,25 +57,33 @@ public class DataChart extends ApplicationFrame{
         container.setLayout(new BoxLayout(container, BoxLayout.X_AXIS));
 
         JPanel panel1 = new JPanel();
-        JPanel panel2 = new JPanel();
+        panel2 = new JPanel();
 
         chartPanel.setPreferredSize(new java.awt.Dimension(600, 900));
         panel1.add(chartPanel);
-
-        Object rowData[][] = { { "Row1-Column1", "Row1-Column2", "Row1-Column3" },
-                { "Row2-Column1", "Row2-Column2", "Row2-Column3" } };
-        Object columnNames[] = { "Column One", "Column Two", "Column Three" };
-        JTable table = new JTable(rowData, columnNames);
-
-        table.setPreferredSize(new java.awt.Dimension(900,900));
-
-        panel2.add(table);
 
         container.add(panel1);
         container.add(panel2);
 
         setContentPane(container);
     }
+
+
+    public void initDataTable(Track track){
+        Object[] column = new Object[track.getSections().size()];
+        Object[][] data = new Object[1][track.getSections().size()];
+        for(int i=0; i<track.getSections().size(); i++){
+            column[i]=i;
+            data[0][i]=track.getSections().get(i).getDuration();
+        }
+        table = new JTable(data, column);
+        panel2.add(table);
+    }
+
+
+
+
+
 
     /**
      * Creates a sample chart.
