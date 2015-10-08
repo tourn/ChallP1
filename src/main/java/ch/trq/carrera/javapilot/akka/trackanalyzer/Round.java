@@ -52,6 +52,8 @@ public class Round {
         return startRoundTimeStamp;
     }
 
+    public long getEndRoundTimeStamp() { return endRoundTimeStamp; }
+
     public int getCountOfTrackSections(){
         return trackSections.size();
     }
@@ -59,4 +61,6 @@ public class Round {
     public int getCountOfTrackVelocities(){
         return trackVelocities.size();
     }
+
+    public int getPilotPower() { return pilotPower; }
 }

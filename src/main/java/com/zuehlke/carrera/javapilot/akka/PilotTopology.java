@@ -28,7 +28,7 @@ public class PilotTopology {
     }
 
     public Map<String, ActorRef> create() {
-        ActorRef initialProcessor = system.actorOf(TrackLearner.props(kobayashi, 120));
+        ActorRef initialProcessor = system.actorOf(TrackLearner.props(kobayashi, 100));
         entryPoints.put(PENALTY_ENTRYPOINT, initialProcessor);
         entryPoints.put(SENSOR_ENTRYPOINT, initialProcessor);
         entryPoints.put(VELOCITY_ENTRYPOINT, initialProcessor);

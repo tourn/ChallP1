@@ -28,8 +28,7 @@ public class TrackLearner extends UntypedActor {
 
     enum State{
         STRAIGHT,
-        TURN_LEFT,
-        TURN_RIGHT
+        TURN
     }
 
     private State state = State.STRAIGHT;
@@ -68,8 +67,8 @@ public class TrackLearner extends UntypedActor {
 
     private void handleRoundTimeMessage(RoundTimeMessage message) {
         trackAnalyzer.newRound(message.getTimestamp(), power);
-        trackAnalyzer.printLastRound();
-        //trackAnalyzer.calculateTrack();
+        //trackAnalyzer.printLastRound();
+        trackAnalyzer.calculateTrack();
         roundCounter++;
         //LOGGER.info("Round Nr. "+roundCounter);
     }
@@ -79,22 +78,15 @@ public class TrackLearner extends UntypedActor {
         gyroZ.shift(event.getG()[2]);
         switch(state){
             case STRAIGHT:
-                if(gyroZ.currentMean() > TURN_THRESHOLD){
-                    state = State.TURN_RIGHT;
-                    trackAnalyzer.addTrackSectionToRound("RIGHT TURN", event.getTimeStamp());
+                    if( Math.abs(gyroZ.currentMean()) > TURN_THRESHOLD){
+                    state = State.TURN;
+                    trackAnalyzer.addTrackSectionToRound("TURN", event.getTimeStamp());
                     LOGGER.info("("+(event.getTimeStamp()-previousTimestamp)+"ms)");
-                    LOGGER.info("RIGHT TURN");
-                    previousTimestamp = event.getTimeStamp();
-                } else if( Math.abs(gyroZ.currentMean()) > TURN_THRESHOLD){
-                    state = State.TURN_LEFT;
-                    trackAnalyzer.addTrackSectionToRound("LEFT TURN", event.getTimeStamp());
-                    LOGGER.info("("+(event.getTimeStamp()-previousTimestamp)+"ms)");
-                    LOGGER.info("LEFT TURN");
+                    LOGGER.info("TURN");
                     previousTimestamp = event.getTimeStamp();
                 }
                 break;
-            case TURN_LEFT:
-            case TURN_RIGHT:
+            case TURN:
                 if(Math.abs(gyroZ.currentMean()) < TURN_THRESHOLD){
                     state = State.STRAIGHT;
                     trackAnalyzer.addTrackSectionToRound("GOING STRAIGHT", event.getTimeStamp());
