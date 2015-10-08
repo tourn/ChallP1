@@ -1,5 +1,7 @@
 package com.zuehlke.carrera.javapilot.services;
 
+import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
+import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import visualization.DataChart;
 
@@ -20,7 +22,18 @@ public class PilotToVisualConnector implements PilotToVisualConnection{
     }
 
     @Override
-    public void sendTrackData() {
+    public void initializeTrack(Track track) {
         //TODO
     }
+
+    @Override
+    public void sectionUpdate(int index, TrackSection section) {
+        //TODO
+    }
+
+    @Override
+    public void carUpdate(int trackSectionIndex, int offset) {
+        //TODO
+    }
+
 }

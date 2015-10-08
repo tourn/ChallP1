@@ -1,5 +1,7 @@
 package com.zuehlke.carrera.javapilot.services;
 
+import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
+import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 
 import java.util.ArrayList;
@@ -9,5 +11,7 @@ import java.util.ArrayList;
  */
 public interface PilotToVisualConnection {
     void send(SensorEvent message);
-    void sendTrackData();
+    void initializeTrack(Track track);
+    void sectionUpdate(int index, TrackSection section);
+    void carUpdate(int trackSectionIndex, int offset);
 }
