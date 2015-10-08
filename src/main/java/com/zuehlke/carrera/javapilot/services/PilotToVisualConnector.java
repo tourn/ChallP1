@@ -18,4 +18,9 @@ public class PilotToVisualConnector implements PilotToVisualConnection{
     public void send(SensorEvent message) {
         dataChart.insertSensorData(message);
     }
+
+    @Override
+    public void sendTrackData() {
+        //TODO
+    }
 }
