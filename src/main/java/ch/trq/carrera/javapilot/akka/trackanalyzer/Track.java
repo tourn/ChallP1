@@ -36,7 +36,7 @@ public class Track {
         this.car = car;
     }
 
-    public class Position{
+    public static class Position{
         private TrackSection section;
         private long durationOffset;
 

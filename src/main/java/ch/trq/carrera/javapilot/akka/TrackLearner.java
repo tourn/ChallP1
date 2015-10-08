@@ -4,6 +4,7 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 //import com.sun.tools.internal.jxc.ap.Const;
+import ch.trq.carrera.javapilot.akka.trackanalyzer.Round;
 import com.zuehlke.carrera.javapilot.akka.PowerAction;
 import com.zuehlke.carrera.javapilot.akka.experimental.ThresholdConfiguration;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackAnalyzer;
@@ -68,8 +69,13 @@ public class TrackLearner extends UntypedActor {
     private void handleRoundTimeMessage(RoundTimeMessage message) {
         trackAnalyzer.newRound(message.getTimestamp(), power);
         //trackAnalyzer.printLastRound();
-        trackAnalyzer.calculateTrack();
-        roundCounter++;
+        roundCounter += 1;
+        if(roundCounter == 2) {
+            pilot.tell(trackAnalyzer.calculateTrack(), ActorRef.noSender());
+        } else {
+            //just print
+            //trackAnalyzer.calculateTrack();
+        }
         //LOGGER.info("Round Nr. "+roundCounter);
     }
 

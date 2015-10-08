@@ -77,18 +77,13 @@ public class TrackAnalyzer {
         printTrack(round);
     }
 
-    public void calculateTrack(){
-        if (rounds.size()<3) {
-            return;
-        }else if (rounds.size() == 3) {
-            LOGGER.info("Starts with first Track-Calculation");
-        }
+    public Track calculateTrack(){
         List<Round> tempRoundList = new ArrayList<Round>(rounds);
         Round calculatedRound = new Round(0,rounds.get(1).getPilotPower());
 
         // Remove the first and second round (first is broken, second may not be recorded with the right beginning velocity
         tempRoundList.remove(0);
-        tempRoundList.remove(0);
+        //tempRoundList.remove(0);
 
         //TODO: remove "fault" "GOING STRAIGHT" trackSections, sections, which are not longer than XXX ms.
         //DONE
@@ -222,6 +217,27 @@ public class TrackAnalyzer {
 
         //printRound(calculatedRound);
         printTrack(calculatedRound);
+        return generateTrack(calculatedRound);
+    }
+
+    private Track generateTrack(Round round){
+        Track track = new Track();
+        round.getTrackSections().stream().forEach(s -> track.getSections().add(s));
+        /*
+        round.getTrackVelocites().stream().forEach(v -> {
+            TrackSection last = null;
+            for(Iterator<TrackSection> it = round.getTrackSections().iterator();; it.hasNext()){
+                TrackSection section = it.next();
+                if(section.getTimeStamp() > v.getTimeStamp()){
+                    track.getCheckpoints().add(new Track.Position(last, v.getTimeStamp()-last.getTimeStamp()));
+                    break;
+                } else {
+                    last = section;
+                }
+            }
+        });
+        */
+        return track;
     }
 
     public void printTrack(Round round){

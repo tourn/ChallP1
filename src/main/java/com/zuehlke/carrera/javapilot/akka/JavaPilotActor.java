@@ -4,6 +4,7 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.japi.Creator;
+import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import com.zuehlke.carrera.javapilot.akka.experimental.ThresholdConfiguration;
 import com.zuehlke.carrera.javapilot.config.PilotProperties;
 import com.zuehlke.carrera.javapilot.services.EndpointAnnouncement;
@@ -72,6 +73,9 @@ public class JavaPilotActor extends UntypedActor {
 
             if(message instanceof PilotToVisualConnection){
                 this.visualConnection = (PilotToVisualConnection) message;
+            } else if (message instanceof Track){
+                LOGGER.info("Recieved Track");
+                this.visualConnection.initializeTrack((Track) message);
             }
             if (message instanceof RaceStartMessage) {
                 handleRaceStart((RaceStartMessage) message);
