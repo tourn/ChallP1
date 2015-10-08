@@ -31,6 +31,7 @@ package visualization;
 public class DataChart extends ApplicationFrame{
 
     private final JPanel panel2;
+    private final JPanel container;
     private JTable table;
     /** The time series data. */
     private XYSeries series;
@@ -53,14 +54,15 @@ public class DataChart extends ApplicationFrame{
 
         final ChartPanel chartPanel = new ChartPanel(chart);
 
-        JPanel container = new JPanel();
+        container = new JPanel();
         container.setLayout(new BoxLayout(container, BoxLayout.X_AXIS));
 
         JPanel panel1 = new JPanel();
-        panel2 = new JPanel();
+        panel2 = new JPanel(new BorderLayout());
 
         chartPanel.setPreferredSize(new java.awt.Dimension(600, 900));
         panel1.add(chartPanel);
+        panel2.setPreferredSize(new java.awt.Dimension(900, 900));
 
         container.add(panel1);
         container.add(panel2);
@@ -77,7 +79,10 @@ public class DataChart extends ApplicationFrame{
             data[0][i]=track.getSections().get(i).getDuration();
         }
         table = new JTable(data, column);
-        panel2.add(table);
+        panel2.add(table, BorderLayout.CENTER);
+        panel2.add(table.getTableHeader(), BorderLayout.NORTH);
+        container.add(panel2);
+        setContentPane(container);
     }
 
 
