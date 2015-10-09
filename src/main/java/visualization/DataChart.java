@@ -7,8 +7,10 @@ package visualization;
         import java.util.stream.LongStream;
 
         import javax.swing.*;
+        import javax.swing.table.DefaultTableModel;
 
         import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
+        import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
         import com.zuehlke.carrera.relayapi.messages.SensorEvent;
         import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
         import org.jfree.chart.ChartFactory;
@@ -38,6 +40,7 @@ public class DataChart extends ApplicationFrame{
     private XYSeries speedSeries;
     private XYPlot plot;
     private XYSeriesCollection speeddata;
+    private DefaultTableModel model;
 
     /**
      *
@@ -72,17 +75,31 @@ public class DataChart extends ApplicationFrame{
 
 
     public void initDataTable(Track track){
-        Object[] column = new Object[track.getSections().size()];
-        Object[][] data = new Object[1][track.getSections().size()];
+        model = new DefaultTableModel();
+        Object[] objects = new Object[track.getSections().size()];
         for(int i=0; i<track.getSections().size(); i++){
-            column[i]=i;
-            data[0][i]=track.getSections().get(i).getDuration();
+            model.addColumn(i);
+            objects[i] = track.getSections().get(i).getDuration();
         }
-        table = new JTable(data, column);
+        model.addRow(objects);
+        table = new JTable(model);
         panel2.add(table, BorderLayout.CENTER);
         panel2.add(table.getTableHeader(), BorderLayout.NORTH);
-        container.add(panel2);
         setContentPane(container);
+    }
+
+    public void updateDataTable(int index, TrackSection section){
+        if(index==0){
+            Object[] objects = {section.getDuration()};
+            model.insertRow(0, objects);
+        }else{
+            model.setValueAt(section.getDuration(), 0, index);
+        }
+        table.repaint();
+    }
+
+    public void updateCarPosition(int tracksection, int offset){
+        
     }
 
 
