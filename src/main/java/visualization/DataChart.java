@@ -1,51 +1,57 @@
 package visualization;
 
-        import java.awt.BorderLayout;
-        import java.awt.event.ActionEvent;
-        import java.awt.event.ActionListener;
-        import java.util.stream.IntStream;
-        import java.util.stream.LongStream;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 
-        import javax.swing.*;
-        import javax.swing.table.DefaultTableModel;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 
-        import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
-        import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
-        import com.zuehlke.carrera.relayapi.messages.SensorEvent;
-        import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
-        import org.jfree.chart.ChartFactory;
-        import org.jfree.chart.ChartPanel;
-        import org.jfree.chart.JFreeChart;
-        import org.jfree.chart.axis.ValueAxis;
-        import org.jfree.chart.plot.XYPlot;
-        import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
-        import org.jfree.chart.renderer.xy.XYItemRenderer;
-        import org.jfree.data.time.Millisecond;
-        import org.jfree.data.time.TimeSeries;
-        import org.jfree.data.time.TimeSeriesCollection;
-        import org.jfree.data.time.TimeSeriesTableModel;
-        import org.jfree.data.xy.XYDataset;
-        import org.jfree.data.xy.XYSeries;
-        import org.jfree.data.xy.XYSeriesCollection;
-        import org.jfree.ui.ApplicationFrame;
-        import org.jfree.ui.RefineryUtilities;
+import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
+import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
+import com.zuehlke.carrera.relayapi.messages.SensorEvent;
+import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.data.time.Millisecond;
+import org.jfree.data.time.TimeSeries;
+import org.jfree.data.time.TimeSeriesCollection;
+import org.jfree.data.time.TimeSeriesTableModel;
+import org.jfree.data.xy.XYDataset;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.ui.ApplicationFrame;
+import org.jfree.ui.RefineryUtilities;
 
-public class DataChart extends ApplicationFrame{
+public class DataChart extends ApplicationFrame {
 
     private final JPanel panel2;
     private final JPanel container;
     private JTable table;
-    /** The time series data. */
+    /**
+     * The time series data.
+     */
     private XYSeries series;
     private XYSeries speedSeries;
     private XYPlot plot;
     private XYSeriesCollection speeddata;
     private DefaultTableModel model;
+    private Rectangle2D.Float rect = new Rectangle2D.Float(0, 0, 0, 0);
 
     /**
-     *
-     * @param title  the frame title.
+     * @param title the frame title.
      */
+
     public DataChart(final String title) {
 
         super(title);
@@ -61,7 +67,16 @@ public class DataChart extends ApplicationFrame{
         container.setLayout(new BoxLayout(container, BoxLayout.X_AXIS));
 
         JPanel panel1 = new JPanel();
-        panel2 = new JPanel(new BorderLayout());
+        panel2 = new JPanel(new BorderLayout()) {
+            @Override
+            public void paint(Graphics graphics) {
+                super.paint(graphics);
+                Graphics2D g = (Graphics2D) graphics;
+                Color myColor = new Color(255, 53,51, 180 );
+                g.setColor(myColor);
+                g.fill(rect);
+            }
+        };
 
         chartPanel.setPreferredSize(new java.awt.Dimension(600, 900));
         panel1.add(chartPanel);
@@ -73,11 +88,10 @@ public class DataChart extends ApplicationFrame{
         setContentPane(container);
     }
 
-
-    public void initDataTable(Track track){
+    public void initDataTable(Track track) {
         model = new DefaultTableModel();
         Object[] objects = new Object[track.getSections().size()];
-        for(int i=0; i<track.getSections().size(); i++){
+        for (int i = 0; i < track.getSections().size(); i++) {
             model.addColumn(i);
             objects[i] = track.getSections().get(i).getDuration();
         }
@@ -86,32 +100,36 @@ public class DataChart extends ApplicationFrame{
         panel2.add(table, BorderLayout.CENTER);
         panel2.add(table.getTableHeader(), BorderLayout.NORTH);
         setContentPane(container);
+        int xtable = table.getX();
+        int ytable = table.getY();
+        rect.setRect(xtable, ytable-10, xtable + 10, ytable + 15);
+        panel2.repaint();
     }
 
-    public void updateDataTable(int index, TrackSection section){
-        if(index==0){
+    public void updateDataTable(int index, TrackSection section) {
+        if (index == 0) {
             Object[] objects = {section.getDuration()};
             model.insertRow(0, objects);
-        }else{
+        } else {
             model.setValueAt(section.getDuration(), 0, index);
         }
         table.repaint();
     }
 
-    public void updateCarPosition(int tracksection, int offset){
-        
+    public void updateCarPosition(int tracksection, int offset) {
+        int twidth = table.getWidth();
+        int xtable = table.getX();
+        int ytable = table.getY();
+        int sectionwidth = twidth / model.getColumnCount();
+
+        rect.setRect(xtable, ytable-10, xtable + 10, ytable + 15);
     }
-
-
-
-
 
 
     /**
      * Creates a sample chart.
      *
-     * @param dataset  the dataset.
-     *
+     * @param dataset the dataset.
      * @return A sample chart.
      */
     private JFreeChart createChart(final XYDataset dataset) {
@@ -137,11 +155,11 @@ public class DataChart extends ApplicationFrame{
         return result;
     }
 
-    public void insertSpeedData(VelocityMessage message){
-        this.speedSeries.add(message.getTimeStamp(), message.getVelocity()*10);
+    public void insertSpeedData(VelocityMessage message) {
+        this.speedSeries.add(message.getTimeStamp(), message.getVelocity() * 10);
     }
 
-    public void insertSensorData(SensorEvent message){
+    public void insertSensorData(SensorEvent message) {
         this.series.add(message.getTimeStamp(), message.getG()[2]);
     }
 
