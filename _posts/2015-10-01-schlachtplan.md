@@ -4,7 +4,7 @@ title:      Schlachtplan
 date:       2015-10-01
 ---
 
-Heute haben wir uns hingesetzt und festgestellt, dass wir gar nicht so recht wissen, wo anzufangen. Dies brachte uns dazu, eine Uebersicht unser naechsten Aufgaben aufzustellen.
+Heute haben wir uns hingesetzt und festgestellt, dass wir gar nicht so recht wissen, wo anzufangen. Dies brachte uns dazu, eine Übersicht unser nächsten Aufgaben aufzustellen.
 
 ## Algorithmus
 * 2 Phasen
@@ -12,7 +12,7 @@ Heute haben wir uns hingesetzt und festgestellt, dass wir gar nicht so recht wis
     * Konstante geschwindigkeit (verschiedene)
     * Aufteilen in Segmente (Geraden, Kurven, Geschwindigkeit, Rundenzeit)
   * Optimieren
-    * Geschwindigkeit anpassen (Anhand gelernter STrecke)
+    * Geschwindigkeit anpassen (Anhand gelernter Strecke)
     * Streckenveraenderung Modellieren
     * Aktuelle Position tracken
       * Berechnung
