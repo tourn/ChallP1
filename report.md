@@ -27,5 +27,8 @@ permalink: /report/
 * Visualizer als Service implementieren, Asynchrone Message des Pilots verarbeiten
 * TrackAnalyzer verbessern
 
-### 15.10.15
-* Track Visualier implementieren
+### 15.10.15 (4h)
+* Track Visualizer implementieren
+* Car Position implementiert
+* Periodische RundenUpdates visualisieren
+* Refactoring TrackAnalyzer
