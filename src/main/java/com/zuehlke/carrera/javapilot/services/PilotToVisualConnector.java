@@ -28,12 +28,11 @@ public class PilotToVisualConnector implements PilotToVisualConnection{
 
     @Override
     public void sectionUpdate(int index, TrackSection section) {
-        sectionUpdate(index, section);
+        dataChart.updateDataTable(index, section);
     }
 
     @Override
     public void carUpdate(int trackSectionIndex, int offset) {
-        carUpdate(trackSectionIndex, offset);
+        dataChart.updateCarPosition(trackSectionIndex, offset);
     }
-
 }
