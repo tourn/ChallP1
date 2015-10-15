@@ -4,25 +4,28 @@ title: Stundenreport
 permalink: /report/
 ---
 
-### 22.9.15
+### 22.9.15 (5h)
 * Entwicklungsumgebungen einrichten
 * In Beispielcode einlesen
-* Einlesen in Akka, Machine Learning, ...
+* Einlesen in Akka & Machine Learning
 * Einfache Kurvenerkennung implementieren
 
-### 24.9.15
-* TrackAnalyzer Idee entwickelt und implementiert
+### 24.9.15 (3h)
+* TrackAnalyzer Idee entwickeln und implementieren
 
-### 1.10.15
-* Vorgehen besprochen
-* Grundidee erarbeitet und aufgeteilt
-* Visualisierungs Framework eingebunden (JFreeChart)
+### 1.10.15 (6h)
+* Vorgehen besprechen
+* Grundidee erarbeiten und aufteilen
+* Visualisierungs Framework einbinden (JFreeChart)
 * [Android App](https://github.com/tourn/ChallP1-CarreraRemote/releases/tag/0.1) zur Steuerung des Simulators
-* TrackAnalyzer verbessert
+* TrackAnalyzer verbessern
 
-### 8.10.15
-* Algorithmus diskutiert und Ansatz ausgearbeitet
-* Weitere visuelle Elemente definiert
-* Datenstruktur für TrackAnalyzer überdenkt
-* Visualizer als Service implementiert, Asynchrone Message Verarbeitung des Pilots
-* Streckenelement-Erkennung umgesetzt 
+### 8.10.15 (5h)
+* Kurvenerkennungsalgorithmus diskutieren und Ansatz ausarbeiten
+* Neuen Visualisierungsscsreen für TrackAnalyzer konzipieren
+* Datenstruktur des TrackAnalyzer überarbeiten
+* Visualizer als Service implementieren, Asynchrone Message des Pilots verarbeiten
+* TrackAnalyzer verbessern
+
+### 15.10.15
+* Track Visualier implementieren
