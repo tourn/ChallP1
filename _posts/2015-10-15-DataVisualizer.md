@@ -6,7 +6,7 @@ date:       2015-10-15
 
 Bis anhin haben wir alle möglichen Daten, welche wir irgendwie bekommen konnten, in unsere erstellten Datenstrukturen gespeichert. Damit man bei dieser Unmenge an Daten davon verschohnt werden den Wald voller Bäume nicht mehr zusehen, stellen wir die wichtigsten Informationen visuell dar.
 
-Nach einem kurzen Proof-of-Concept viel die Technologiewahl auf ein Java Swing Framework([JFreeChart](http://www.jfree.org/jsfreechart/). Somit müssen wir keine weitere Sprache einführen und halten unseren Technologie-Zoo möglichst kompakt.
+Nach einem kurzen Proof-of-Concept viel die Technologiewahl auf ein Java Swing Framework([JFreeChart](http://www.jfree.org/jsfreechart/)). Somit müssen wir keine weitere Sprache einführen und halten unseren Technologie-Zoo möglichst kompakt.
 
 Zu Begin versuchten wir das `DataChart`-Objekt im `JavaPilotActor` zu instanzieren, da wir dort sehr nah bei den darzustellenden Daten waren. Anfangs liefen wir in eine HeadlessException, welche grundsätzlich bedeutet, dass man im momentanen Kontext kein Java Swing Frame erstellen kann. Als Workaround setzten wir das System-Property `headless` auf false, anschliessend konnte ein erstes DataChart(Gyro-Z) erstellt werden.
 
