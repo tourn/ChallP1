@@ -2,6 +2,8 @@ package com.zuehlke.carrera.javapilot.akka;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import akka.actor.Props;
+import akka.actor.UntypedActor;
 import ch.trq.carrera.javapilot.akka.TrackLearner;
 import visualization.DataChart;
 
@@ -27,8 +29,8 @@ public class PilotTopology {
         this.system = system;
     }
 
-    public Map<String, ActorRef> create() {
-        ActorRef initialProcessor = system.actorOf(TrackLearner.props(kobayashi, 100));
+    public Map<String, ActorRef> create(Props props) {
+        ActorRef initialProcessor = system.actorOf(props);
         entryPoints.put(PENALTY_ENTRYPOINT, initialProcessor);
         entryPoints.put(SENSOR_ENTRYPOINT, initialProcessor);
         entryPoints.put(VELOCITY_ENTRYPOINT, initialProcessor);

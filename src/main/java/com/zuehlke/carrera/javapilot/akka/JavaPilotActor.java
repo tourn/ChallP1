@@ -4,6 +4,8 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.japi.Creator;
+import ch.trq.carrera.javapilot.akka.SpeedOptimizer;
+import ch.trq.carrera.javapilot.akka.TrackLearner;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import com.zuehlke.carrera.javapilot.akka.experimental.ThresholdConfiguration;
 import com.zuehlke.carrera.javapilot.config.PilotProperties;
@@ -39,14 +41,15 @@ public class JavaPilotActor extends UntypedActor {
 
         this.properties = properties;
 
-        createTopology();
+        createInitialTopology();
     }
 
-    private void createTopology() {
+    private void createInitialTopology(){
+        createTopology(TrackLearner.props(getSelf(), 100));
+    }
 
-
-        Map<String, ActorRef> entryPoints = new PilotTopology(getSelf(), getContext().system()).create();
-
+    private void createTopology(Props props) {
+        Map<String, ActorRef> entryPoints = new PilotTopology(getSelf(), getContext().system()).create(props);
         this.sensorEntryPoint = entryPoints.get(PilotTopology.SENSOR_ENTRYPOINT);
         this.velocityEntryPoint = entryPoints.get(PilotTopology.VELOCITY_ENTRYPOINT);
         this.penaltyEntryPoint = entryPoints.get(PilotTopology.PENALTY_ENTRYPOINT);
@@ -74,8 +77,10 @@ public class JavaPilotActor extends UntypedActor {
             if(message instanceof PilotToVisualConnection){
                 this.visualConnection = (PilotToVisualConnection) message;
             } else if (message instanceof Track){
+                //Switchover to Phase Two
                 LOGGER.info("Recieved Track");
                 this.visualConnection.initializeTrack((Track) message);
+                createTopology(SpeedOptimizer.props(getSelf(), (Track) message));
             }
             if (message instanceof RaceStartMessage) {
                 handleRaceStart((RaceStartMessage) message);
@@ -203,7 +208,7 @@ public class JavaPilotActor extends UntypedActor {
     }
 
     private void handleRaceStart(RaceStartMessage message) {
-        createTopology();
+        createInitialTopology();
         long now = System.currentTimeMillis();
         LOGGER.info("received race start");
     }
