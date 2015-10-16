@@ -92,7 +92,7 @@ public class DataChart extends ApplicationFrame {
         model = new DefaultTableModel();
         Object[] objects = new Object[track.getSections().size()];
         for (int i = 0; i < track.getSections().size(); i++) {
-            model.addColumn(i);
+            model.addColumn(i + ": " + track.getSections().get(i).getDirection());
             objects[i] = track.getSections().get(i).getDuration();
         }
         model.addRow(objects);

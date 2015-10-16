@@ -88,6 +88,7 @@ public class JavaPilotActor extends UntypedActor {
                 handleSensorEvent((SensorEvent) message);
 
             } else if (message instanceof VelocityMessage) {
+                visualConnection.send((VelocityMessage)message);
                 handleVelocityMessage((VelocityMessage) message);
 
             } else if (message instanceof PilotToRelayConnection) {

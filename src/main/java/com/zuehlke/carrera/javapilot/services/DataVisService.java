@@ -3,6 +3,7 @@ package com.zuehlke.carrera.javapilot.services;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import org.jfree.ui.RefineryUtilities;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
 import visualization.DataChart;
@@ -16,6 +17,7 @@ import java.net.ServerSocket;
  */
 @Service
 @EnableScheduling
+@EnableAsync
 public class DataVisService {
 
     private final DataChart visualizer;
