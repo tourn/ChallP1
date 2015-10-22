@@ -32,15 +32,15 @@ public class PositionTracker {
 
         pos.setDurationOffset(pos.getDurationOffset()+offset);
         if(sectionChanged()){
-            //int index = track.getSections().indexOf(pos.getSection());
+            if(onSectionChange!=null){
+                onSectionChange.onUpdate(sectionIndex, pos.getSection());
+            }
+
             sectionIndex = (sectionIndex +1) % track.getSections().size();
             TrackSection next = track.getSections().get(sectionIndex);
             pos.setSection(next);
             pos.setDurationOffset(0); //add overshoot?
 
-            if(onSectionChange!=null){
-                onSectionChange.onUpdate(sectionIndex, pos.getSection());
-            }
         }
         if(onUpdate != null){
             onUpdate.onUpdate(sectionIndex, pos.getDurationOffset());
