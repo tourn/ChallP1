@@ -92,20 +92,24 @@ public class DataChart extends ApplicationFrame {
     }
 
     public void initDataTable(Track track) {
+        int holeduration=0;
+        this.track = track;
         model = new DefaultTableModel();
         Object[] objects = new Object[track.getSections().size()];
         for (int i = 0; i < track.getSections().size(); i++) {
             model.addColumn(i + ": " + track.getSections().get(i).getDirection());
             objects[i] = track.getSections().get(i).getDuration();
+            holeduration += track.getSections().get(i).getDuration();
         }
         model.addRow(objects);
         table = new JTable(model);
         panel2.add(table, BorderLayout.CENTER);
         panel2.add(table.getTableHeader(), BorderLayout.NORTH);
+        /*for(int i = 0; i < model.getColumnCount(); i++){
+            double durationWidth = track.getSections().get(i).getDuration() / holeduration;
+            table.getColumnModel().getColumn(i).setPreferredWidth((int) Math.round(table.getWidth() * durationWidth));
+        }*/
         setContentPane(container);
-        int xtable = table.getX();
-        int ytable = table.getY();
-        rect.setRect(xtable, ytable-10, xtable + 10, ytable + 15);
         panel2.repaint();
     }
 
@@ -123,13 +127,15 @@ public class DataChart extends ApplicationFrame {
         int twidth = table.getWidth();
         int xtable = table.getX();
         int ytable = table.getY();
-        int sectionwidth = twidth / model.getColumnCount();
+        int sectionwidth = twidth / table.getColumnCount();
 
-        double prozentualoffeset = offset / track.getSections().get(tracksection).getDuration();
+        double prozentualoffeset = (double)offset / (double)track.getSections().get(tracksection).getDuration();
 
-        if(offset <= track.getSections().get(tracksection).getDuration()){
-            rect.setRect(xtable + prozentualoffeset*sectionwidth, ytable-10, xtable + 10 + prozentualoffeset*sectionwidth, ytable + 15);
-        }
+        double xrectl = xtable + tracksection * sectionwidth + prozentualoffeset * sectionwidth;
+        double xrectr = 10;
+
+        rect.setRect(xrectl, ytable-10, xrectr, ytable + 15);
+        panel2.repaint();
     }
 
 
