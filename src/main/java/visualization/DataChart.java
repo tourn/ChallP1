@@ -50,6 +50,7 @@ public class DataChart extends ApplicationFrame {
     private XYSeriesCollection speeddata;
     private DefaultTableModel model;
     private Rectangle2D.Float rect = new Rectangle2D.Float(0, 0, 0, 0);
+    private double holeduration=0;
 
     /**
      * @param title the frame title.
@@ -63,6 +64,8 @@ public class DataChart extends ApplicationFrame {
         final XYSeriesCollection dataset = new XYSeriesCollection(this.series);
         speeddata = new XYSeriesCollection(this.speedSeries);
         final JFreeChart chart = createChart(dataset);
+        JFrame trackframe = new JFrame();
+        trackframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         final ChartPanel chartPanel = new ChartPanel(chart);
 
@@ -83,16 +86,19 @@ public class DataChart extends ApplicationFrame {
 
         chartPanel.setPreferredSize(new java.awt.Dimension(600, 900));
         panel1.add(chartPanel);
-        panel2.setPreferredSize(new java.awt.Dimension(900, 900));
+        panel2.setPreferredSize(new java.awt.Dimension(1200, 900));
 
         container.add(panel1);
-        container.add(panel2);
+
+
+        trackframe.setContentPane(panel2);
+        trackframe.pack();
+        trackframe.setVisible(true);
 
         setContentPane(container);
     }
 
     public void initDataTable(Track track) {
-        int holeduration=0;
         this.track = track;
         model = new DefaultTableModel();
         Object[] objects = new Object[track.getSections().size()];
@@ -103,19 +109,26 @@ public class DataChart extends ApplicationFrame {
         }
         model.addRow(objects);
         table = new JTable(model);
+        resizeTableColumn();
         panel2.add(table, BorderLayout.CENTER);
         panel2.add(table.getTableHeader(), BorderLayout.NORTH);
-        /*for(int i = 0; i < model.getColumnCount(); i++){
-            double durationWidth = track.getSections().get(i).getDuration() / holeduration;
-            table.getColumnModel().getColumn(i).setPreferredWidth((int) Math.round(table.getWidth() * durationWidth));
-        }*/
-        setContentPane(container);
         panel2.repaint();
+    }
+
+    public void resizeTableColumn(){
+        double durationWidth;
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        for(int i = 0; i < model.getColumnCount(); i++){
+            durationWidth = (double) track.getSections().get(i).getDuration() / holeduration;
+            int columnwidth = (int) ((double) panel2.getWidth() * durationWidth);
+            table.getColumnModel().getColumn(i).setMinWidth(columnwidth);
+        }
     }
 
     public void updateDataTable(int index, TrackSection section) {
         if (index == 0) {
             Object[] objects = {section.getDuration()};
+            resizeTableColumn();
             model.insertRow(0, objects);
         } else {
             model.setValueAt(section.getDuration(), 0, index);
