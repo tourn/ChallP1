@@ -178,7 +178,7 @@ public class TrackAnalyzer {
     }
 
     private Round createCalculatedRound(List<Round> tempRoundList){
-        Round calculatedRound = new Round(0,rounds.get(1).getPilotPower());
+        Round calculatedRound = new Round(0,tempRoundList.get(0).getPilotPower());
 
         for(int i=0; i<tempRoundList.get(0).getCountOfTrackSections(); i++){
             calculatedRound.addTrackSection(tempRoundList.get(0).getTrackSections().get(i).getDirection(),0);
@@ -235,6 +235,7 @@ public class TrackAnalyzer {
 
         Round calculatedRound = createCalculatedRound(tempRoundList);
 
+
         //printRound(calculatedRound);
         printTrack(calculatedRound);
         return generateTrack(calculatedRound);
@@ -246,6 +247,7 @@ public class TrackAnalyzer {
     private Track generateTrack(Round round){
         Track track = new Track();
         round.getTrackSections().stream().forEach(s -> track.getSections().add(s));
+        track.setPower(round.getPilotPower());
         /*
         round.getTrackVelocites().stream().forEach(v -> {
             TrackSection last = null;

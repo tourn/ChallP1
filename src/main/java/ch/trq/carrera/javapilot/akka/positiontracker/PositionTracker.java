@@ -20,6 +20,7 @@ public class PositionTracker {
     private FloatingHistory gyroZ = new FloatingHistory(8);
     private static double TURN_THRESHOLD = 1500;
     private final Logger LOGGER = LoggerFactory.getLogger(PositionTracker.class);
+    private int power;
 
     public PositionTracker(Track track){
         this.track = track;
@@ -84,5 +85,18 @@ public class PositionTracker {
 
     public void setOnUpdate(UpdateCallback onUpdate) {
         this.onUpdate = onUpdate;
+    }
+
+    public void setPower(int power){
+        this.power = power;
+    }
+
+    public boolean isTurn(){
+        return pos.getSection().getDirection().equals("TURN");
+    }
+
+    public double getPercentageDistance(){
+        // TODO SOME MORE LOGICs
+        return((double)pos.getDurationOffset())/((double)pos.getSection().getDuration());
     }
 }

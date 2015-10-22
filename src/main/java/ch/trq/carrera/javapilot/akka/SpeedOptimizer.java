@@ -23,6 +23,9 @@ public class SpeedOptimizer extends UntypedActor {
     private ActorRef pilot;
     private final Track track;
     private int power = 200;
+    private int minPower = 100;
+    private int maxTurnPower = 220;
+    private int maxPower = 255;
     private PositionTracker positionTracker;
 
     public SpeedOptimizer(ActorRef pilot, Track track) {
@@ -39,8 +42,14 @@ public class SpeedOptimizer extends UntypedActor {
             @Override
             public void onUpdate(int sectionIndex, TrackSection section) {
                 pilot.tell(new SectionUpdate(section, sectionIndex), getSelf());
+                if(section.getDirection().equals("TURN")){
+                    changePower(maxPower);
+                }else{
+                    changePower(maxTurnPower);
+                }
             }
         });
+        changePower(maxTurnPower);
     }
 
     public static Props props ( ActorRef pilot, Track track ) {
@@ -65,6 +74,17 @@ public class SpeedOptimizer extends UntypedActor {
 
     private void handleSensorEvent(SensorEvent event) {
         positionTracker.update(event);
-        pilot.tell ( new PowerAction(power), getSelf());
+        if(!positionTracker.isTurn()){
+            LOGGER.info("DUCK GOING STRAIGHT: " + positionTracker.getPercentageDistance());
+            if(positionTracker.getPercentageDistance()>0.2){
+                changePower(minPower);
+            }
+        }
+        //pilot.tell ( new PowerAction(power), getSelf());
+    }
+
+    private void changePower(int power){
+        pilot.tell(new PowerAction(power), getSelf());
+        positionTracker.setPower(power);
     }
 }

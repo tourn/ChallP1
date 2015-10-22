@@ -11,6 +11,15 @@ public class Track {
     private List<TrackSection> sections = new ArrayList<>();
     private List<Position> checkpoints = new ArrayList<>();
     private Position car = null;
+    private int power;
+
+    public int getPower() {
+        return power;
+    }
+
+    public void setPower(int power) {
+        this.power = power;
+    }
 
     public List<TrackSection> getSections() {
         return sections;
