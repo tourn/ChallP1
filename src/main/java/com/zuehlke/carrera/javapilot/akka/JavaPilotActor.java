@@ -6,6 +6,8 @@ import akka.actor.UntypedActor;
 import akka.japi.Creator;
 import ch.trq.carrera.javapilot.akka.SpeedOptimizer;
 import ch.trq.carrera.javapilot.akka.TrackLearner;
+import ch.trq.carrera.javapilot.akka.positiontracker.CarUpdate;
+import ch.trq.carrera.javapilot.akka.positiontracker.SectionUpdate;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import com.zuehlke.carrera.javapilot.akka.experimental.ThresholdConfiguration;
 import com.zuehlke.carrera.javapilot.config.PilotProperties;
@@ -81,7 +83,15 @@ public class JavaPilotActor extends UntypedActor {
                 LOGGER.info("Recieved Track");
                 this.visualConnection.initializeTrack((Track) message);
                 createTopology(SpeedOptimizer.props(getSelf(), (Track) message));
+            } else if (message instanceof CarUpdate){
+                CarUpdate update = (CarUpdate) message;
+                visualConnection.carUpdate(update.getTrackIndex(), (int) update.getOffset());
+            } else if (message instanceof SectionUpdate){
+                SectionUpdate update = (SectionUpdate) message;
+                visualConnection.sectionUpdate(update.getSectionIndex(), update.getSection());
             }
+
+            // ------
             if (message instanceof RaceStartMessage) {
                 handleRaceStart((RaceStartMessage) message);
 

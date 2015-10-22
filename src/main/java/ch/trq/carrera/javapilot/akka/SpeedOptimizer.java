@@ -3,14 +3,16 @@ package ch.trq.carrera.javapilot.akka;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
+import ch.trq.carrera.javapilot.akka.positiontracker.CarUpdate;
+import ch.trq.carrera.javapilot.akka.positiontracker.PositionTracker;
+import ch.trq.carrera.javapilot.akka.positiontracker.SectionUpdate;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
+import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
 import com.zuehlke.carrera.javapilot.akka.PowerAction;
-import com.zuehlke.carrera.javapilot.akka.experimental.ThresholdConfiguration;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.rmi.runtime.Log;
 
 /**
  *  Currently not optimizing anything, merely a placeholder.
@@ -21,10 +23,24 @@ public class SpeedOptimizer extends UntypedActor {
     private ActorRef pilot;
     private final Track track;
     private int power = 200;
+    private PositionTracker positionTracker;
 
     public SpeedOptimizer(ActorRef pilot, Track track) {
         this.pilot = pilot;
         this.track = track;
+        positionTracker = new PositionTracker(track);
+        positionTracker.setOnUpdate(new PositionTracker.UpdateCallback() {
+            @Override
+            public void onUpdate(int sectionIndex, long offset) {
+                pilot.tell(new CarUpdate(sectionIndex, offset), getSelf());
+            }
+        });
+        positionTracker.setOnSectionChange(new PositionTracker.SectionChangeCallback() {
+            @Override
+            public void onUpdate(int sectionIndex, TrackSection section) {
+                pilot.tell(new SectionUpdate(section, sectionIndex), getSelf());
+            }
+        });
     }
 
     public static Props props ( ActorRef pilot, Track track ) {
@@ -48,6 +64,7 @@ public class SpeedOptimizer extends UntypedActor {
     }
 
     private void handleSensorEvent(SensorEvent event) {
+        positionTracker.update(event);
         pilot.tell ( new PowerAction(power), getSelf());
     }
 }
