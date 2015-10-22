@@ -32,3 +32,10 @@ permalink: /report/
 * Car Position implementiert
 * Periodische RundenUpdates visualisieren
 * Refactoring TrackAnalyzer
+* TrackAnalyzer mehr oder weniger fertigstellen
+* Wechseln vom TrackAnalyzer auf die zweite Fahrphase
+
+### 22.10.15 (5h)
+* Visualizer implementieren
+* PositionTracker implementieren
+* Erste Geschwindigkeitsanpassungen mit PositionTracker
