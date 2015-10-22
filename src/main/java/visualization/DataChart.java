@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.logging.Logger;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
@@ -32,12 +33,14 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.ApplicationFrame;
 import org.jfree.ui.RefineryUtilities;
+import sun.rmi.runtime.Log;
 
 public class DataChart extends ApplicationFrame {
 
     private final JPanel panel2;
     private final JPanel container;
     private JTable table;
+    private Track track;
     /**
      * The time series data.
      */
@@ -122,7 +125,11 @@ public class DataChart extends ApplicationFrame {
         int ytable = table.getY();
         int sectionwidth = twidth / model.getColumnCount();
 
-        rect.setRect(xtable, ytable-10, xtable + 10, ytable + 15);
+        double prozentualoffeset = offset / track.getSections().get(tracksection).getDuration();
+
+        if(offset <= track.getSections().get(tracksection).getDuration()){
+            rect.setRect(xtable + prozentualoffeset*sectionwidth, ytable-10, xtable + 10 + prozentualoffeset*sectionwidth, ytable + 15);
+        }
     }
 
 
