@@ -3,6 +3,9 @@ package ch.trq.carrera.javapilot.akka.positiontracker;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
+import com.zuehlke.carrera.timeseries.FloatingHistory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by tourn on 22.10.15.
@@ -14,6 +17,9 @@ public class PositionTracker {
     private SectionChangeCallback onSectionChange;
     private Track.Position pos;
     private int sectionIndex;
+    private FloatingHistory gyroZ = new FloatingHistory(8);
+    private static double TURN_THRESHOLD = 1500;
+    private final Logger LOGGER = LoggerFactory.getLogger(PositionTracker.class);
 
     public PositionTracker(Track track){
         this.track = track;
@@ -22,6 +28,8 @@ public class PositionTracker {
     }
 
     public void update(SensorEvent e){
+        gyroZ.shift(e.getG()[2]);
+
         if(tLastUpdate == -1){
             tLastUpdate = e.getTimeStamp();
             return;
@@ -48,6 +56,17 @@ public class PositionTracker {
     }
 
     private boolean sectionChanged(){
+        //LOGGER.info("Selection changed ???");
+        if(pos.getSection().getDuration() < (2*pos.getDurationOffset())){
+            if(pos.getSection().getDirection().equals("GOING STRAIGHT") && Math.abs(gyroZ.currentMean()) > TURN_THRESHOLD){
+                LOGGER.info("going into TURN");
+                return true;
+            }
+            if(pos.getSection().getDirection().equals("TURN") && Math.abs(gyroZ.currentMean()) < TURN_THRESHOLD){
+                LOGGER.info("going into GOING STRAIGHT");
+                return true;
+            }
+        }
         return pos.getSection().getDuration() < pos.getDurationOffset();
     }
 
