@@ -2,6 +2,7 @@ package com.zuehlke.carrera.javapilot.services;
 
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
+import com.zuehlke.carrera.relayapi.messages.RoundTimeMessage;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
 
@@ -16,4 +17,5 @@ public interface PilotToVisualConnection {
     void initializeTrack(Track track);
     void sectionUpdate(int index, TrackSection section);
     void carUpdate(int trackSectionIndex, int offset);
+    void newRoundMessage(RoundTimeMessage message);
 }

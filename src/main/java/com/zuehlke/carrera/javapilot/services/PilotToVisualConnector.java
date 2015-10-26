@@ -2,6 +2,7 @@ package com.zuehlke.carrera.javapilot.services;
 
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
+import com.zuehlke.carrera.relayapi.messages.RoundTimeMessage;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
 import visualization.DataChart;
@@ -40,5 +41,10 @@ public class PilotToVisualConnector implements PilotToVisualConnection{
     @Override
     public void carUpdate(int trackSectionIndex, int offset) {
         dataChart.updateCarPosition(trackSectionIndex, offset);
+    }
+
+    @Override
+    public void newRoundMessage(RoundTimeMessage message) {
+        dataChart.newRoundMessage(message);
     }
 }

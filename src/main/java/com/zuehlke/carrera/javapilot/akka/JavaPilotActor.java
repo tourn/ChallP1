@@ -122,6 +122,7 @@ public class JavaPilotActor extends UntypedActor {
                 sensorEntryPoint.forward(message, getContext());
 
             } else if (message instanceof RoundTimeMessage) {
+                visualConnection.newRoundMessage((RoundTimeMessage) message);
                 handleRoundTime((RoundTimeMessage) message);
 
             } else if (message instanceof String) {

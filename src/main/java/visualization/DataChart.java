@@ -15,6 +15,7 @@ import javax.swing.table.DefaultTableModel;
 
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
+import com.zuehlke.carrera.relayapi.messages.RoundTimeMessage;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
 import org.jfree.chart.ChartFactory;
@@ -56,7 +57,8 @@ public class DataChart extends ApplicationFrame {
     private XYSeriesCollection speeddata;
     private DefaultTableModel model;
     private Rectangle2D.Float rect = new Rectangle2D.Float(0, 0, 0, 0);
-    private double holeduration=0;
+    private double holeduration = 0;
+    private boolean notfirst = false;
 
     /**
      * @param title the frame title.
@@ -88,7 +90,7 @@ public class DataChart extends ApplicationFrame {
             public void paint(Graphics graphics) {
                 super.paint(graphics);
                 Graphics2D g = (Graphics2D) graphics;
-                Color myColor = new Color(255, 53,51, 180 );
+                Color myColor = new Color(255, 53, 51, 180);
                 g.setColor(myColor);
                 g.fill(rect);
             }
@@ -127,10 +129,10 @@ public class DataChart extends ApplicationFrame {
         panel2.repaint();
     }
 
-    public void resizeTableColumn(){
+    public void resizeTableColumn() {
         double durationWidth;
         table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        for(int i = 0; i < model.getColumnCount(); i++){
+        for (int i = 0; i < model.getColumnCount(); i++) {
             durationWidth = (double) track.getSections().get(i).getDuration() / holeduration;
             int columnwidth = (int) ((double) panel2.getWidth() * durationWidth);
             table.getColumnModel().getColumn(i).setMinWidth(columnwidth);
@@ -142,14 +144,21 @@ public class DataChart extends ApplicationFrame {
             Object[] objects = {section.getDuration()};
             resizeTableColumn();
             model.insertRow(0, objects);
-            tmpSeries=secondPhaseSerie;
+        } else {
+            model.setValueAt(section.getDuration(), 0, index);
+        }
+    }
+
+    public void newRoundMessage(RoundTimeMessage m) {
+        if (notfirst) {
+            tmpSeries = secondPhaseSerie;
             XYPlot plot = chartModel.getXYPlot();
             secondPhaseSerie.clear();
             plot.setDataset(1, datasetRound);
             plot.setRenderer(1, new StandardXYItemRenderer());
-            absolut_time=-1;
+            absolut_time = -1;
         } else {
-            model.setValueAt(section.getDuration(), 0, index);
+            notfirst = true;
         }
     }
 
@@ -159,12 +168,12 @@ public class DataChart extends ApplicationFrame {
         int ytable = table.getY();
         int sectionwidth = twidth / table.getColumnCount();
 
-        double prozentualoffeset = (double)offset / (double)track.getSections().get(tracksection).getDuration();
+        double prozentualoffeset = (double) offset / (double) track.getSections().get(tracksection).getDuration();
 
         double xrectl = xtable + tracksection * sectionwidth + prozentualoffeset * sectionwidth;
         double xrectr = 10;
 
-        rect.setRect(xrectl, ytable-10, xrectr, ytable + 15);
+        rect.setRect(xrectl, ytable - 10, xrectr, ytable + 15);
         panel2.repaint();
     }
 
@@ -196,16 +205,17 @@ public class DataChart extends ApplicationFrame {
     }
 
 
-
     public void insertSpeedData(VelocityMessage message) {
         this.speedSeries.add(message.getTimeStamp(), message.getVelocity() * 10);
     }
 
     public void insertSensorData(SensorEvent message) {
-        if(absolut_time == -1){
-            absolut_time = message.getTimeStamp();
+        if (notfirst) {
+            if (absolut_time == -1) {
+                absolut_time = message.getTimeStamp();
+            }
+            this.tmpSeries.add(Math.abs(absolut_time - message.getTimeStamp()), message.getG()[2]);
         }
-        this.tmpSeries.add(Math.abs(absolut_time - message.getTimeStamp()), message.getG()[2]);
     }
 
 }
