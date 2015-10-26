@@ -39,3 +39,7 @@ permalink: /report/
 * Visualizer implementieren
 * PositionTracker implementieren
 * Erste Geschwindigkeitsanpassungen mit PositionTracker
+
+### 27.10.15 (3h)
+* Gyro-Z Graph für Learning Phase
+* Gyro-Z Graph für Speed Phase zum Direktvergleich und Hilfestellung für Positiontracking
