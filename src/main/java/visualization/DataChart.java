@@ -39,14 +39,20 @@ public class DataChart extends ApplicationFrame {
 
     private final JPanel panel2;
     private final JPanel container;
+    private final JFreeChart chartModel;
+    //private final JFreeChart chartRound;
+    private final XYSeriesCollection datasetRound;
+    private final XYSeriesCollection datasetModel;
     private JTable table;
     private Track track;
     /**
      * The time series data.
      */
+    private long absolut_time = -1;
     private XYSeries series;
+    private XYSeries secondPhaseSerie;
+    private XYSeries tmpSeries;
     private XYSeries speedSeries;
-    private XYPlot plot;
     private XYSeriesCollection speeddata;
     private DefaultTableModel model;
     private Rectangle2D.Float rect = new Rectangle2D.Float(0, 0, 0, 0);
@@ -59,15 +65,19 @@ public class DataChart extends ApplicationFrame {
     public DataChart(final String title) {
 
         super(title);
-        this.series = new XYSeries("Sensor Z");
+        this.series = new XYSeries("Sensor Z Model");
+        this.secondPhaseSerie = new XYSeries("Sensor Z Round");
         this.speedSeries = new XYSeries("Speed");
-        final XYSeriesCollection dataset = new XYSeriesCollection(this.series);
+        datasetModel = new XYSeriesCollection(this.series);
+        datasetRound = new XYSeriesCollection(this.secondPhaseSerie);
         speeddata = new XYSeriesCollection(this.speedSeries);
-        final JFreeChart chart = createChart(dataset);
+        chartModel = createChart(datasetModel);
+        //chartRound = createChart(datasetRound);
         JFrame trackframe = new JFrame();
         trackframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        final ChartPanel chartPanel = new ChartPanel(chart);
+        final ChartPanel chartPanelModel = new ChartPanel(chartModel);
+        //final ChartPanel chartPanelRound = new ChartPanel(chartRound);
 
         container = new JPanel();
         container.setLayout(new BoxLayout(container, BoxLayout.X_AXIS));
@@ -84,12 +94,14 @@ public class DataChart extends ApplicationFrame {
             }
         };
 
-        chartPanel.setPreferredSize(new java.awt.Dimension(600, 900));
-        panel1.add(chartPanel);
+        chartPanelModel.setPreferredSize(new java.awt.Dimension(1200, 450));
+        //chartPanelRound.setPreferredSize(new java.awt.Dimension(1200, 450));
+        panel1.add(chartPanelModel);
+        //panel1.add(chartPanelRound);
+        panel1.setPreferredSize(new java.awt.Dimension(1200, 900));
         panel2.setPreferredSize(new java.awt.Dimension(1200, 900));
 
         container.add(panel1);
-
 
         trackframe.setContentPane(panel2);
         trackframe.pack();
@@ -130,10 +142,15 @@ public class DataChart extends ApplicationFrame {
             Object[] objects = {section.getDuration()};
             resizeTableColumn();
             model.insertRow(0, objects);
+            tmpSeries=secondPhaseSerie;
+            XYPlot plot = chartModel.getXYPlot();
+            secondPhaseSerie.clear();
+            plot.setDataset(1, datasetRound);
+            plot.setRenderer(1, new StandardXYItemRenderer());
+            absolut_time=-1;
         } else {
             model.setValueAt(section.getDuration(), 0, index);
         }
-        table.repaint();
     }
 
     public void updateCarPosition(int tracksection, int offset) {
@@ -168,25 +185,27 @@ public class DataChart extends ApplicationFrame {
                 true,
                 false
         );
-        plot = result.getXYPlot();
+        XYPlot plot = result.getXYPlot();
         ValueAxis axis = plot.getDomainAxis();
-        axis.setAutoRange(true);
-        axis.setFixedAutoRange(60000.0);  // 60 seconds
+        //axis.setAutoRange(true);
+        //axis.setFixedAutoRange(60000.0);  // 60 seconds
         axis = plot.getRangeAxis();
-        axis.setRange(-5000, 5000);
-
-        plot.setDataset(1, speeddata);
-        plot.setRenderer(1, new StandardXYItemRenderer());
-
+        axis.setRange(-5000, 6000);
+        tmpSeries = this.series;
         return result;
     }
+
+
 
     public void insertSpeedData(VelocityMessage message) {
         this.speedSeries.add(message.getTimeStamp(), message.getVelocity() * 10);
     }
 
     public void insertSensorData(SensorEvent message) {
-        this.series.add(message.getTimeStamp(), message.getG()[2]);
+        if(absolut_time == -1){
+            absolut_time = message.getTimeStamp();
+        }
+        this.tmpSeries.add(Math.abs(absolut_time - message.getTimeStamp()), message.getG()[2]);
     }
 
 }

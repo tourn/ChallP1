@@ -44,12 +44,10 @@ public class PositionTracker {
             if(onSectionChange!=null){
                 onSectionChange.onUpdate(sectionIndex, pos.getSection());
             }
-
             sectionIndex = (sectionIndex +1) % track.getSections().size();
             TrackSection next = track.getSections().get(sectionIndex);
             pos.setSection(next);
             pos.setDurationOffset(0); //add overshoot?
-
         }
         if(onUpdate != null){
             onUpdate.onUpdate(sectionIndex, pos.getDurationOffset());
@@ -58,7 +56,7 @@ public class PositionTracker {
 
     private boolean sectionChanged(){
         //LOGGER.info("Selection changed ???");
-        if(pos.getSection().getDuration() < (2*pos.getDurationOffset())){
+       if(pos.getSection().getDuration() < (2*pos.getDurationOffset())){
             if(pos.getSection().getDirection().equals("GOING STRAIGHT") && Math.abs(gyroZ.currentMean()) > TURN_THRESHOLD){
                 LOGGER.info("going into TURN");
                 return true;
@@ -67,7 +65,7 @@ public class PositionTracker {
                 LOGGER.info("going into GOING STRAIGHT");
                 return true;
             }
-        }
+       }
         return pos.getSection().getDuration() < pos.getDurationOffset();
     }
 
