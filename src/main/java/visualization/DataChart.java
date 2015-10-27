@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.text.SimpleDateFormat;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -21,6 +22,7 @@ import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
@@ -41,11 +43,12 @@ public class DataChart extends ApplicationFrame {
     private final JPanel panel2;
     private final JPanel container;
     private final JFreeChart chartModel;
-    //private final JFreeChart chartRound;
+    private final JFreeChart chartRound;
     private final XYSeriesCollection datasetRound;
     private final XYSeriesCollection datasetModel;
     private JTable table;
     private Track track;
+    private int second = 0;
     /**
      * The time series data.
      */
@@ -74,12 +77,12 @@ public class DataChart extends ApplicationFrame {
         datasetRound = new XYSeriesCollection(this.secondPhaseSerie);
         speeddata = new XYSeriesCollection(this.speedSeries);
         chartModel = createChart(datasetModel);
-        //chartRound = createChart(datasetRound);
+        chartRound = createChart(datasetRound);
         JFrame trackframe = new JFrame();
         trackframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         final ChartPanel chartPanelModel = new ChartPanel(chartModel);
-        //final ChartPanel chartPanelRound = new ChartPanel(chartRound);
+        final ChartPanel chartPanelRound = new ChartPanel(chartRound);
 
         container = new JPanel();
         container.setLayout(new BoxLayout(container, BoxLayout.X_AXIS));
@@ -97,9 +100,9 @@ public class DataChart extends ApplicationFrame {
         };
 
         chartPanelModel.setPreferredSize(new java.awt.Dimension(1200, 450));
-        //chartPanelRound.setPreferredSize(new java.awt.Dimension(1200, 450));
+        chartPanelRound.setPreferredSize(new java.awt.Dimension(1200, 450));
         panel1.add(chartPanelModel);
-        //panel1.add(chartPanelRound);
+        panel1.add(chartPanelRound);
         panel1.setPreferredSize(new java.awt.Dimension(1200, 900));
         panel2.setPreferredSize(new java.awt.Dimension(1200, 900));
 
@@ -152,14 +155,17 @@ public class DataChart extends ApplicationFrame {
     public void newRoundMessage(RoundTimeMessage m) {
         if (notfirst) {
             tmpSeries = secondPhaseSerie;
-            XYPlot plot = chartModel.getXYPlot();
-            secondPhaseSerie.clear();
-            plot.setDataset(1, datasetRound);
-            plot.setRenderer(1, new StandardXYItemRenderer());
-            absolut_time = -1;
+            if (second == 2) {
+                XYPlot plot = chartModel.getXYPlot();
+                secondPhaseSerie.clear();
+                plot.setDataset(1, datasetRound);
+                plot.setRenderer(1, new StandardXYItemRenderer());
+                absolut_time = -1;
+            }
         } else {
             notfirst = true;
         }
+        second++;
     }
 
     public void updateCarPosition(int tracksection, int offset) {
@@ -196,8 +202,7 @@ public class DataChart extends ApplicationFrame {
         );
         XYPlot plot = result.getXYPlot();
         ValueAxis axis = plot.getDomainAxis();
-        //axis.setAutoRange(true);
-        //axis.setFixedAutoRange(60000.0);  // 60 seconds
+        ((DateAxis)axis).setDateFormatOverride(new SimpleDateFormat("ss"));
         axis = plot.getRangeAxis();
         axis.setRange(-5000, 6000);
         tmpSeries = this.series;
@@ -214,7 +219,9 @@ public class DataChart extends ApplicationFrame {
             if (absolut_time == -1) {
                 absolut_time = message.getTimeStamp();
             }
-            this.tmpSeries.add(Math.abs(absolut_time - message.getTimeStamp()), message.getG()[2]);
+            if(second <= 3){
+                this.tmpSeries.add(Math.abs(absolut_time - message.getTimeStamp()), message.getG()[2]);
+            }
         }
     }
 
