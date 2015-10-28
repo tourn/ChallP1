@@ -1,19 +1,13 @@
 package visualization;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
-import java.util.logging.Logger;
-import java.util.stream.IntStream;
-import java.util.stream.LongStream;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
+import ch.qos.logback.core.pattern.color.BlueCompositeConverter;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
 import com.zuehlke.carrera.relayapi.messages.RoundTimeMessage;
@@ -27,16 +21,10 @@ import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
-import org.jfree.data.time.Millisecond;
-import org.jfree.data.time.TimeSeries;
-import org.jfree.data.time.TimeSeriesCollection;
-import org.jfree.data.time.TimeSeriesTableModel;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.ApplicationFrame;
-import org.jfree.ui.RefineryUtilities;
-import sun.rmi.runtime.Log;
 
 public class DataChart extends ApplicationFrame {
 
@@ -44,8 +32,10 @@ public class DataChart extends ApplicationFrame {
     private final JPanel container;
     private final JFreeChart chartModel;
     private final JFreeChart chartRound;
-    private final XYSeriesCollection datasetRound;
+    private final XYSeriesCollection datasetRound1;
     private final XYSeriesCollection datasetModel;
+    private final XYSeries secondPhaseSerie2;
+    private final XYSeriesCollection datasetRound2;
     private JTable table;
     private Track track;
     private int second = 0;
@@ -54,7 +44,7 @@ public class DataChart extends ApplicationFrame {
      */
     private long absolut_time = -1;
     private XYSeries series;
-    private XYSeries secondPhaseSerie;
+    private XYSeries secondPhaseSerie1;
     private XYSeries tmpSeries;
     private XYSeries speedSeries;
     private XYSeriesCollection speeddata;
@@ -62,6 +52,7 @@ public class DataChart extends ApplicationFrame {
     private Rectangle2D.Float rect = new Rectangle2D.Float(0, 0, 0, 0);
     private double holeduration = 0;
     private boolean notfirst = false;
+    private StandardXYItemRenderer renderer;
 
     /**
      * @param title the frame title.
@@ -71,13 +62,15 @@ public class DataChart extends ApplicationFrame {
 
         super(title);
         this.series = new XYSeries("Sensor Z Model");
-        this.secondPhaseSerie = new XYSeries("Sensor Z Round");
+        this.secondPhaseSerie1 = new XYSeries("Sensor Z Round");
+        secondPhaseSerie2 = new XYSeries("Sensor Z 2 Round");
         this.speedSeries = new XYSeries("Speed");
         datasetModel = new XYSeriesCollection(this.series);
-        datasetRound = new XYSeriesCollection(this.secondPhaseSerie);
+        datasetRound1 = new XYSeriesCollection(this.secondPhaseSerie1);
+        datasetRound2 = new XYSeriesCollection(this.secondPhaseSerie2);
         speeddata = new XYSeriesCollection(this.speedSeries);
         chartModel = createChart(datasetModel);
-        chartRound = createChart(datasetRound);
+        chartRound = createChart(datasetRound2);
         JFrame trackframe = new JFrame();
         trackframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -99,12 +92,12 @@ public class DataChart extends ApplicationFrame {
             }
         };
 
-        chartPanelModel.setPreferredSize(new java.awt.Dimension(1200, 450));
-        chartPanelRound.setPreferredSize(new java.awt.Dimension(1200, 450));
+        chartPanelModel.setPreferredSize(new Dimension(1200, 450));
+        //chartPanelRound.setPreferredSize(new Dimension(1200, 450));
         panel1.add(chartPanelModel);
-        panel1.add(chartPanelRound);
-        panel1.setPreferredSize(new java.awt.Dimension(1200, 900));
-        panel2.setPreferredSize(new java.awt.Dimension(1200, 900));
+        //panel1.add(chartPanelRound);
+        panel1.setPreferredSize(new Dimension(1200, 900));
+        panel2.setPreferredSize(new Dimension(1200, 900));
 
         container.add(panel1);
 
@@ -145,7 +138,6 @@ public class DataChart extends ApplicationFrame {
     public void updateDataTable(int index, TrackSection section) {
         if (index == 0) {
             Object[] objects = {section.getDuration()};
-            resizeTableColumn();
             model.insertRow(0, objects);
         } else {
             model.setValueAt(section.getDuration(), 0, index);
@@ -154,18 +146,17 @@ public class DataChart extends ApplicationFrame {
 
     public void newRoundMessage(RoundTimeMessage m) {
         if (notfirst) {
-            tmpSeries = secondPhaseSerie;
-            if (second == 2) {
-                XYPlot plot = chartModel.getXYPlot();
-                secondPhaseSerie.clear();
-                plot.setDataset(1, datasetRound);
-                plot.setRenderer(1, new StandardXYItemRenderer());
-                absolut_time = -1;
-            }
+            tmpSeries = secondPhaseSerie1;
+            secondPhaseSerie1.clear();
+            absolut_time = -1;
         } else {
             notfirst = true;
+            renderer = new StandardXYItemRenderer();
+            XYPlot plot = chartModel.getXYPlot();
+            plot.setDataset(1, datasetRound1);
+            renderer.setSeriesPaint(1, Color.BLUE);
+            plot.setRenderer(1, renderer);
         }
-        second++;
     }
 
     public void updateCarPosition(int tracksection, int offset) {
@@ -202,7 +193,7 @@ public class DataChart extends ApplicationFrame {
         );
         XYPlot plot = result.getXYPlot();
         ValueAxis axis = plot.getDomainAxis();
-        ((DateAxis)axis).setDateFormatOverride(new SimpleDateFormat("ss"));
+        ((DateAxis) axis).setDateFormatOverride(new SimpleDateFormat("ss"));
         axis = plot.getRangeAxis();
         axis.setRange(-5000, 6000);
         tmpSeries = this.series;
@@ -219,9 +210,7 @@ public class DataChart extends ApplicationFrame {
             if (absolut_time == -1) {
                 absolut_time = message.getTimeStamp();
             }
-            if(second <= 3){
-                this.tmpSeries.add(Math.abs(absolut_time - message.getTimeStamp()), message.getG()[2]);
-            }
+            this.tmpSeries.add(Math.abs(absolut_time - message.getTimeStamp()), message.getG()[2]);
         }
     }
 
