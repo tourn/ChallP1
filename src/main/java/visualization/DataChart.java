@@ -159,7 +159,7 @@ public class DataChart extends ApplicationFrame {
         }
     }
 
-    public void updateCarPosition(int tracksection, int offset) {
+    public void updateCarPosition(int tracksection, int offset, double percentageDistance) {
         int twidth = table.getWidth();
         int xtable = table.getX();
         int ytable = table.getY();
@@ -173,7 +173,6 @@ public class DataChart extends ApplicationFrame {
         rect.setRect(xrectl, ytable - 10, xrectr, ytable + 15);
         panel2.repaint();
     }
-
 
     /**
      * Creates a sample chart.
@@ -200,7 +199,6 @@ public class DataChart extends ApplicationFrame {
         return result;
     }
 
-
     public void insertSpeedData(VelocityMessage message) {
         this.speedSeries.add(message.getTimeStamp(), message.getVelocity() * 10);
     }
@@ -213,5 +211,4 @@ public class DataChart extends ApplicationFrame {
             this.tmpSeries.add(Math.abs(absolut_time - message.getTimeStamp()), message.getG()[2]);
         }
     }
-
 }

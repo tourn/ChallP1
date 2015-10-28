@@ -38,9 +38,10 @@ public class PilotToVisualConnector implements PilotToVisualConnection{
         dataChart.updateDataTable(index, section);
     }
 
+
     @Override
-    public void carUpdate(int trackSectionIndex, int offset) {
-        dataChart.updateCarPosition(trackSectionIndex, offset);
+    public void carUpdate(int trackSectionIndex, int offset, double percentageDistance) {
+        dataChart.updateCarPosition(trackSectionIndex, offset, percentageDistance);
     }
 
     @Override
