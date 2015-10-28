@@ -2,7 +2,9 @@ package ch.trq.carrera.javapilot.akka.positiontracker;
 
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
+import com.zuehlke.carrera.relayapi.messages.RoundTimeMessage;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
+import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
 import com.zuehlke.carrera.timeseries.FloatingHistory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,10 +24,16 @@ public class PositionTracker {
     private final Logger LOGGER = LoggerFactory.getLogger(PositionTracker.class);
     private int power;
 
+    private double sectionPercentage=0;
+    private int velocityPositionId;
+    private long roundStartTimeStamp;
+    private long rountTime;
+
     public PositionTracker(Track track){
         this.track = track;
         pos = new Track.Position(track.getSections().get(0), 0);
         sectionIndex = 0;
+        velocityPositionId = 0;
     }
 
     public void update(SensorEvent e){
@@ -33,6 +41,7 @@ public class PositionTracker {
 
         if(tLastUpdate == -1){
             tLastUpdate = e.getTimeStamp();
+            roundStartTimeStamp = e.getTimeStamp();
             return;
         }
         long offset = e.getTimeStamp() - tLastUpdate;
@@ -67,6 +76,23 @@ public class PositionTracker {
             }
        }
         return pos.getSection().getDuration() < pos.getDurationOffset();
+    }
+
+    public void velocityUpdate(VelocityMessage message){
+        if(Math.abs(message.getTimeStamp()-roundStartTimeStamp)<500){
+            velocityPositionId = 0;
+        } else{
+            velocityPositionId = (++velocityPositionId)%track.getSections().size();
+        }
+        LOGGER.info("Sind an Position: " + velocityPositionId);
+        // TODO Zurückgeben auf welcher SectionID das auto sich befindet + wieviel Prozent der Section abgeschlossen ist -> meistens entweder 0.00 oder 1.00, gibt aber ausnahmen
+
+    }
+
+    public void roundTimeUpdate(RoundTimeMessage message){
+        rountTime = message.getRoundDuration();
+        LOGGER.info("LETZTE RUNDENZEIT: " + rountTime);
+        roundStartTimeStamp = message.getTimestamp();
     }
 
     public static abstract class UpdateCallback{
