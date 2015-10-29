@@ -43,3 +43,12 @@ permalink: /report/
 ### 27.10.15 (3h)
 * Gyro-Z Graph für Learning Phase
 * Gyro-Z Graph für Speed Phase zum Direktvergleich und Hilfestellung für Positiontracking
+
+### 28.10.15 (3h)
+* PositionTracker verbessern, anhand der Velocities-Sensoren
+* Position Class (im Track) erweitern
+
+### 29.10.15 (4h)
+* TrackAnalyzer überarbeiten
+* TrackLerner Parameterisieren
+* PositionTracker verbessern
