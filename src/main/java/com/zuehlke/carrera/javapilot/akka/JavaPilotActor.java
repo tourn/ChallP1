@@ -85,7 +85,7 @@ public class JavaPilotActor extends UntypedActor {
                 createTopology(SpeedOptimizer.props(getSelf(), (Track) message));
             } else if (message instanceof CarUpdate){
                 CarUpdate update = (CarUpdate) message;
-                visualConnection.carUpdate(update.getTrackIndex(), (int) update.getOffset());
+                visualConnection.carUpdate(update.getTrackIndex(), (int) update.getOffset(), update.getPercentage());
             } else if (message instanceof SectionUpdate){
                 SectionUpdate update = (SectionUpdate) message;
                 visualConnection.sectionUpdate(update.getSectionIndex(), update.getSection());

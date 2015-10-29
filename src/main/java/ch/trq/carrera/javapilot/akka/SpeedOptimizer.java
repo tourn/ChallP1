@@ -36,8 +36,8 @@ public class SpeedOptimizer extends UntypedActor {
 
         positionTracker.setOnUpdate(new PositionTracker.UpdateCallback() {
             @Override
-            public void onUpdate(int sectionIndex, long offset) {
-                pilot.tell(new CarUpdate(sectionIndex, offset), getSelf());
+            public void onUpdate(int sectionIndex, long offset, double percentage) {
+                pilot.tell(new CarUpdate(sectionIndex, offset, percentage), getSelf());
             }
         });
 

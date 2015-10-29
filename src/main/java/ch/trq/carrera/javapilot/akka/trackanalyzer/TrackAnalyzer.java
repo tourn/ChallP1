@@ -247,6 +247,22 @@ public class TrackAnalyzer {
     private Track generateTrack(Round round){
         Track track = new Track();
         round.getTrackSections().stream().forEach(s -> track.getSections().add(s));
+        for(TrackVelocity trackVelocity : round.getTrackVelocites()){
+            TrackSection trackSection = round.getTrackSections().get(0);
+            for(Iterator<TrackSection> trackSectionIterator = round.getTrackSections().iterator(); trackSectionIterator.hasNext(); ) {
+                if(trackVelocity.getTimeStamp()>trackSection.getTimeStamp()){
+                    trackSection = trackSectionIterator.next();
+                } else{
+                    break;
+                }
+            }
+            long offset = trackSection.getTimeStamp()-trackVelocity.getTimeStamp();
+            Track.Position p = new Track.Position(trackSection,offset);
+            p.setPercentage((double)offset/(double)trackSection.getDuration());
+            LOGGER.info("offset: " + offset + "ms, TracksectionID: " + round.getTrackSections().indexOf(trackSection));
+            LOGGER.info("CHECKPOINT %: " + p.getPercentage());
+            track.getCheckpoints().add(p);
+        }
         track.setPower(round.getPilotPower());
         /*
         round.getTrackVelocites().stream().forEach(v -> {
