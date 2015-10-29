@@ -7,6 +7,8 @@ import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
 import visualization.DataChart;
 
+import java.util.ArrayList;
+
 /**
  * Created by mario on 08.10.15.
  */
@@ -31,6 +33,11 @@ public class PilotToVisualConnector implements PilotToVisualConnection{
     @Override
     public void initializeTrack(Track track) {
         dataChart.initDataTable(track);
+    }
+
+    @Override
+    public void initializeCheckpoints(ArrayList<Track.Position> checkpoints) {
+        dataChart.insertCheckpoints(checkpoints);
     }
 
     @Override
