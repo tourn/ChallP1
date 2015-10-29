@@ -33,7 +33,7 @@ public class PositionTracker {
         this.track = track;
         pos = new Track.Position(track.getSections().get(0), 0);
         sectionIndex = 0;
-        velocityPositionId = 0;
+        velocityPositionId = -1;
     }
 
     public void update(SensorEvent e){
@@ -87,18 +87,39 @@ public class PositionTracker {
     }
 
     public void velocityUpdate(VelocityMessage message){
-        if(Math.abs(message.getTimeStamp()-roundStartTimeStamp)<500){
+        /*if(Math.abs(message.getTimeStamp()-roundStartTimeStamp)<500){
             velocityPositionId = 0;
         } else{
-            velocityPositionId = (++velocityPositionId)%track.getSections().size();
-        }
+            velocityPositionId = (++velocityPositionId)%track.getCheckpoints().size();
+        }*/
+        velocityPositionId = (++velocityPositionId)%track.getCheckpoints().size();
         ///LOGGER.info("Sind an Position: " + velocityPositionId);
         // TODO Zurückgeben auf welcher SectionID das auto sich befindet + wieviel Prozent der Section abgeschlossen ist -> meistens entweder 0.00 oder 1.00, gibt aber ausnahmen
-        pos.setPercentage(track.getCheckpoints().get(velocityPositionId).getPercentage());
+        if(sectionIndex != getTrackSectionId(velocityPositionId)/*track.getSections().indexOf(track.getCheckpoints().get(velocityPositionId).getSection())*/) {
+            LOGGER.info("WRONG SECTION");
+            setNewSection(track.getCheckpoints().get(velocityPositionId));
+        }else{
+            LOGGER.info("RIGHT SECTION");
+            pos.setPercentage(track.getCheckpoints().get(velocityPositionId).getPercentage());
+        }
+
+        /*pos.setPercentage(track.getCheckpoints().get(velocityPositionId).getPercentage());
         pos.setSection(track.getCheckpoints().get(velocityPositionId).getSection());
         sectionIndex = getTrackSectionId(velocityPositionId);
         int sid = getTrackSectionId(velocityPositionId);
-        LOGGER.info("Section: " +sid + ", " + pos.getPercentage() + "%");
+        LOGGER.info("Section: " +sid + ", " + pos.getPercentage() + "%");*/
+    }
+
+    private void setNewSection(Track.Position position){
+        if((sectionIndex +1) % track.getSections().size()==getTrackSectionId(velocityPositionId)){
+            if(onSectionChange!=null){
+                onSectionChange.onUpdate(sectionIndex, pos.getSection());
+            }
+        }
+        sectionIndex = getTrackSectionId(velocityPositionId);
+        pos.setPercentage(position.getPercentage());
+        pos.setSection(position.getSection());
+        pos.setDurationOffset(position.getDurationOffset());
     }
 
     private int getTrackSectionId(int velocityPositionId){

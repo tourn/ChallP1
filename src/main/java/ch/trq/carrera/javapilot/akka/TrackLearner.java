@@ -33,20 +33,31 @@ public class TrackLearner extends UntypedActor {
     }
 
     private State state = State.STRAIGHT;
-    private FloatingHistory gyroZ = new FloatingHistory(8);
+    private FloatingHistory gyroZ;/* = new FloatingHistory(8);*/
     private static double TURN_THRESHOLD = 1000;
     private static long previousTimestamp = 0;
     private static int roundCounter = 0;
     private static TrackAnalyzer trackAnalyzer = new TrackAnalyzer();
     private boolean finishLearning = false;
 
-    public TrackLearner(ActorRef pilot, int power) {
+    // Parameter
+    int startRoundNr;
+    int faultyGoingStraightTime;
+    int faultyTurnTime;
+    int amountOfRounds;
+
+    public TrackLearner(ActorRef pilot, int power, int startRoundNr, int amountOfRounds, int faultyGoingStraightTime, int faultyTurnTime, int floatingHistorySize) {
         this.pilot = pilot;
         this.power = power;
+        this.startRoundNr = startRoundNr;
+        this.amountOfRounds = amountOfRounds;
+        this.faultyGoingStraightTime = faultyGoingStraightTime;
+        this.faultyTurnTime = faultyTurnTime;
+        gyroZ = new FloatingHistory(floatingHistorySize);
     }
 
-    public static Props props ( ActorRef pilot, int power ) {
-        return Props.create( TrackLearner.class, ()->new TrackLearner( pilot, power));
+    public static Props props ( ActorRef pilot, int power, int startRoundNr, int amountOfRounds, int faultyGoingStraightTime, int faultyTurnTime, int floatingHistorySize ) {
+        return Props.create( TrackLearner.class, ()->new TrackLearner( pilot, power, startRoundNr, amountOfRounds, faultyGoingStraightTime, faultyTurnTime, floatingHistorySize));
     }
 
     @Override
@@ -71,7 +82,7 @@ public class TrackLearner extends UntypedActor {
         trackAnalyzer.newRound(message.getTimestamp(), power);
         //trackAnalyzer.printLastRound();
         roundCounter += 1;
-        if(roundCounter == 3) {
+        if(roundCounter == startRoundNr+amountOfRounds) {
             //pilot.tell(trackAnalyzer.calculateTrack(), ActorRef.noSender());
             trackAnalyzer.finishLearing();
             finishLearning = true;
@@ -83,30 +94,32 @@ public class TrackLearner extends UntypedActor {
     }
 
     private void handleSensorEvent(SensorEvent event) {
-        if(finishLearning){
-            pilot.tell(trackAnalyzer.calculateTrack(), ActorRef.noSender());
-        }else {
-            pilot.tell(new PowerAction(power), getSelf());
-            gyroZ.shift(event.getG()[2]);
-            switch (state) {
-                case STRAIGHT:
-                    if (Math.abs(gyroZ.currentMean()) > TURN_THRESHOLD) {
-                        state = State.TURN;
-                        trackAnalyzer.addTrackSectionToRound("TURN", event.getTimeStamp());
-                        //LOGGER.info("("+(event.getTimeStamp()-previousTimestamp)+"ms)");
-                        //LOGGER.info("TURN");
-                        previousTimestamp = event.getTimeStamp();
+        pilot.tell(new PowerAction(power), getSelf());
+        gyroZ.shift(event.getG()[2]);
+        switch (state) {
+            case STRAIGHT:
+                if (Math.abs(gyroZ.currentMean()) > TURN_THRESHOLD) {
+                    state = State.TURN;
+                    trackAnalyzer.addTrackSectionToRound("TURN", event.getTimeStamp());
+                    if(finishLearning){
+                        pilot.tell(trackAnalyzer.calculateTrack(startRoundNr,faultyGoingStraightTime,faultyTurnTime), ActorRef.noSender());
                     }
-                    break;
-                case TURN:
-                    if (Math.abs(gyroZ.currentMean()) < TURN_THRESHOLD) {
-                        state = State.STRAIGHT;
-                        trackAnalyzer.addTrackSectionToRound("GOING STRAIGHT", event.getTimeStamp());
-                        //LOGGER.info("("+(event.getTimeStamp()-previousTimestamp)+"ms)");
-                        //LOGGER.info("GOING STRAIGHT");
-                        previousTimestamp = event.getTimeStamp();
+                    //LOGGER.info("("+(event.getTimeStamp()-previousTimestamp)+"ms)");
+                    //LOGGER.info("TURN");
+                    previousTimestamp = event.getTimeStamp();
+                }
+                break;
+            case TURN:
+                if (Math.abs(gyroZ.currentMean()) < TURN_THRESHOLD) {
+                    state = State.STRAIGHT;
+                    trackAnalyzer.addTrackSectionToRound("GOING STRAIGHT", event.getTimeStamp());
+                    if(finishLearning){
+                        pilot.tell(trackAnalyzer.calculateTrack(startRoundNr,faultyGoingStraightTime,faultyTurnTime), ActorRef.noSender());
                     }
-            }
+                    //LOGGER.info("("+(event.getTimeStamp()-previousTimestamp)+"ms)");
+                    //LOGGER.info("GOING STRAIGHT");
+                    previousTimestamp = event.getTimeStamp();
+                }
         }
     }
 }

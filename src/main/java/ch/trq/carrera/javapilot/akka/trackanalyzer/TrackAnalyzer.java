@@ -23,6 +23,8 @@ public class TrackAnalyzer {
 
     private final Logger LOGGER = LoggerFactory.getLogger(TrackAnalyzer.class);
 
+    //Parameter
+
     public TrackAnalyzer() {
         rounds = new ArrayList<Round>();
     }
@@ -233,13 +235,16 @@ public class TrackAnalyzer {
 
 
 
-    public Track calculateTrack(){
+    public Track calculateTrack(int startRoundNr,int faultyGoingStraightTime, int faultyTurnTime){
+        /*int startRoundNr;
         int faultyGoingStraightTime = 300;
-        int faultyTurnTime = 150;
+        int faultyTurnTime = 150;*/
         List<Round> tempRoundList = new ArrayList<Round>(rounds);
 
-        // Remove the first and second round (first is broken)
-        tempRoundList.remove(0);
+        // Remove all Rounds until startRoundNr.
+        for(int i = 0; i < startRoundNr; i++){
+            tempRoundList.remove(0);
+        }
 
         removeFaultGoingStraightTrackSections(tempRoundList,faultyGoingStraightTime);
 
