@@ -64,6 +64,7 @@ public class PositionTracker {
             pos.setPercentage(0);
         }
         if(onUpdate != null){
+            //LOGGER.info("SENDING: SID: " + sectionIndex + ", Offset: " + pos.getDurationOffset() + "ms, Percentage: " + pos.getPercentage() + "%");
             onUpdate.onUpdate(sectionIndex, pos.getDurationOffset(),pos.getPercentage());
         }
     }

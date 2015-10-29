@@ -16,10 +16,20 @@ public class TrackAnalyzer {
     private Round tempRound = new Round(0,0);
     private TrackSection tempTrackSection = new TrackSection("",0);
 
+    private boolean isLearingFinished = false;
+
+    private boolean isNewRound=false;
+    private int newPilotPower;
+
     private final Logger LOGGER = LoggerFactory.getLogger(TrackAnalyzer.class);
 
     public TrackAnalyzer() {
         rounds = new ArrayList<Round>();
+    }
+
+
+    public void finishLearing(){
+        isLearingFinished = true;
     }
 
     /**
@@ -27,14 +37,24 @@ public class TrackAnalyzer {
      * @param timeStamp
      */
     public void newRound(long timeStamp,int pilotPower){
-        tempTrackSection.setDuration(timeStamp - tempTrackSection.getTimeStamp());
+        isNewRound = true;
+        newPilotPower = pilotPower;
+        /*tempTrackSection.setDuration(timeStamp - tempTrackSection.getTimeStamp());
         tempRound.setEndRoundTimeStamp(timeStamp);
         rounds.add(tempRound);
-        tempRound = new Round(timeStamp,pilotPower);
+        tempRound = new Round(timeStamp,pilotPower);*/
     }
 
     public void addTrackSectionToRound(String direction, long timeStamp){
-        tempTrackSection.setDuration(timeStamp - tempTrackSection.getTimeStamp());
+        if(isNewRound){
+            isNewRound = false;
+            tempTrackSection.setDuration(timeStamp - tempTrackSection.getTimeStamp());
+            tempRound.setEndRoundTimeStamp(timeStamp);
+            rounds.add(tempRound);
+            tempRound = new Round(timeStamp,newPilotPower);
+        }else{
+            tempTrackSection.setDuration(timeStamp - tempTrackSection.getTimeStamp());
+        }
         tempTrackSection = new TrackSection(direction,timeStamp);
         tempRound.addTrackSection(tempTrackSection);
     }
@@ -248,18 +268,25 @@ public class TrackAnalyzer {
         Track track = new Track();
         round.getTrackSections().stream().forEach(s -> track.getSections().add(s));
         for(TrackVelocity trackVelocity : round.getTrackVelocites()){
-            TrackSection trackSection = round.getTrackSections().get(0);
-            for(Iterator<TrackSection> trackSectionIterator = round.getTrackSections().iterator(); trackSectionIterator.hasNext(); ) {
+            /*for(Iterator<TrackSection> trackSectionIterator = round.getTrackSections().iterator(); trackSectionIterator.hasNext(); ) {
                 if(trackVelocity.getTimeStamp()>trackSection.getTimeStamp()){
                     trackSection = trackSectionIterator.next();
                 } else{
                     break;
                 }
+            }*/
+            int trackSectionId=0;
+            for(int i=0;i<round.getTrackSections().size();i++){
+                if(round.getTrackSections().get(i).getTimeStamp()<trackVelocity.getTimeStamp() && round.getTrackSections().get(i).getTimeStamp()+round.getTrackSections().get(i).getDuration()>trackVelocity.getTimeStamp()){
+                    trackSectionId=i;
+                }
             }
-            long offset = trackSection.getTimeStamp()-trackVelocity.getTimeStamp();
+            TrackSection trackSection = round.getTrackSections().get(trackSectionId);
+            long offset = trackVelocity.getTimeStamp()-trackSection.getTimeStamp();
+            //LOGGER.info("offset: " +offset+", TVTS: " + trackVelocity.getTimeStamp() + ", TSTS: " + trackSection.getTimeStamp());
             Track.Position p = new Track.Position(trackSection,offset);
             p.setPercentage((double)offset/(double)trackSection.getDuration());
-            LOGGER.info("offset: " + offset + "ms, TracksectionID: " + round.getTrackSections().indexOf(trackSection));
+            //LOGGER.info("offset: " + offset + "ms, TracksectionID: " + round.getTrackSections().indexOf(trackSection));
             LOGGER.info("CHECKPOINT %: " + p.getPercentage());
             track.getCheckpoints().add(p);
         }
