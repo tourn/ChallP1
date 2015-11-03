@@ -30,5 +30,5 @@ Mit diesem Setup kann der Pilot seine Berechnungen dem `DataVisService` mitteile
 
 ![Gyro-Z](/ChallP1/images/visualize-gyro.gif)
 
-![Carposition](/ChallP1/images/visualizer-sections.gif)
+![Carposition](/ChallP1/images/visualize-sections.gif)
 
