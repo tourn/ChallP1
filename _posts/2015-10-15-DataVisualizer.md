@@ -26,3 +26,9 @@ Aufbau der Schnittstelle *Pilot / Visualizer*:
                 -Tabellendarstellung der erkannten TrackSections
                 -Positiosanzeige des Pilots auf der Strecke(Streckentabelle)
 Mit diesem Setup kann der Pilot seine Berechnungen dem `DataVisService` mitteilen, welcher diese dann dem `DataChart` zur Darstellung weitergibt. Somit erreichen wir eine saubere Trennung von Datenverarbeitung und Darstellung und verhindern eine Blockade des Pilots!
+
+
+![Gyro-Z](/ChallP1/images/visualize-gyro.gif)
+
+![Carposition](/ChallP1/images/visualizer-sections.gif)
+
