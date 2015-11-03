@@ -40,18 +40,25 @@ permalink: /report/
 * PositionTracker implementieren
 * Erste Geschwindigkeitsanpassungen mit PositionTracker
 
-### 27.10.15 (3h)
-* Gyro-Z Graph für Learning Phase
-* Gyro-Z Graph für Speed Phase zum Direktvergleich und Hilfestellung für Positiontracking
+### 27.10.15
+* Visualisierung (3h m)
+  * Gyro-Z Graph für Learning Phase
+  * Gyro-Z Graph für Speed Phase zum Direktvergleich und Hilfestellung für Positiontracking
 
-### 28.10.15 (3h)
-* PositionTracker verbessern, anhand der Velocities-Sensoren
-* Position Class (im Track) erweitern
+### 28.10.15
+* PositionTracker (3h f)
+  * PositionTracker verbessern, anhand der Velocities-Sensoren
+  * Position Class (im Track) erweitern
 
-### 29.10.15 (4h)
-* TrackAnalyzer überarbeiten
-* TrackLerner Parameterisieren
-* PositionTracker verbessern
-* Kalman-Filter Proof of Conecpt
+### 29.10.15
+* TrackLearner überarbeiten (2h f)
+* PositionTracker verbessern (2h f)
+* Kalman-Filter (4h dm)
+  * Einlesen
+  * Versuchen, auf Positionsberechnung anzuwenden
 
-
+### 3.11.15
+* Präsentation vorbereiten (4h dm)
+* Kalman-Filter (2h dm)
+  * Versuchen, auf Positionsberechnung anzuwenden
+* TrackAnalyzer refactoren & testen (4h f)
