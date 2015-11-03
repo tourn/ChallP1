@@ -12,14 +12,14 @@ import java.util.function.Consumer;
  * Created by Frank on 22.09.2015.
  */
 public class TrackAnalyzer {
-    private ArrayList<Round> rounds;
-    private Round tempRound = new Round(0,0);
-    private TrackSection tempTrackSection = new TrackSection(State.TURN,0);
+    protected ArrayList<Round> rounds;
+    protected Round tempRound = new Round(0,0);
+    protected TrackSection tempTrackSection = new TrackSection(State.TURN,0);
 
     private boolean isLearingFinished = false;
 
     protected boolean isNewRound=false;
-    private int newPilotPower;
+    protected int newPilotPower;
 
     private final Logger LOGGER = LoggerFactory.getLogger(TrackAnalyzer.class);
 
@@ -101,7 +101,7 @@ public class TrackAnalyzer {
     }
 
     // CALCULATE TRACK PRIVATE METHODS -- begin
-    protected void iterateEachRound(List<Round> tempRoundList,Consumer<Round> c){
+    private void iterateEachRound(List<Round> tempRoundList,Consumer<Round> c){
         for(Iterator<Round> roundIterator = tempRoundList.iterator(); roundIterator.hasNext(); ) {
             Round round = roundIterator.next();
             c.accept(round);
@@ -122,6 +122,11 @@ public class TrackAnalyzer {
         });
         //RECALCULATE THE DURATION FOR EACH TRACKSECTION!!!
         iterateEachRound(tempRoundList, round -> {
+            // If the first TrackSection dont have the same startTimeStamp like the RoundStartTimeStamp, recalculate this
+            if(round.getTrackSections().get(0).getTimeStamp()!= round.getStartRoundTimeStamp()){
+                round.getTrackSections().get(0).setDuration(round.getTrackSections().get(0).getDuration() + round.getTrackSections().get(0).getTimeStamp() - round.getStartRoundTimeStamp());
+                round.getTrackSections().get(0).setTimeStamp(round.getStartRoundTimeStamp());
+            }
             for (int i = 0; i < round.getCountOfTrackSections(); i++) {
                 if (i < round.getCountOfTrackSections() - 1) {
                     round.getTrackSections().get(i).setDuration(round.getTrackSections().get(i + 1).getTimeStamp() - round.getTrackSections().get(i).getTimeStamp());
@@ -137,7 +142,7 @@ public class TrackAnalyzer {
         iterateEachRound(tempRoundList, round -> {
             for(Iterator<TrackSection> trackSectionIterator = round.getTrackSections().iterator(); trackSectionIterator.hasNext(); ) {
                 TrackSection trackSection = trackSectionIterator.next();
-                if(trackSection.getDuration() < faultyGoingStraightTime && trackSection.getDirection().equals("GOING STRAIGHT")){
+                if(trackSection.getDuration() < faultyGoingStraightTime && trackSection.getDirection().equals(State.STRAIGHT)){
                     trackSectionIterator.remove();
                 }
             }
@@ -149,7 +154,7 @@ public class TrackAnalyzer {
         iterateEachRound(tempRoundList, round -> {
             for(Iterator<TrackSection> trackSectionIterator = round.getTrackSections().iterator(); trackSectionIterator.hasNext(); ) {
                 TrackSection trackSection = trackSectionIterator.next();
-                if(trackSection.getDuration() < 150){
+                if(trackSection.getDuration() < faultyTurnTime && trackSection.getDirection().equals(State.TURN)){
                     trackSectionIterator.remove();
                 }
             }
