@@ -3,7 +3,7 @@ package visualization;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.util.*;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -128,6 +128,7 @@ public class DataChart extends ApplicationFrame {
         resizeTableColumn();
         panel2.add(table, BorderLayout.CENTER);
         panel2.add(table.getTableHeader(), BorderLayout.NORTH);
+        insertCheckpoints(track.getCheckpoints());
         model.addRow(objects);
         panel2.repaint();
     }
@@ -167,7 +168,7 @@ public class DataChart extends ApplicationFrame {
         }
     }
 
-    public void insertCheckpoints(ArrayList<Track.Position> checkpoints) {
+    public void insertCheckpoints(java.util.List<Track.Position> checkpoints) {
         int twidth = table.getWidth();
         int xtable = table.getX();
         int ytable = table.getY();
@@ -181,7 +182,7 @@ public class DataChart extends ApplicationFrame {
         }
     }
 
-    public void updateCarPosition(int tracksection, int offset, double percentageDistance) {
+    public void updateCarPosition(int tracksection, double percentageDistance) {
         int twidth = table.getWidth();
         int xtable = table.getX();
         int ytable = table.getY();
