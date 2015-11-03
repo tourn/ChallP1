@@ -14,11 +14,11 @@ import java.util.function.Consumer;
 public class TrackAnalyzer {
     private ArrayList<Round> rounds;
     private Round tempRound = new Round(0,0);
-    private TrackSection tempTrackSection = new TrackSection("",0);
+    private TrackSection tempTrackSection = new TrackSection(State.TURN,0);
 
     private boolean isLearingFinished = false;
 
-    private boolean isNewRound=false;
+    protected boolean isNewRound=false;
     private int newPilotPower;
 
     private final Logger LOGGER = LoggerFactory.getLogger(TrackAnalyzer.class);
@@ -47,7 +47,7 @@ public class TrackAnalyzer {
         tempRound = new Round(timeStamp,pilotPower);*/
     }
 
-    public void addTrackSectionToRound(String direction, long timeStamp){
+    public void addTrackSectionToRound(State direction, long timeStamp){
         if(isNewRound){
             isNewRound = false;
             tempTrackSection.setDuration(timeStamp - tempTrackSection.getTimeStamp());
@@ -101,14 +101,14 @@ public class TrackAnalyzer {
     }
 
     // CALCULATE TRACK PRIVATE METHODS -- begin
-    private void iterateEachRound(List<Round> tempRoundList,Consumer<Round> c){
+    protected void iterateEachRound(List<Round> tempRoundList,Consumer<Round> c){
         for(Iterator<Round> roundIterator = tempRoundList.iterator(); roundIterator.hasNext(); ) {
             Round round = roundIterator.next();
             c.accept(round);
         }
     }
 
-    private void mergeAndRecalculateTrackSections(List<Round> tempRoundList){
+    protected void mergeAndRecalculateTrackSections(List<Round> tempRoundList){
         //merge same directions (which follows each other)!!!
         iterateEachRound(tempRoundList, round -> {
             for (int i = 0; i < round.getCountOfTrackSections(); i++) {
@@ -132,7 +132,7 @@ public class TrackAnalyzer {
         });
     }
 
-    private void removeFaultGoingStraightTrackSections(List<Round> tempRoundList, int faultyGoingStraightTime){
+    protected void removeFaultGoingStraightTrackSections(List<Round> tempRoundList, int faultyGoingStraightTime){
         //remove "fault" "GOING STRAIGHT" trackSections, sections, which are not longer than <faultyGoingStraightTime> ms.
         iterateEachRound(tempRoundList, round -> {
             for(Iterator<TrackSection> trackSectionIterator = round.getTrackSections().iterator(); trackSectionIterator.hasNext(); ) {
@@ -144,7 +144,7 @@ public class TrackAnalyzer {
         });
     }
 
-    private void removeFaultTurnTrackSections(List<Round> tempRoundList, int faultyTurnTime){
+    protected void removeFaultTurnTrackSections(List<Round> tempRoundList, int faultyTurnTime){
         //remove "fault" "Turn" trackSections, sections, which are not longer than <faultyTurnTime> ms.
         iterateEachRound(tempRoundList, round -> {
             for(Iterator<TrackSection> trackSectionIterator = round.getTrackSections().iterator(); trackSectionIterator.hasNext(); ) {
@@ -156,7 +156,7 @@ public class TrackAnalyzer {
         });
     }
 
-    private boolean haveSameAmountOfTrackSections(List<Round> tempRoundList){
+    protected boolean haveSameAmountOfTrackSections(List<Round> tempRoundList){
         //Check that all rounds have the same count of TrackSections
         int trackSectionCounter = tempRoundList.get(0).getCountOfTrackSections();
         for(Iterator<Round> roundIterator = tempRoundList.iterator(); roundIterator.hasNext(); ) {
@@ -170,10 +170,10 @@ public class TrackAnalyzer {
         return true;
     }
 
-    private boolean haveAllRoundsSameDirections(List<Round> tempRoundList){
+    protected boolean haveAllRoundsSameDirections(List<Round> tempRoundList){
         //TODO: Check that all rounds have the same Tracksection-Directions
         for (int i = 0; i < tempRoundList.get(0).getCountOfTrackSections(); i++) {
-            String direction = tempRoundList.get(0).getTrackSections().get(i).getDirection();
+            State direction = tempRoundList.get(0).getTrackSections().get(i).getDirection();
             for (Iterator<Round> roundIterator = tempRoundList.iterator(); roundIterator.hasNext(); ) {
                 Round round = roundIterator.next();
                 if (!(round.getTrackSections().get(i).getDirection().equals(direction))) {
@@ -187,7 +187,7 @@ public class TrackAnalyzer {
         return true;
     }
 
-    private void useLowestTrackSectionRoundOnly(List<Round> tempRoundList){
+    protected void useLowestTrackSectionRoundOnly(List<Round> tempRoundList){
         // If Calculation failed -> the calculatet track will be the track with the lowest Tracksection;
         Round roundWithLowestTrackSection = tempRoundList.get(0);
         for(Round round : tempRoundList){
@@ -199,7 +199,7 @@ public class TrackAnalyzer {
         tempRoundList.add(roundWithLowestTrackSection);
     }
 
-    private Round createCalculatedRound(List<Round> tempRoundList){
+    protected Round createCalculatedRound(List<Round> tempRoundList){
         Round calculatedRound = new Round(0,tempRoundList.get(0).getPilotPower());
 
         for(int i=0; i<tempRoundList.get(0).getCountOfTrackSections(); i++){
@@ -319,17 +319,20 @@ public class TrackAnalyzer {
         char dir;
         for(int i=0; i<round.getCountOfTrackSections(); i++){
             switch(round.getTrackSections().get(i).getDirection()){
-                case "LEFT TURN":
+                /*case "LEFT TURN":
                     dir = '/';
                     break;
                 case "RIGHT TURN":
                     dir = '\\';
-                    break;
-                case "GOING STRAIGHT":
+                    break;*/
+                case STRAIGHT:
                     dir = '-';
                     break;
-                default:
+                case TURN:
                     dir = 'X';
+                    break;
+                default:
+                    dir = '#';
             }
             for(int j=0; j<round.getTrackSections().get(i).getDuration()/100;j++){
                 track += dir;

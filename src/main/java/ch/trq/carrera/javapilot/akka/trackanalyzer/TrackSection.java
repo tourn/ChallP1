@@ -4,16 +4,16 @@ package ch.trq.carrera.javapilot.akka.trackanalyzer;
  * Created by Frank on 22.09.2015.
  */
 public class TrackSection {
-    private String direction;
+    private State direction;
     /// Duration in ms
     private long duration=0;
     private long timeStamp;
 
-    public TrackSection(String direction, long timeStamp){
+    public TrackSection(State direction, long timeStamp){
         this.direction = direction;
         this.timeStamp = timeStamp;
     }
-    public void setDirection(String direction){
+    public void setDirection(State direction){
         this.direction = direction;
     }
     public void setDuration(long duration){
@@ -23,7 +23,7 @@ public class TrackSection {
         this.timeStamp = timeStamp;
     }
 
-    public String getDirection(){
+    public State getDirection(){
         return direction;
     }
 

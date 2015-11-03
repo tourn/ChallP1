@@ -5,6 +5,7 @@ import akka.actor.Props;
 import akka.actor.UntypedActor;
 //import com.sun.tools.internal.jxc.ap.Const;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Round;
+import ch.trq.carrera.javapilot.akka.trackanalyzer.State;
 import com.zuehlke.carrera.javapilot.akka.PowerAction;
 import com.zuehlke.carrera.javapilot.akka.experimental.ThresholdConfiguration;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackAnalyzer;
@@ -26,11 +27,6 @@ public class TrackLearner extends UntypedActor {
     private ActorRef pilot;
 
     private final Logger LOGGER = LoggerFactory.getLogger(TrackLearner.class);
-
-    enum State{
-        STRAIGHT,
-        TURN
-    }
 
     private State state = State.STRAIGHT;
     private FloatingHistory gyroZ;/* = new FloatingHistory(8);*/
@@ -100,7 +96,7 @@ public class TrackLearner extends UntypedActor {
             case STRAIGHT:
                 if (Math.abs(gyroZ.currentMean()) > TURN_THRESHOLD) {
                     state = State.TURN;
-                    trackAnalyzer.addTrackSectionToRound("TURN", event.getTimeStamp());
+                    trackAnalyzer.addTrackSectionToRound(State.TURN, event.getTimeStamp());
                     if(finishLearning){
                         pilot.tell(trackAnalyzer.calculateTrack(startRoundNr,faultyGoingStraightTime,faultyTurnTime), ActorRef.noSender());
                     }
@@ -112,7 +108,7 @@ public class TrackLearner extends UntypedActor {
             case TURN:
                 if (Math.abs(gyroZ.currentMean()) < TURN_THRESHOLD) {
                     state = State.STRAIGHT;
-                    trackAnalyzer.addTrackSectionToRound("GOING STRAIGHT", event.getTimeStamp());
+                    trackAnalyzer.addTrackSectionToRound(State.STRAIGHT, event.getTimeStamp());
                     if(finishLearning){
                         pilot.tell(trackAnalyzer.calculateTrack(startRoundNr,faultyGoingStraightTime,faultyTurnTime), ActorRef.noSender());
                     }
