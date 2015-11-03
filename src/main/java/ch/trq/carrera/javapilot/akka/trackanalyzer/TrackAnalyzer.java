@@ -233,7 +233,12 @@ public class TrackAnalyzer {
             calculatedRound.getTrackVelocites().get(i).setVelocity(calculatedRound.getTrackVelocites().get(i).getVelocity() / tempRoundList.size());
             calculatedRound.getTrackVelocites().get(i).setTimeStamp(calculatedRound.getTrackVelocites().get(i).getTimeStamp() / tempRoundList.size());
         }
-
+        // SetRoundTime
+        int roundTime=0;
+        for(int i=0;i<calculatedRound.getCountOfTrackSections();i++){
+            roundTime+=calculatedRound.getTrackSections().get(i).getDuration();
+        }
+        calculatedRound.setEndRoundTimeStamp(roundTime);
         return calculatedRound;
     }
     // CALCULATE TRACK PRIVATE METHODS -- end
