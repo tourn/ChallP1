@@ -124,11 +124,11 @@ public class DataChart extends ApplicationFrame {
             objects[i] = track.getSections().get(i).getDuration();
             holeduration += track.getSections().get(i).getDuration();
         }
-        model.addRow(objects);
         table = new JTable(model);
         resizeTableColumn();
         panel2.add(table, BorderLayout.CENTER);
         panel2.add(table.getTableHeader(), BorderLayout.NORTH);
+        model.addRow(objects);
         panel2.repaint();
     }
 

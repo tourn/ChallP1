@@ -9,6 +9,7 @@ import ch.trq.carrera.javapilot.akka.positiontracker.SectionUpdate;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
 import com.zuehlke.carrera.javapilot.akka.PowerAction;
+import com.zuehlke.carrera.relayapi.messages.RoundTimeMessage;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
 import org.slf4j.Logger;
@@ -25,19 +26,21 @@ public class SpeedOptimizer extends UntypedActor {
     private int power = 200;
     private int minPower = 100;
     private int maxTurnPower = 220;
-    private int maxPower = 255;
+    private int maxPower = 220;
     private PositionTracker positionTracker;
 
     public SpeedOptimizer(ActorRef pilot, Track track) {
         this.pilot = pilot;
         this.track = track;
         positionTracker = new PositionTracker(track);
+
         positionTracker.setOnUpdate(new PositionTracker.UpdateCallback() {
             @Override
-            public void onUpdate(int sectionIndex, long offset) {
-                pilot.tell(new CarUpdate(sectionIndex, offset), getSelf());
+            public void onUpdate(int sectionIndex, long offset, double percentage) {
+                pilot.tell(new CarUpdate(sectionIndex, offset, percentage), getSelf());
             }
         });
+
         positionTracker.setOnSectionChange(new PositionTracker.SectionChangeCallback() {
             @Override
             public void onUpdate(int sectionIndex, TrackSection section) {
@@ -63,19 +66,27 @@ public class SpeedOptimizer extends UntypedActor {
             handleSensorEvent((SensorEvent) message);
         } else if ( message instanceof VelocityMessage) {
                 handleVelocityMessage((VelocityMessage) message);
-        } else {
+        } else if ( message instanceof RoundTimeMessage) {
+        handleRoundTimeMessage((RoundTimeMessage) message);
+        }else {
             unhandled(message);
         }
     }
 
+    private void handleRoundTimeMessage(RoundTimeMessage message) {
+        // ignore for now
+        positionTracker.roundTimeUpdate(message);
+    }
+
     private void handleVelocityMessage(VelocityMessage message) {
         // ignore for now
+        positionTracker.velocityUpdate(message);
     }
 
     private void handleSensorEvent(SensorEvent event) {
         positionTracker.update(event);
         if(!positionTracker.isTurn()){
-            LOGGER.info("DUCK GOING STRAIGHT: " + positionTracker.getPercentageDistance());
+            //LOGGER.info("DUCK GOING STRAIGHT: " + positionTracker.getPercentageDistance());
             if(positionTracker.getPercentageDistance()>0.2){
                 changePower(minPower);
             }

@@ -47,7 +47,7 @@ public class JavaPilotActor extends UntypedActor {
     }
 
     private void createInitialTopology(){
-        createTopology(TrackLearner.props(getSelf(), 100));
+        createTopology(TrackLearner.props(getSelf(), 100,1,2,300,150,8));
     }
 
     private void createTopology(Props props) {
@@ -84,8 +84,9 @@ public class JavaPilotActor extends UntypedActor {
                 this.visualConnection.initializeTrack((Track) message);
                 createTopology(SpeedOptimizer.props(getSelf(), (Track) message));
             } else if (message instanceof CarUpdate){
+                //LOGGER.info("SENDING: SID: " + ((CarUpdate) message).getTrackIndex() + ", Offset: " + ((CarUpdate) message).getOffset() + "ms, Percentage: " + ((CarUpdate) message).getPercentage() + "%");
                 CarUpdate update = (CarUpdate) message;
-                visualConnection.carUpdate(update.getTrackIndex(), (int) update.getOffset());
+                visualConnection.carUpdate(update.getTrackIndex(), (int) update.getOffset(), update.getPercentage());
             } else if (message instanceof SectionUpdate){
                 SectionUpdate update = (SectionUpdate) message;
                 visualConnection.sectionUpdate(update.getSectionIndex(), update.getSection());

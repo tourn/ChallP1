@@ -6,10 +6,12 @@ package ch.trq.carrera.javapilot.akka.positiontracker;
 public class CarUpdate {
     private int trackIndex;
     private long offset;
+    private double percentage;
 
-    public CarUpdate(int trackIndex, long offset) {
+    public CarUpdate(int trackIndex, long offset, double percentage) {
         this.trackIndex = trackIndex;
         this.offset = offset;
+        this.percentage = percentage;
     }
 
     public long getOffset() {
@@ -28,4 +30,11 @@ public class CarUpdate {
         this.trackIndex = trackIndex;
     }
 
+    public double getPercentage() {
+        return percentage;
+    }
+
+    public void setPercentage(double percentage) {
+        this.percentage = percentage;
+    }
 }
