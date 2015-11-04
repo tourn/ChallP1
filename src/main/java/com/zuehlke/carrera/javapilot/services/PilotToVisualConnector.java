@@ -36,11 +36,6 @@ public class PilotToVisualConnector implements PilotToVisualConnection{
     }
 
     @Override
-    public void initializeCheckpoints(ArrayList<Track.Position> checkpoints) {
-        dataChart.insertCheckpoints(checkpoints);
-    }
-
-    @Override
     public void sectionUpdate(int index, TrackSection section) {
         dataChart.updateDataTable(index, section);
     }

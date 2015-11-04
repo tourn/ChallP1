@@ -291,7 +291,7 @@ public class TrackAnalyzer {
             //LOGGER.info("offset: " +offset+", TVTS: " + trackVelocity.getTimeStamp() + ", TSTS: " + trackSection.getTimeStamp());
             Track.Position p = new Track.Position(trackSection,offset);
             p.setPercentage((double)offset/(double)trackSection.getDuration());
-            //LOGGER.info("offset: " + offset + "ms, TracksectionID: " + round.getTrackSections().indexOf(trackSection));
+            LOGGER.info("offset: " + offset + "ms, TracksectionID: " + round.getTrackSections().indexOf(trackSection));
             LOGGER.info("CHECKPOINT %: " + p.getPercentage());
             track.getCheckpoints().add(p);
         }

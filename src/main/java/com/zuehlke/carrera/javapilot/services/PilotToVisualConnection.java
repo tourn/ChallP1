@@ -15,7 +15,6 @@ public interface PilotToVisualConnection {
     void send(SensorEvent message);
     void send(VelocityMessage message);
     void initializeTrack(Track track);
-    void initializeCheckpoints(ArrayList<Track.Position> checkpoints);
     void sectionUpdate(int index, TrackSection section);
     void carUpdate(int trackSectionIndex, double percentageDistance);
     void newRoundMessage(RoundTimeMessage message);

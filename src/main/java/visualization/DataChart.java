@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -53,6 +54,7 @@ public class DataChart extends ApplicationFrame {
     private double holeduration = 0;
     private boolean notfirst = false;
     private StandardXYItemRenderer renderer;
+    private int[] sectionbegins;
 
     /**
      * @param title the frame title.
@@ -128,8 +130,8 @@ public class DataChart extends ApplicationFrame {
         resizeTableColumn();
         panel2.add(table, BorderLayout.CENTER);
         panel2.add(table.getTableHeader(), BorderLayout.NORTH);
-        insertCheckpoints(track.getCheckpoints());
         model.addRow(objects);
+        insertCheckpoints();
         panel2.repaint();
     }
 
@@ -168,29 +170,40 @@ public class DataChart extends ApplicationFrame {
         }
     }
 
-    public void insertCheckpoints(java.util.List<Track.Position> checkpoints) {
-        int twidth = table.getWidth();
+    public void insertCheckpoints() {
         int xtable = table.getX();
         int ytable = table.getY();
-        int sectionwidth = twidth / table.getColumnCount();
         double xrectl = 0;
         double xrectr = 10;
+        int sectionwidth=0;
+        List<Track.Position> checkpoints = track.getCheckpoints();
+
+        sectionbegins = new int[track.getSections().size()];
+
+        for(int i = 0; i<track.getSections().size(); i++){
+            if(i>0){
+                sectionbegins[i]=sectionbegins[i-1]+table.getColumnModel().getColumn(i-1).getWidth();
+            }else{
+                sectionbegins[i]=0;
+            }
+        }
 
         for(Track.Position p : checkpoints){
-            xrectl = xtable + checkpoints.indexOf(p) * sectionwidth + p.getDurationOffset() * sectionwidth;
-            this.checkpoints.add(new Rectangle2D.Double(xrectl, ytable - 30, xrectr, ytable + 15));
+            sectionwidth = table.getColumnModel().getColumn(checkpoints.indexOf(p)).getWidth();
+            xrectl = xtable + sectionbegins[checkpoints.indexOf(p)] + p.getPercentage() * sectionwidth;
+            this.checkpoints.add(new Rectangle2D.Double(xrectl, ytable - 30, xrectr, ytable + 50));
         }
     }
 
     public void updateCarPosition(int tracksection, double percentageDistance) {
-        int twidth = table.getWidth();
         int xtable = table.getX();
         int ytable = table.getY();
-        int sectionwidth = twidth / table.getColumnCount();
+        int sectionwidth = table.getColumnModel().getColumn(tracksection).getWidth();
 
         //double prozentualoffeset = (double) offset / (double) track.getSections().get(tracksection).getDuration();
 
-        double xrectl = xtable + tracksection * sectionwidth + percentageDistance * sectionwidth;
+
+        double xrectl = xtable + sectionbegins[tracksection] + percentageDistance * sectionwidth;
         double xrectr = 10;
 
         rect.setRect(xrectl, ytable - 10, xrectr, ytable + 15);
