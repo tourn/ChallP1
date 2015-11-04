@@ -95,7 +95,7 @@ public class DataChart extends ApplicationFrame {
                 //print Checkpoints
                 myColor = new Color(0, 102, 255, 180);
                 g.setColor(myColor);
-                for(Rectangle2D check : checkpoints){
+                for (Rectangle2D check : checkpoints) {
                     g.fill(check);
                 }
             }
@@ -120,6 +120,7 @@ public class DataChart extends ApplicationFrame {
     public void initDataTable(Track track) {
         this.track = track;
         model = new DefaultTableModel();
+        holeduration=0;
         Object[] objects = new Object[track.getSections().size()];
         for (int i = 0; i < track.getSections().size(); i++) {
             model.addColumn(i + ": " + track.getSections().get(i).getDirection());
@@ -175,22 +176,22 @@ public class DataChart extends ApplicationFrame {
         int ytable = table.getY();
         double xrectl = 0;
         double xrectr = 10;
-        int sectionwidth=0;
+        int sectionwidth = 0;
         List<Track.Position> checkpoints = track.getCheckpoints();
 
         sectionbegins = new int[track.getSections().size()];
 
-        for(int i = 0; i<track.getSections().size(); i++){
-            if(i>0){
-                sectionbegins[i]=sectionbegins[i-1]+table.getColumnModel().getColumn(i-1).getWidth();
-            }else{
-                sectionbegins[i]=0;
+        for (int i = 0; i < track.getSections().size(); i++) {
+            if (i > 0) {
+                sectionbegins[i] = sectionbegins[i - 1] + table.getColumnModel().getColumn(i - 1).getMinWidth();
+            } else {
+                sectionbegins[i] = 0;
             }
         }
 
-        for(Track.Position p : checkpoints){
-            sectionwidth = table.getColumnModel().getColumn(checkpoints.indexOf(p)).getWidth();
-            xrectl = xtable + sectionbegins[checkpoints.indexOf(p)] + p.getPercentage() * sectionwidth;
+        for (Track.Position p : checkpoints) {
+            sectionwidth = table.getColumnModel().getColumn(track.getSections().indexOf(p.getSection())).getMinWidth();
+            xrectl = xtable + sectionbegins[track.getSections().indexOf(p.getSection())] + p.getPercentage() * sectionwidth;
             this.checkpoints.add(new Rectangle2D.Double(xrectl, ytable - 30, xrectr, ytable + 50));
         }
     }
@@ -198,9 +199,7 @@ public class DataChart extends ApplicationFrame {
     public void updateCarPosition(int tracksection, double percentageDistance) {
         int xtable = table.getX();
         int ytable = table.getY();
-        int sectionwidth = table.getColumnModel().getColumn(tracksection).getWidth();
-
-        //double prozentualoffeset = (double) offset / (double) track.getSections().get(tracksection).getDuration();
+        int sectionwidth = table.getColumnModel().getColumn(tracksection).getMinWidth();
 
 
         double xrectl = xtable + sectionbegins[tracksection] + percentageDistance * sectionwidth;
