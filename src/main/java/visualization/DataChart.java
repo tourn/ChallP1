@@ -63,6 +63,7 @@ public class DataChart extends ApplicationFrame {
     public DataChart(final String title) {
 
         super(title);
+        setResizable(false);
         this.series = new XYSeries("Sensor Z Model");
         this.secondPhaseSerie1 = new XYSeries("Sensor Z Round");
         secondPhaseSerie2 = new XYSeries("Sensor Z 2 Round");
@@ -106,7 +107,7 @@ public class DataChart extends ApplicationFrame {
         panel1.add(chartPanelModel);
         //panel1.add(chartPanelRound);
         panel1.setPreferredSize(new Dimension(1200, 900));
-        panel2.setPreferredSize(new Dimension(1200, 900));
+        panel2.setPreferredSize(new Dimension(1400, 900));
 
         container.add(panel1);
 
