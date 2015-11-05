@@ -79,8 +79,6 @@ public class TrackLearner extends UntypedActor {
         //trackAnalyzer.printLastRound();
         roundCounter += 1;
         if(roundCounter == startRoundNr+amountOfRounds) {
-            //pilot.tell(trackAnalyzer.calculateTrack(), ActorRef.noSender());
-            trackAnalyzer.finishLearing();
             finishLearning = true;
         } else {
             //just print

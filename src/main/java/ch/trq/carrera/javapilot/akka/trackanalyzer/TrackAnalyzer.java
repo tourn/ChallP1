@@ -16,37 +16,37 @@ public class TrackAnalyzer {
     protected Round tempRound = new Round(0,0);
     protected TrackSection tempTrackSection = new TrackSection(State.TURN,0);
 
-    private boolean isLearingFinished = false;
-
-    protected boolean isNewRound=false;
+    protected boolean isNewRound;
     protected int newPilotPower;
 
     private final Logger LOGGER = LoggerFactory.getLogger(TrackAnalyzer.class);
 
-    //Parameter
-
     public TrackAnalyzer() {
         rounds = new ArrayList<Round>();
+        isNewRound = false;
     }
 
-
-    public void finishLearing(){
-        isLearingFinished = true;
-    }
 
     /**
-     * This method ends the old round (add the end time), add it to the Rounds-List and starts a new round
-     * @param timeStamp
+     * Sets the status, that there has started a new Round. The TrackAnalyzer will end the last round at the next
+     * TrackSection and setup a new Round
+     *
+     * @param  pilotPower  the Pilot-Power from the last Round
      */
     public void newRound(int pilotPower){
         isNewRound = true;
         newPilotPower = pilotPower;
-        /*tempTrackSection.setDuration(timeStamp - tempTrackSection.getTimeStamp());
-        tempRound.setEndRoundTimeStamp(timeStamp);
-        rounds.add(tempRound);
-        tempRound = new Round(timeStamp,pilotPower);*/
     }
 
+    /**
+     * Creates a new Track-Section with the Direction and the start-time-stamp and adds it to the round.
+     * Calculates and sets also the duration of the last Tracksection.
+     * If there is a new round (after Calling newRound), it creates also a new round before adding the new track-section
+     * to the round.
+     *
+     * @param direction The Direction of the track-section
+     * @param timeStamp The start-time-stamp of the next tracksection
+     */
     public void addTrackSectionToRound(State direction, long timeStamp){
         if(isNewRound){
             isNewRound = false;
@@ -61,11 +61,20 @@ public class TrackAnalyzer {
         tempRound.addTrackSection(tempTrackSection);
     }
 
+    /**
+     * Creates a new track-velocity and adds it to the actual round
+     *
+     * @param velocity The velocity from the velocity-sensor-message
+     * @param timeStamp The received time-stamp from the velocity-sensor-message
+     */
     public void addTrackVelocitiesToRound(double velocity, long timeStamp){
         tempRound.addTrackVelocity(new TrackVelocity(velocity, timeStamp));
     }
 
-    public int roundCount(){
+    /**
+     * @return The amount of all completed rounds in the TrackAnalyzer
+     */
+    public int getCompletedRoundsCount(){
         return rounds.size();
     }
 
@@ -74,7 +83,7 @@ public class TrackAnalyzer {
     }
 
     public void printRound(int roundnr){
-        if (roundnr < roundCount()){
+        if (roundnr < getCompletedRoundsCount()){
             Round round = rounds.get(roundnr);
             LOGGER.info("Round Nr. " + roundnr);
             printRound(round);
@@ -83,6 +92,16 @@ public class TrackAnalyzer {
         }
     }
 
+    /**
+     * Prints the round into the console (Logger). The Information of the round which wil be printed are:
+     * <ul></ul>
+     *  <li>Roundtime
+     *  <li>List of all TrackVelocities with their velocity and timestamp
+     *  <li>List of all Tracksections with their direction, duration and timestamp
+     * </ul>
+     *
+     * @param round The round which will be printed
+     */
     public void printRound(Round round){
         LOGGER.info("===================================================================");
         LOGGER.info("Time: " + round.getRoundTime() + "ms");
@@ -244,7 +263,18 @@ public class TrackAnalyzer {
     // CALCULATE TRACK PRIVATE METHODS -- end
 
 
-
+    /**
+     * Merges and calculate from the completed rounds in an average round which starts at time Zero. This
+     * round will transformed afterwards in a Track
+     *
+     * @param  startRoundNr  The amount of rounds which will be skipped at the beginning
+     * @param  faultyGoingStraightTime The minimal duration for Straight-TrackSections. Each Straight-TrackSection
+     *                                 below this duration will be removed.
+     * @param  faultyTurnTime The minimal duration for Turn-TrackSections. Each Turn-TrackSection below this duration
+     *                        will be removed.
+     * @return      The calculated Track
+     * @see         Track
+     */
     public Track calculateTrack(int startRoundNr,int faultyGoingStraightTime, int faultyTurnTime){
         /*int startRoundNr;
         int faultyGoingStraightTime = 300;
@@ -275,7 +305,6 @@ public class TrackAnalyzer {
         printTrack(calculatedRound);
         return generateTrack(calculatedRound);
     }
-
 
 
 

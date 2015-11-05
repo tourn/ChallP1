@@ -107,9 +107,9 @@ public class TrackAnalyzerTest {
     @Test
     public void addTrackSectionToRoundWhenIsNewRoundShouldAddANewRound() {
         trackAnalyzer.newRound(0);
-        assertEquals(0, trackAnalyzer.roundCount());
+        assertEquals(0, trackAnalyzer.getCompletedRoundsCount());
         trackAnalyzer.addTrackSectionToRound(State.TURN, 0);
-        assertEquals(1, trackAnalyzer.roundCount());
+        assertEquals(1, trackAnalyzer.getCompletedRoundsCount());
     }
 
     @Test
