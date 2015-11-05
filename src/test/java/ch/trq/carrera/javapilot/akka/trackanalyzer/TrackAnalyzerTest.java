@@ -86,19 +86,19 @@ public class TrackAnalyzerTest {
     @Test
     public void newRoundShouldSetIsNewRoundFromFalseToTrue() {
         assertFalse(trackAnalyzer.isNewRound);
-        trackAnalyzer.newRound(0,0);
+        trackAnalyzer.newRound(0);
         assertTrue(trackAnalyzer.isNewRound);
     }
 
     @Test
     public void newRoundShouldSetPilotPower() {
-        trackAnalyzer.newRound(0, 100);
+        trackAnalyzer.newRound(100);
         assertEquals(100, trackAnalyzer.newPilotPower);
     }
 
     @Test
     public void addTrackSectionToRoundShouldSetIsNewRoundToFalseWhenItIsTrue() {
-        trackAnalyzer.newRound(0, 0);
+        trackAnalyzer.newRound(0);
         assertTrue(trackAnalyzer.isNewRound);
         trackAnalyzer.addTrackSectionToRound(State.TURN, 0);
         assertFalse(trackAnalyzer.isNewRound);
@@ -106,7 +106,7 @@ public class TrackAnalyzerTest {
 
     @Test
     public void addTrackSectionToRoundWhenIsNewRoundShouldAddANewRound() {
-        trackAnalyzer.newRound(0, 0);
+        trackAnalyzer.newRound(0);
         assertEquals(0, trackAnalyzer.roundCount());
         trackAnalyzer.addTrackSectionToRound(State.TURN, 0);
         assertEquals(1, trackAnalyzer.roundCount());
@@ -114,27 +114,27 @@ public class TrackAnalyzerTest {
 
     @Test
     public void addTrackSectionToRoundTheNewSectionShouldntHaveTheTurnDirectionWhichWasSet(){
-        trackAnalyzer.newRound(0, 0);
+        trackAnalyzer.newRound(0);
         trackAnalyzer.addTrackSectionToRound(State.TURN, 0);
         assertEquals(State.TURN, trackAnalyzer.tempRound.getTrackSections().get(trackAnalyzer.tempRound.getCountOfTrackSections()-1).getDirection());
     }
     @Test
     public void addTrackSectionToRoundTheNewSectionShouldntHaveTheStraightDirectionWhichWasSet(){
-        trackAnalyzer.newRound(0, 0);
+        trackAnalyzer.newRound(0);
         trackAnalyzer.addTrackSectionToRound(State.STRAIGHT, 0);
         assertEquals(State.STRAIGHT, trackAnalyzer.tempRound.getTrackSections().get(trackAnalyzer.tempRound.getCountOfTrackSections() - 1).getDirection());
     }
 
     @Test
     public void addTrackSectionToRoundTheNewSectionShouldntHaveADuration() {
-        trackAnalyzer.newRound(0, 0);
+        trackAnalyzer.newRound(0);
         trackAnalyzer.addTrackSectionToRound(State.TURN, 123);
         assertEquals(0, trackAnalyzer.tempRound.getTrackSections().get(trackAnalyzer.tempRound.getCountOfTrackSections()-1).getDuration());
     }
 
     @Test
     public void addTrackSectionToRoundThePreviousSectionShouldHaveADuration() {
-        trackAnalyzer.newRound(0, 0);
+        trackAnalyzer.newRound(0);
         trackAnalyzer.addTrackSectionToRound(State.STRAIGHT, 0);
         trackAnalyzer.addTrackSectionToRound(State.TURN, 123);
         assertEquals(trackAnalyzer.tempRound.getTrackSections().get(trackAnalyzer.tempRound.getCountOfTrackSections()-1).getTimeStamp()-trackAnalyzer.tempRound.getTrackSections().get(trackAnalyzer.tempRound.getCountOfTrackSections()-2).getTimeStamp(), trackAnalyzer.tempRound.getTrackSections().get(trackAnalyzer.tempRound.getCountOfTrackSections()-2).getDuration());
@@ -303,5 +303,12 @@ public class TrackAnalyzerTest {
         for(TrackVelocity trackVelocity : round.getTrackVelocites()){
             assertTrue("No TimeStamp should be larger than the roundtime",trackVelocity.getTimeStamp()<round.getRoundTime());
         }
+    }
+
+    @Test
+    public void generateTrackTest(){
+        Track track = trackAnalyzer.generateTrack(round1);
+        assertEquals("Track should have the same count of TrackSections like the round",round1.getCountOfTrackSections(),track.getSections().size());
+
     }
 }

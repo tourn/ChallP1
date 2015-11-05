@@ -38,7 +38,7 @@ public class TrackAnalyzer {
      * This method ends the old round (add the end time), add it to the Rounds-List and starts a new round
      * @param timeStamp
      */
-    public void newRound(long timeStamp,int pilotPower){
+    public void newRound(int pilotPower){
         isNewRound = true;
         newPilotPower = pilotPower;
         /*tempTrackSection.setDuration(timeStamp - tempTrackSection.getTimeStamp());
@@ -279,7 +279,7 @@ public class TrackAnalyzer {
 
 
 
-    private Track generateTrack(Round round){
+    protected Track generateTrack(Round round){
         Track track = new Track();
         round.getTrackSections().stream().forEach(s -> track.getSections().add(s));
         for(TrackVelocity trackVelocity : round.getTrackVelocites()){

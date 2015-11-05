@@ -75,7 +75,7 @@ public class TrackLearner extends UntypedActor {
     }
 
     private void handleRoundTimeMessage(RoundTimeMessage message) {
-        trackAnalyzer.newRound(message.getTimestamp(), power);
+        trackAnalyzer.newRound(power);
         //trackAnalyzer.printLastRound();
         roundCounter += 1;
         if(roundCounter == startRoundNr+amountOfRounds) {
