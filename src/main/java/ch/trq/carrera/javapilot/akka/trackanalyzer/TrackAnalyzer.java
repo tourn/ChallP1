@@ -276,9 +276,6 @@ public class TrackAnalyzer {
      * @see         Track
      */
     public Track calculateTrack(int startRoundNr,int faultyGoingStraightTime, int faultyTurnTime){
-        /*int startRoundNr;
-        int faultyGoingStraightTime = 300;
-        int faultyTurnTime = 150;*/
         List<Round> tempRoundList = new ArrayList<Round>(rounds);
 
         // Remove all Rounds until startRoundNr.
@@ -312,13 +309,6 @@ public class TrackAnalyzer {
         Track track = new Track();
         round.getTrackSections().stream().forEach(s -> track.getSections().add(s));
         for(TrackVelocity trackVelocity : round.getTrackVelocites()){
-            /*for(Iterator<TrackSection> trackSectionIterator = round.getTrackSections().iterator(); trackSectionIterator.hasNext(); ) {
-                if(trackVelocity.getTimeStamp()>trackSection.getTimeStamp()){
-                    trackSection = trackSectionIterator.next();
-                } else{
-                    break;
-                }
-            }*/
             int trackSectionId=0;
             for(int i=0;i<round.getTrackSections().size();i++){
                 if(round.getTrackSections().get(i).getTimeStamp()<trackVelocity.getTimeStamp() && round.getTrackSections().get(i).getTimeStamp()+round.getTrackSections().get(i).getDuration()>trackVelocity.getTimeStamp()){
@@ -330,27 +320,21 @@ public class TrackAnalyzer {
             //LOGGER.info("offset: " +offset+", TVTS: " + trackVelocity.getTimeStamp() + ", TSTS: " + trackSection.getTimeStamp());
             Track.Position p = new Track.Position(trackSection,offset);
             p.setPercentage((double)offset/(double)trackSection.getDuration());
-            //LOGGER.info("offset: " + offset + "ms, TracksectionID: " + round.getTrackSections().indexOf(trackSection));
+            LOGGER.info("offset: " + offset + "ms, TracksectionID: " + round.getTrackSections().indexOf(trackSection));
             LOGGER.info("CHECKPOINT %: " + p.getPercentage());
             track.getCheckpoints().add(p);
         }
         track.setPower(round.getPilotPower());
-        /*
-        round.getTrackVelocites().stream().forEach(v -> {
-            TrackSection last = null;
-            for(Iterator<TrackSection> it = round.getTrackSections().iterator();; it.hasNext()){
-                TrackSection section = it.next();
-                if(section.getTimeStamp() > v.getTimeStamp()){
-                    track.getCheckpoints().add(new Track.Position(last, v.getTimeStamp()-last.getTimeStamp()));
-                    break;
-                } else {
-                    last = section;
-                }
-            }
-        });
-        */
+
+        calculateDistances(track);
+
         return track;
     }
+
+    private void calculateDistances(Track track){
+
+    }
+
 
     public void printTrack(Round round){
         String track = "";
@@ -358,12 +342,6 @@ public class TrackAnalyzer {
         char dir;
         for(int i=0; i<round.getCountOfTrackSections(); i++){
             switch(round.getTrackSections().get(i).getDirection()){
-                /*case "LEFT TURN":
-                    dir = '/';
-                    break;
-                case "RIGHT TURN":
-                    dir = '\\';
-                    break;*/
                 case STRAIGHT:
                     dir = '-';
                     break;

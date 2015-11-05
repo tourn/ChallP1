@@ -9,6 +9,8 @@ public class TrackSection {
     private long duration=0;
     private long timeStamp;
 
+    private double distance=0;
+
     public TrackSection(State direction, long timeStamp){
         this.direction = direction;
         this.timeStamp = timeStamp;
@@ -33,5 +35,13 @@ public class TrackSection {
 
     public long getTimeStamp(){
         return timeStamp;
+    }
+
+    public double getDistance() {
+        return distance;
+    }
+
+    public void setDistance(double distance) {
+        this.distance = distance;
     }
 }
