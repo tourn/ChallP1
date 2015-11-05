@@ -14,11 +14,10 @@ permalink: /report/
 * TrackAnalyzer Idee entwickeln und implementieren
 
 ### 1.10.15 (6h)
-* Vorgehen besprechen
-* Grundidee erarbeiten und aufteilen
-* Visualisierungs Framework einbinden (JFreeChart)
-* [Android App](https://github.com/tourn/ChallP1-CarreraRemote/releases/tag/0.1) zur Steuerung des Simulators
-* TrackAnalyzer verbessern
+* Grundidee erarbeiten und aufteilen (2h dfm)
+* Visualisierungs Framework einbinden (JFreeChart) (4h m)
+* [Android App](https://github.com/tourn/ChallP1-CarreraRemote/releases/tag/0.1) zur Steuerung des Simulators (3h d)
+* TrackAnalyzer verbessern (3h dfm)
 
 ### 8.10.15 (5h)
 * Kurvenerkennungsalgorithmus diskutieren und Ansatz ausarbeiten
@@ -62,3 +61,10 @@ permalink: /report/
 * Kalman-Filter (2h dm)
   * Versuchen, auf Positionsberechnung anzuwenden
 * TrackAnalyzer refactoren & testen (4h f)
+
+### 5.11.15
+* Kalman Filter (4h dm)
+  * Parameter und Prediction Matrix bestimmen
+  * Code mit apache commons lib implementieren
+* Track Analyzer refactoren (2h f)
+* Geschwindigkeitsberechnung implementieren und debuggen (3h dfm)
