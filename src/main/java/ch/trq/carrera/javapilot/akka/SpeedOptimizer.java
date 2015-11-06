@@ -25,8 +25,8 @@ public class SpeedOptimizer extends UntypedActor {
     private final Track track;
     private int power = 200;
     private int minPower = 100;
-    private int maxTurnPower = 220;
-    private int maxPower = 220;
+    private int maxTurnPower = 150;
+    private int maxPower = 200;
     private PositionTracker positionTracker;
 
     public SpeedOptimizer(ActorRef pilot, Track track) {
@@ -85,11 +85,14 @@ public class SpeedOptimizer extends UntypedActor {
 
     private void handleSensorEvent(SensorEvent event) {
         positionTracker.update(event);
-        if(!positionTracker.isTurn()){
-            //LOGGER.info("DUCK GOING STRAIGHT: " + positionTracker.getPercentageDistance());
-            if(positionTracker.getPercentageDistance()>0.2){
+        if(!positionTracker.isTurn()) {
+            if (positionTracker.getPercentageDistance() > 0.5) {
                 changePower(minPower);
+            } else {
+                changePower(maxPower);
             }
+        }else {
+            changePower(maxTurnPower);
         }
         //pilot.tell ( new PowerAction(power), getSelf());
     }
