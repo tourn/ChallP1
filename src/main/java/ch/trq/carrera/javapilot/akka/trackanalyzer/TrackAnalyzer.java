@@ -365,17 +365,30 @@ public class TrackAnalyzer {
             }
             TrackSection trackSection = round.getTrackSections().get(trackSectionId);
             long offset = trackVelocity.getTimeStamp()-trackSection.getTimeStamp();
+            long offset2 = trackSection.getDuration()-offset;
+            double distanceOffset2 = calculateDistance(offset2,trackSection.getDirection(),trackVelocity.getVelocity(),round.getPilotPower());
+            double distanceOffset = trackSection.getDistance()-distanceOffset2;
             //LOGGER.info("offset: " +offset+", TVTS: " + trackVelocity.getTimeStamp() + ", TSTS: " + trackSection.getTimeStamp());
             Track.Position p = new Track.Position(trackSection,offset);
-            p.setPercentage((double) offset / (double) trackSection.getDuration());
+            p.setDistanceOffset(distanceOffset);
+            p.setPercentage(distanceOffset/trackSection.getDistance());
+            //LOGGER.info("0-1: "+ distanceOffset + ", 1-2: " + distanceOffset2 + ", 0-2: " + trackSection.getDistance());
+            //p.setPercentage((double) offset / (double) trackSection.getDuration());
             //LOGGER.info("offset: " + offset + "ms, TracksectionID: " + round.getTrackSections().indexOf(trackSection));
             LOGGER.info("CHECKPOINT %: " + p.getPercentage());
             track.getCheckpoints().add(p);
         }
         track.setPower(round.getPilotPower());
-
-
         return track;
+    }
+
+    private double calculateDistance(long dtime, State turn, double v0, int power){
+        double distance = 0;
+        for(int i = 0; i<dtime;i++){
+            v0 = trackPhysicsModel.average_velocity(v0, turn, power, 1.0/1000.0);
+            distance += tempVelocity * 1.0/1000.0;
+        }
+        return distance;
     }
 
     public void printTrack(Round round){

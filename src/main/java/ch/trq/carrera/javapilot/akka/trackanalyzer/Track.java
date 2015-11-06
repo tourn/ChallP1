@@ -48,6 +48,7 @@ public class Track {
     public static class Position{
         private TrackSection section;
         private long durationOffset;
+        private double distanceOffset;
         private double percentage;
 
         public Position(TrackSection section, long durationOffset) {
@@ -79,6 +80,14 @@ public class Track {
 
         public void setPercentage(double percentage) {
             this.percentage = percentage;
+        }
+
+        public double getDistanceOffset() {
+            return distanceOffset;
+        }
+
+        public void setDistanceOffset(double distanceOffset) {
+            this.distanceOffset = distanceOffset;
         }
     }
 }
