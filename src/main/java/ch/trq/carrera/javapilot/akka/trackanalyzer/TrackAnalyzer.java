@@ -26,6 +26,8 @@ public class TrackAnalyzer {
     private final Logger LOGGER = LoggerFactory.getLogger(TrackAnalyzer.class);
     private TrackPhysicsModel trackPhysicsModel = new TrackPhysicsModel();
 
+    private double absoluteDistance = 0;
+
     public TrackAnalyzer() {
         rounds = new ArrayList<Round>();
         isNewRound = false;
@@ -61,9 +63,14 @@ public class TrackAnalyzer {
             tempRound.setEndRoundTimeStamp(timeStamp);
             rounds.add(tempRound);
             tempRound = new Round(timeStamp,newPilotPower);
+
+            absoluteDistance = 0;
         }else{
             tempTrackSection.setDuration(timeStamp - tempTrackSection.getTimeStamp());
         }
+
+        absoluteDistance += tempDistance;
+
         tempTrackSection = new TrackSection(direction,timeStamp);
         tempRound.addTrackSection(tempTrackSection);
     }
@@ -413,4 +420,19 @@ public class TrackAnalyzer {
         LOGGER.info("\n"+track);
     }
 
+    public double getTempDistance() {
+        return tempDistance;
+    }
+
+    public double getTempVelocity() {
+        return tempVelocity;
+    }
+
+    public double getAbsoluteDistance(){
+        return absoluteDistance;
+    }
+
+    public int getTrackSectionId(){
+        return tempRound.getCountOfTrackSections();
+    }
 }

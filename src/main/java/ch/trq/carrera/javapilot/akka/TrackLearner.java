@@ -4,6 +4,7 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 //import com.sun.tools.internal.jxc.ap.Const;
+import ch.trq.carrera.javapilot.akka.log.LogMessage;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Round;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.State;
 import com.zuehlke.carrera.javapilot.akka.PowerAction;
@@ -41,6 +42,7 @@ public class TrackLearner extends UntypedActor {
     int faultyGoingStraightTime;
     int faultyTurnTime;
     int amountOfRounds;
+    private String actorDescription;
 
     public TrackLearner(ActorRef pilot, int power, int startRoundNr, int amountOfRounds, int faultyGoingStraightTime, int faultyTurnTime, int floatingHistorySize) {
         this.pilot = pilot;
@@ -50,6 +52,7 @@ public class TrackLearner extends UntypedActor {
         this.faultyGoingStraightTime = faultyGoingStraightTime;
         this.faultyTurnTime = faultyTurnTime;
         gyroZ = new FloatingHistory(floatingHistorySize);
+        actorDescription = getActorDescription();
     }
 
     public static Props props ( ActorRef pilot, int power, int startRoundNr, int amountOfRounds, int faultyGoingStraightTime, int faultyTurnTime, int floatingHistorySize ) {
@@ -89,6 +92,7 @@ public class TrackLearner extends UntypedActor {
 
     long tempTimeStamp = 0;
     private void handleSensorEvent(SensorEvent event) {
+        LogMessage log = new LogMessage(event, System.currentTimeMillis());
         pilot.tell(new PowerAction(power), getSelf());
         gyroZ.shift(event.getG()[2]);
         if (event.getTimeStamp()-tempTimeStamp <1000)
@@ -119,5 +123,28 @@ public class TrackLearner extends UntypedActor {
                     previousTimestamp = event.getTimeStamp();
                 }
         }
+        populateLog(log);
+        pilot.tell(log, ActorRef.noSender());
+    }
+
+    private void populateLog(LogMessage log){
+        log.setPower(power);
+        log.setActorDescription(actorDescription);
+        log.setVelocity(trackAnalyzer.getTempVelocity());
+        log.setPositionRelative(trackAnalyzer.getTempDistance());
+        log.settAfterCalculation(System.currentTimeMillis());
+        log.setTrackSectionId(trackAnalyzer.getTrackSectionId());
+        log.setPositionAbsolute(trackAnalyzer.getAbsoluteDistance());
+
+    }
+
+    private String getActorDescription(){
+        return String.format("TrackLearner power: %d, startRoundNr: %d, amountOfRounds: %d, faultyGoingStraightTime: %d, faultyTurnTime: %d",
+                power,
+                startRoundNr,
+                amountOfRounds,
+                faultyGoingStraightTime,
+                faultyTurnTime
+        );
     }
 }

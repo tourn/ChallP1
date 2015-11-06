@@ -6,9 +6,11 @@ import akka.actor.UntypedActor;
 import akka.japi.Creator;
 import ch.trq.carrera.javapilot.akka.SpeedOptimizer;
 import ch.trq.carrera.javapilot.akka.TrackLearner;
+import ch.trq.carrera.javapilot.akka.log.LogMessage;
 import ch.trq.carrera.javapilot.akka.positiontracker.CarUpdate;
 import ch.trq.carrera.javapilot.akka.positiontracker.SectionUpdate;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
+import com.google.gson.Gson;
 import com.zuehlke.carrera.javapilot.akka.experimental.ThresholdConfiguration;
 import com.zuehlke.carrera.javapilot.config.PilotProperties;
 import com.zuehlke.carrera.javapilot.services.EndpointAnnouncement;
@@ -16,10 +18,14 @@ import com.zuehlke.carrera.javapilot.services.PilotToRelayConnection;
 import com.zuehlke.carrera.javapilot.services.PilotToVisualConnection;
 import com.zuehlke.carrera.relayapi.messages.*;
 import org.jfree.ui.RefineryUtilities;
+import org.jfree.util.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import visualization.DataChart;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -35,11 +41,23 @@ public class JavaPilotActor extends UntypedActor {
     private ActorRef penaltyEntryPoint;
     private ActorRef roundTimeEntryPoint;
 
+    private FileWriter logWriter;
+    private Gson gson = new Gson();
+    private boolean firstLogEntry = true;
+
     private PilotToRelayConnection relayConnection;
 
     private PilotToVisualConnection visualConnection;
 
     public JavaPilotActor(PilotProperties properties) {
+        File logFile = new File("logs/log" + System.currentTimeMillis() + ".json");
+        try {
+            logWriter = new FileWriter(logFile);
+            logWriter.append("{ raceData: [");
+            LOGGER.info("Logging to" + logFile.getAbsolutePath());
+        } catch (IOException e) {
+            LOGGER.error("Could not open logfile", e);
+        }
 
         this.properties = properties;
 
@@ -90,6 +108,14 @@ public class JavaPilotActor extends UntypedActor {
             } else if (message instanceof SectionUpdate){
                 SectionUpdate update = (SectionUpdate) message;
                 visualConnection.sectionUpdate(update.getSectionIndex(), update.getSection());
+            } else if (message instanceof LogMessage){
+                String s = gson.toJson(message);
+                if(firstLogEntry){
+                    firstLogEntry = false;
+                } else {
+                    s = "," + s;
+                }
+                logWriter.append(s);
             }
 
             // ------
@@ -223,5 +249,12 @@ public class JavaPilotActor extends UntypedActor {
         createInitialTopology();
         long now = System.currentTimeMillis();
         LOGGER.info("received race start");
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        Log.info("Finalizing");
+        logWriter.append("]}");
+        logWriter.close();
     }
 }
