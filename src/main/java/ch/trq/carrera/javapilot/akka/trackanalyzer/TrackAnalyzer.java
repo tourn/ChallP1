@@ -80,11 +80,16 @@ public class TrackAnalyzer {
         tempVelocity=velocity;
     }
 
-
-    public void updateDistance(long dt, int power, State turn){
-        for(int i = 0; i<dt;i++){
+    /**
+     * Calculates the distance and velocity which has changed in dtime
+     *
+     * @param dtime delta-Time in ms
+     * @param power The Power which was used in this time
+     * @param turn The direction-state
+     */
+    public void updateDistance(long dtime, int power, State turn){
+        for(int i = 0; i<dtime;i++){
             tempVelocity = trackPhysicsModel.average_velocity(tempVelocity, turn, power, 1.0/1000.0);
-            //tempDistance += trackPhysicsModel.distance(tempVelocity,turn,power,1.0/1000.0);
             tempDistance += tempVelocity * 1.0/1000.0;
         }
     }
@@ -96,10 +101,18 @@ public class TrackAnalyzer {
         return rounds.size();
     }
 
+    /**
+     * Prints the last completed round
+     */
     public void printLastRound(){
         printRound(rounds.size()-1);
     }
 
+    /**
+     * Prints the round with this round-id
+     *
+     * @param roundnr The id of the round which will be printed
+     */
     public void printRound(int roundnr){
         if (roundnr < getCompletedRoundsCount()){
             Round round = rounds.get(roundnr);
