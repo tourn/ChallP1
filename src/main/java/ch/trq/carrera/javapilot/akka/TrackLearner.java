@@ -87,9 +87,13 @@ public class TrackLearner extends UntypedActor {
         //LOGGER.info("Round Nr. "+roundCounter);
     }
 
+    long tempTimeStamp = 0;
     private void handleSensorEvent(SensorEvent event) {
         pilot.tell(new PowerAction(power), getSelf());
         gyroZ.shift(event.getG()[2]);
+        if (event.getTimeStamp()-tempTimeStamp <1000)
+            trackAnalyzer.updateDistance(event.getTimeStamp()-tempTimeStamp,power,state);
+        tempTimeStamp = event.getTimeStamp();
         switch (state) {
             case STRAIGHT:
                 if (Math.abs(gyroZ.currentMean()) > TURN_THRESHOLD) {

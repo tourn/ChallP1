@@ -1,5 +1,7 @@
 package ch.trq.carrera.javapilot.math;
 
+import ch.trq.carrera.javapilot.akka.trackanalyzer.State;
+
 /**
  * a very simple model of the physical track properties
  */
@@ -11,22 +13,23 @@ public class TrackPhysicsModel {
      *  although, theoretically that would be an option
      */
     // motor efficicency in kgcm/s2
-    private final float e;
+    private final double e;
 
     // kinetic friction factor on straights in kg/s
-    private final float kfs;
+    private final double kfs;
 
     // kinetic friction factor on a curve
-    private final float kfc;
+    private final double kfc;
 
     // static friction constant
-    private final float sfc;
+    private final double sfc;
 
     // static friction factor
-    private final float sff;
+    private final double sff;
 
     // mass of the car in g
-    private final float m;
+    private final double m;
+    private double turn_radius;
 
     /**
      * a reasonable set of physical constants with the following observable characteristics
@@ -44,12 +47,13 @@ public class TrackPhysicsModel {
      * thus determines e
      */
     public TrackPhysicsModel() {
-        float p_min_straight = 100;
-        float p_min_curve = 120;
-        float p_for_vmax400 = 140;
-        float ri = 1 / 30.0f;
-        float dt_for_acc_to100_at_p150 = 0.5f;
+        double p_min_straight = 100;
+        double p_min_curve = 120;
+        double p_for_vmax400 = 140;
+        double ri = 1 / 30.0f;
+        double dt_for_acc_to100_at_p150 = 0.5f;
 
+        turn_radius = ri;
         m = 300.0f;
         e = m * 100 / dt_for_acc_to100_at_p150 / 50.0f;
         kfs = p_for_vmax400 / 300.0f * e;
@@ -61,9 +65,9 @@ public class TrackPhysicsModel {
         sff = (p_min_curve * e - sfc) / ri;
     }
 
-    public TrackPhysicsModel(float motor_efficiency, float friction_factor,
-                             float curve_friction_factor, float static_friction_constant, float static_friction_factor,
-                             float mass) {
+    public TrackPhysicsModel(double motor_efficiency, double friction_factor,
+                             double curve_friction_factor, double static_friction_constant, double static_friction_factor,
+                             double mass) {
         this.e = motor_efficiency;
         this.kfs = friction_factor;
         this.kfc = curve_friction_factor;
@@ -79,8 +83,24 @@ public class TrackPhysicsModel {
      * @param dt timespan in ms
      * @return the average velocity during a given period of time, given
      */
-    public float average_velocity(float v0, float ri, int p, float dt) {
+    public double average_velocity(double v0, double ri, int p, double dt) {
         return v0 + acceleration(v0, ri, p) * dt / 2;
+    }
+
+    public double average_velocity(double v0, State turn, int p, double dt) {
+        double ri =  State.STRAIGHT == turn ? 0 : turn_radius;
+        return average_velocity(v0, ri, p, dt);
+    }
+
+    public double velocity(double v0, State turn, int p, double dt) {
+        double ri =  State.STRAIGHT == turn ? 0 : turn_radius;
+        return v0 + acceleration(v0, ri, p) * dt;
+    }
+
+    public double distance(double v0, State turn, int p, double dt){
+        double ri =  State.STRAIGHT == turn ? 0 : turn_radius;
+        double v = average_velocity(v0,ri,p,dt);
+        return v*dt;
     }
 
     /**
@@ -89,7 +109,7 @@ public class TrackPhysicsModel {
      * @param p  the digital power value at the start of the period
      * @return the acceleration of the car given
      */
-    public float acceleration(float v0, float ri, int p) {
+    public double acceleration(double v0, double ri, int p) {
         return total_force(p, v0, ri) / m;
     }
 
@@ -99,12 +119,12 @@ public class TrackPhysicsModel {
      * @param p  the digital power value at the start of the period
      * @return the total force active on the car, given
      */
-    public float total_force(int p, float v0, float ri) {
+    public double total_force(int p, double v0, double ri) {
         if (v0 == 0) {
             return Math.max(motor_force(p) - friction_force(v0, ri), 0);
         } else {
-            float fm = motor_force(p);
-            float ff = friction_force(v0, ri);
+            double fm = motor_force(p);
+            double ff = friction_force(v0, ri);
             return fm - ff;
         }
     }
@@ -113,7 +133,7 @@ public class TrackPhysicsModel {
      * @param p the digital power value at the start of the period
      * @return the physical force of the motor, given
      */
-    public float motor_force(int p) {
+    public double motor_force(int p) {
         return p * e;
     }
 
@@ -122,15 +142,15 @@ public class TrackPhysicsModel {
      * @param ri the inverse radius at the start of the period
      * @return the total friction force with noise applied, given
      */
-    public float friction_force(float v0, float ri) {
-        float kffc = kinetic_friction_force_curve(ri, v0);
-        float kffs = kinetic_friction_force_straight(v0);
-        float kinetic_friction = kffc + kffs;
-        float sf = static_friction(ri, v0);
+    public double friction_force(double v0, double ri) {
+        double kffc = kinetic_friction_force_curve(ri, v0);
+        double kffs = kinetic_friction_force_straight(v0);
+        double kinetic_friction = kffc + kffs;
+        double sf = static_friction(ri, v0);
         return kinetic_friction + sf;
     }
 
-    public float static_friction(float ri, float v) {
+    public double static_friction(double ri, double v) {
         if (v <= 0) {
             return sff * ri + sfc;
         } else {
@@ -142,7 +162,7 @@ public class TrackPhysicsModel {
      * @param v0 the velocity of the car
      * @return the physical friction force on a straight section, given
      */
-    public float kinetic_friction_force_straight(float v0) {
+    public double kinetic_friction_force_straight(double v0) {
         return kfs * v0;
     }
 
@@ -151,7 +171,7 @@ public class TrackPhysicsModel {
      * @param v  the velocity of the car
      * @return the physical friction force in a curve section, given
      */
-    public float kinetic_friction_force_curve(float ri, float v) {
+    public double kinetic_friction_force_curve(double ri, double v) {
         return kfc * Math.abs(ri) * v;
     }
 }

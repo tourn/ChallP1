@@ -1,5 +1,6 @@
 package ch.trq.carrera.javapilot.akka.trackanalyzer;
 
+import ch.trq.carrera.javapilot.math.TrackPhysicsModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +20,11 @@ public class TrackAnalyzer {
     protected boolean isNewRound;
     protected int newPilotPower;
 
+    private double tempDistance=0;
+    private double tempVelocity=0;
+
     private final Logger LOGGER = LoggerFactory.getLogger(TrackAnalyzer.class);
+    private TrackPhysicsModel trackPhysicsModel = new TrackPhysicsModel();
 
     public TrackAnalyzer() {
         rounds = new ArrayList<Round>();
@@ -48,6 +53,8 @@ public class TrackAnalyzer {
      * @param timeStamp The start-time-stamp of the next tracksection
      */
     public void addTrackSectionToRound(State direction, long timeStamp){
+        tempTrackSection.setDistance(tempDistance);
+        tempDistance = 0;
         if(isNewRound){
             isNewRound = false;
             tempTrackSection.setDuration(timeStamp - tempTrackSection.getTimeStamp());
@@ -69,6 +76,17 @@ public class TrackAnalyzer {
      */
     public void addTrackVelocitiesToRound(double velocity, long timeStamp){
         tempRound.addTrackVelocity(new TrackVelocity(velocity, timeStamp));
+        LOGGER.info("Velocity: " + velocity + ", calculated: " + tempVelocity + ", difference: " + Math.abs(velocity-tempVelocity));
+        tempVelocity=velocity;
+    }
+
+
+    public void updateDistance(long dt, int power, State turn){
+        for(int i = 0; i<dt;i++){
+            tempVelocity = trackPhysicsModel.average_velocity(tempVelocity, turn, power, 1.0/1000.0);
+            //tempDistance += trackPhysicsModel.distance(tempVelocity,turn,power,1.0/1000.0);
+            tempDistance += tempVelocity * 1.0/1000.0;
+        }
     }
 
     /**
@@ -113,7 +131,7 @@ public class TrackAnalyzer {
         }
         for(Iterator<TrackSection> i = round.getTrackSections().iterator(); i.hasNext();){
             TrackSection trackSection = i.next();
-            LOGGER.info("Direction: " + trackSection.getDirection() + ", Duration:" + trackSection.getDuration() + "ms, TimeStamp: " + trackSection.getTimeStamp());
+            LOGGER.info("Direction: " + trackSection.getDirection() + ", Distance: " + trackSection.getDistance() + "cm , Duration:" + trackSection.getDuration() + "ms, TimeStamp: " + trackSection.getTimeStamp());
         }
         LOGGER.info("===================================================================");
         printTrack(round);
@@ -133,6 +151,7 @@ public class TrackAnalyzer {
             for (int i = 0; i < round.getCountOfTrackSections(); i++) {
                 if (i < round.getCountOfTrackSections() - 1) {
                     if (round.getTrackSections().get(i).getDirection().equals(round.getTrackSections().get(i + 1).getDirection())) {
+                        round.getTrackSections().get(i).setDistance(round.getTrackSections().get(i).getDistance()+round.getTrackSections().get(i+1).getDistance());
                         round.getTrackSections().remove(i + 1);
                         i--;
                     }
@@ -162,6 +181,13 @@ public class TrackAnalyzer {
             for(Iterator<TrackSection> trackSectionIterator = round.getTrackSections().iterator(); trackSectionIterator.hasNext(); ) {
                 TrackSection trackSection = trackSectionIterator.next();
                 if(trackSection.getDuration() < faultyGoingStraightTime && trackSection.getDirection().equals(State.STRAIGHT)){
+                    int sId = round.getTrackSections().indexOf(trackSection);
+                    if(sId<1){
+                        round.getTrackSections().get(sId+1).setDistance(round.getTrackSections().get(sId+1).getDistance()+trackSection.getDistance());
+                    }
+                    else{
+                        round.getTrackSections().get(sId-1).setDistance(round.getTrackSections().get(sId-1).getDistance()+trackSection.getDistance());
+                    }
                     trackSectionIterator.remove();
                 }
             }
@@ -174,6 +200,13 @@ public class TrackAnalyzer {
             for(Iterator<TrackSection> trackSectionIterator = round.getTrackSections().iterator(); trackSectionIterator.hasNext(); ) {
                 TrackSection trackSection = trackSectionIterator.next();
                 if(trackSection.getDuration() < faultyTurnTime && trackSection.getDirection().equals(State.TURN)){
+                    int sId = round.getTrackSections().indexOf(trackSection);
+                    if(sId<1){
+                        round.getTrackSections().get(sId+1).setDistance(round.getTrackSections().get(sId+1).getDistance()+trackSection.getDistance());
+                    }
+                    else{
+                        round.getTrackSections().get(sId-1).setDistance(round.getTrackSections().get(sId-1).getDistance()+trackSection.getDistance());
+                    }
                     trackSectionIterator.remove();
                 }
             }
@@ -238,15 +271,17 @@ public class TrackAnalyzer {
                 calculatedRound.getTrackSections().get(i).setDuration(calculatedRound.getTrackSections().get(i).getDuration() + round.getTrackSections().get(i).getDuration());
                 calculatedRound.getTrackSections().get(i).setTimeStamp((calculatedRound.getTrackSections().get(i).getTimeStamp() + (round.getTrackSections().get(i).getTimeStamp() - round.getStartRoundTimeStamp())));
                 //LOGGER.info("TS: "+calculatedRound.getTrackSections().get(1).getTimeStamp());
+                calculatedRound.getTrackSections().get(i).setDistance(calculatedRound.getTrackSections().get(i).getDistance() + round.getTrackSections().get(i).getDistance());
             }
             for(int i=0; i<round.getCountOfTrackVelocities(); i++){
                 calculatedRound.getTrackVelocites().get(i).setVelocity(calculatedRound.getTrackVelocites().get(i).getVelocity()+round.getTrackVelocites().get(i).getVelocity());
                 calculatedRound.getTrackVelocites().get(i).setTimeStamp((calculatedRound.getTrackVelocites().get(i).getTimeStamp() + (round.getTrackVelocites().get(i).getTimeStamp() - round.getStartRoundTimeStamp())));
             }
         }
-        for(int i=0; i<calculatedRound.getCountOfTrackSections(); i++){
+        for(int i=0; i<calculatedRound.getCountOfTrackSections(); i++) {
             calculatedRound.getTrackSections().get(i).setDuration(calculatedRound.getTrackSections().get(i).getDuration() / tempRoundList.size());
             calculatedRound.getTrackSections().get(i).setTimeStamp(calculatedRound.getTrackSections().get(i).getTimeStamp() / tempRoundList.size());
+            calculatedRound.getTrackSections().get(i).setDistance(calculatedRound.getTrackSections().get(i).getDistance() / tempRoundList.size());
         }
         for(int i=0; i<calculatedRound.getCountOfTrackVelocities(); i++){
             calculatedRound.getTrackVelocites().get(i).setVelocity(calculatedRound.getTrackVelocites().get(i).getVelocity() / tempRoundList.size());
@@ -298,7 +333,7 @@ public class TrackAnalyzer {
         Round calculatedRound = createCalculatedRound(tempRoundList);
 
 
-        //printRound(calculatedRound);
+        printRound(calculatedRound);
         printTrack(calculatedRound);
         return generateTrack(calculatedRound);
     }
@@ -306,9 +341,11 @@ public class TrackAnalyzer {
 
 
     protected Track generateTrack(Round round){
+        List<Double> velocities = new ArrayList<>();
         Track track = new Track();
         round.getTrackSections().stream().forEach(s -> track.getSections().add(s));
         for(TrackVelocity trackVelocity : round.getTrackVelocites()){
+            //velocities.add(trackVelocity.getVelocity());
             int trackSectionId=0;
             for(int i=0;i<round.getTrackSections().size();i++){
                 if(round.getTrackSections().get(i).getTimeStamp()<trackVelocity.getTimeStamp() && round.getTrackSections().get(i).getTimeStamp()+round.getTrackSections().get(i).getDuration()>trackVelocity.getTimeStamp()){
@@ -326,13 +363,48 @@ public class TrackAnalyzer {
         }
         track.setPower(round.getPilotPower());
 
-        calculateDistances(track);
+        //calculateDistances(track,velocities);
 
         return track;
     }
 
-    private void calculateDistances(Track track){
+    private void calculateDistances(Track track,List<Double> velocities){
+        TrackPhysicsModel physicsModel = new TrackPhysicsModel();
 
+        Track.Position firstVelocityPos = track.getCheckpoints().get(0);
+        int tsid = track.getSections().indexOf(firstVelocityPos.getSection());
+
+        //double beginningVelocityOfSection =
+        double endVelocityOfSection;
+        double dt = (float)(track.getSections().get(tsid).getDuration()-firstVelocityPos.getDurationOffset());
+        double v0 = velocities.get(0).floatValue();
+        int p = track.getPower();
+        State turn = firstVelocityPos.getSection().getDirection();
+        double velocityAtTheEnd = physicsModel.velocity(v0, turn, 100, dt / 1000);
+        LOGGER.info("v0: "+v0+", p: "+p+", dt: "+dt);
+        LOGGER.info("VELOCITY " +velocityAtTheEnd);
+        TrackSection tr = track.getSections().get(tsid + 1);
+        dt = (track.getSections().get(tsid+1).getDuration());
+        v0 = velocityAtTheEnd;
+        p = track.getPower();
+        turn = track.getSections().get(tsid+1).getDirection();
+        double dist=0;
+        for(int i = 0; i<dt;i++){
+            dist += physicsModel.distance(velocityAtTheEnd,turn,p,1.0/1000.0);
+            velocityAtTheEnd = physicsModel.average_velocity(velocityAtTheEnd, turn, p, 1.0/1000.0);
+        }
+        LOGGER.info("v0: "+v0+", p: "+p+", dt: "+dt);
+        LOGGER.info("TRACK-DISTANCE OF TS("+tsid+1+") is " +dist+"cm");
+        dt = (track.getSections().get(tsid+1).getDuration());
+        v0 = velocityAtTheEnd;
+        p = track.getPower();
+        turn = track.getSections().get(tsid +1).getDirection();
+        for(int i = 0; i<dt;i++){
+            velocityAtTheEnd = physicsModel.average_velocity(v0, turn, p, 1.0/1000.0);
+            v0 = velocityAtTheEnd;
+        }
+        LOGGER.info("v0: "+v0+", p: "+p+", dt: "+dt);
+        LOGGER.info("VELOCITY " +velocityAtTheEnd);
     }
 
 
