@@ -7,6 +7,7 @@ import akka.japi.Creator;
 import ch.trq.carrera.javapilot.akka.SpeedOptimizer;
 import ch.trq.carrera.javapilot.akka.TrackLearner;
 import ch.trq.carrera.javapilot.akka.log.LogMessage;
+import ch.trq.carrera.javapilot.akka.log.LogWriter;
 import ch.trq.carrera.javapilot.akka.positiontracker.CarUpdate;
 import ch.trq.carrera.javapilot.akka.positiontracker.SectionUpdate;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
@@ -41,23 +42,16 @@ public class JavaPilotActor extends UntypedActor {
     private ActorRef penaltyEntryPoint;
     private ActorRef roundTimeEntryPoint;
 
-    private FileWriter logWriter;
-    private Gson gson = new Gson();
-    private boolean firstLogEntry = true;
+    private LogWriter logwriter;
+
 
     private PilotToRelayConnection relayConnection;
 
     private PilotToVisualConnection visualConnection;
 
     public JavaPilotActor(PilotProperties properties) {
-        File logFile = new File("logs/log" + System.currentTimeMillis() + ".json");
-        try {
-            logWriter = new FileWriter(logFile);
-            logWriter.append("{ raceData: [");
-            LOGGER.info("Logging to" + logFile.getAbsolutePath());
-        } catch (IOException e) {
-            LOGGER.error("Could not open logfile", e);
-        }
+
+        logwriter = new LogWriter();
 
         this.properties = properties;
 
@@ -109,13 +103,7 @@ public class JavaPilotActor extends UntypedActor {
                 SectionUpdate update = (SectionUpdate) message;
                 visualConnection.sectionUpdate(update.getSectionIndex(), update.getSection());
             } else if (message instanceof LogMessage){
-                String s = gson.toJson(message);
-                if(firstLogEntry){
-                    firstLogEntry = false;
-                } else {
-                    s = "," + s;
-                }
-                logWriter.append(s);
+                logwriter.append(message);
             }
 
             // ------
@@ -249,12 +237,5 @@ public class JavaPilotActor extends UntypedActor {
         createInitialTopology();
         long now = System.currentTimeMillis();
         LOGGER.info("received race start");
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        Log.info("Finalizing");
-        logWriter.append("]}");
-        logWriter.close();
     }
 }

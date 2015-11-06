@@ -1,0 +1,64 @@
+package ch.trq.carrera.javapilot.akka.log;
+
+import com.google.gson.Gson;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
+/**
+ * Created by tourn on 6.11.15.
+ */
+public class LogWriter {
+    private final Logger LOGGER = LoggerFactory.getLogger(LogWriter.class);
+
+    private FileWriter logWriter;
+    private Gson gson = new Gson();
+    private boolean firstLogEntry = true;
+
+    public LogWriter() {
+
+        File logFile = new File("logs/log" + System.currentTimeMillis() + ".json");
+        try {
+            logWriter = new FileWriter(logFile);
+            logWriter.append("{ raceData: [");
+            LOGGER.info("Logging to" + logFile.getAbsolutePath());
+        } catch ( IOException e ) {
+            LOGGER.error("Could not open logfile", e);
+        }
+    }
+
+    public void append(Object message){
+        StringBuilder msg = new StringBuilder();
+        if(firstLogEntry){
+            firstLogEntry = false;
+        } else {
+            msg.append(",");
+        }
+        msg.append(gson.toJson(message));
+        msg.append("\n");
+        try {
+            logWriter.append(msg.toString());
+        } catch (IOException e) {
+            LOGGER.error("Error writing log", e);
+        }
+
+    }
+
+    public void close(){
+        LOGGER.info("Finalizing");
+        try {
+            logWriter.append("]}");
+            logWriter.close();
+        } catch (IOException e) {
+            LOGGER.error("Error closing logfile", e);
+        }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        close();
+    }
+}
