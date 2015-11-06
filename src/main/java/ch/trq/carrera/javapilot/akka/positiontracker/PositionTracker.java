@@ -152,6 +152,10 @@ public class PositionTracker {
         this.power = power;
     }
 
+    public int getPower(){
+        return power;
+    }
+
     public boolean isTurn(){
         return pos.getSection().getDirection().equals("TURN");
     }

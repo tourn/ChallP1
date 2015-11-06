@@ -3,6 +3,7 @@ package ch.trq.carrera.javapilot.akka;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
+import ch.trq.carrera.javapilot.akka.log.LogMessage;
 import ch.trq.carrera.javapilot.akka.positiontracker.CarUpdate;
 import ch.trq.carrera.javapilot.akka.positiontracker.PositionTracker;
 import ch.trq.carrera.javapilot.akka.positiontracker.SectionUpdate;
@@ -28,6 +29,7 @@ public class SpeedOptimizer extends UntypedActor {
     private int maxTurnPower = 220;
     private int maxPower = 220;
     private PositionTracker positionTracker;
+    private String actorDescription;
 
     public SpeedOptimizer(ActorRef pilot, Track track) {
         this.pilot = pilot;
@@ -53,6 +55,8 @@ public class SpeedOptimizer extends UntypedActor {
             }
         });
         changePower(maxTurnPower);
+
+        actorDescription = getActorDescription();
     }
 
     public static Props props ( ActorRef pilot, Track track ) {
@@ -84,6 +88,7 @@ public class SpeedOptimizer extends UntypedActor {
     }
 
     private void handleSensorEvent(SensorEvent event) {
+        LogMessage log = new LogMessage(event, System.currentTimeMillis());
         positionTracker.update(event);
         if(!positionTracker.isTurn()){
             //LOGGER.info("DUCK GOING STRAIGHT: " + positionTracker.getPercentageDistance());
@@ -92,6 +97,17 @@ public class SpeedOptimizer extends UntypedActor {
             }
         }
         //pilot.tell ( new PowerAction(power), getSelf());
+        popluateLog(log);
+        pilot.tell(log, getSelf());
+    }
+
+    private void popluateLog(LogMessage log){
+        log.setPower(positionTracker.getPower());
+        log.setActorDescription(actorDescription);
+    }
+
+    public String getActorDescription(){
+        return "SpeedOptimizer";
     }
 
     private void changePower(int power){
