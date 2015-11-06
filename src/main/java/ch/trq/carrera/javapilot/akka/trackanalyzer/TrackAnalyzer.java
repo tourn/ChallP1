@@ -357,56 +357,15 @@ public class TrackAnalyzer {
             //LOGGER.info("offset: " +offset+", TVTS: " + trackVelocity.getTimeStamp() + ", TSTS: " + trackSection.getTimeStamp());
             Track.Position p = new Track.Position(trackSection,offset);
             p.setPercentage((double)offset/(double)trackSection.getDuration());
-            LOGGER.info("offset: " + offset + "ms, TracksectionID: " + round.getTrackSections().indexOf(trackSection));
+            //LOGGER.info("offset: " + offset + "ms, TracksectionID: " + round.getTrackSections().indexOf(trackSection));
             LOGGER.info("CHECKPOINT %: " + p.getPercentage());
             track.getCheckpoints().add(p);
         }
         track.setPower(round.getPilotPower());
 
-        //calculateDistances(track,velocities);
 
         return track;
     }
-
-    private void calculateDistances(Track track,List<Double> velocities){
-        TrackPhysicsModel physicsModel = new TrackPhysicsModel();
-
-        Track.Position firstVelocityPos = track.getCheckpoints().get(0);
-        int tsid = track.getSections().indexOf(firstVelocityPos.getSection());
-
-        //double beginningVelocityOfSection =
-        double endVelocityOfSection;
-        double dt = (float)(track.getSections().get(tsid).getDuration()-firstVelocityPos.getDurationOffset());
-        double v0 = velocities.get(0).floatValue();
-        int p = track.getPower();
-        State turn = firstVelocityPos.getSection().getDirection();
-        double velocityAtTheEnd = physicsModel.velocity(v0, turn, 100, dt / 1000);
-        LOGGER.info("v0: "+v0+", p: "+p+", dt: "+dt);
-        LOGGER.info("VELOCITY " +velocityAtTheEnd);
-        TrackSection tr = track.getSections().get(tsid + 1);
-        dt = (track.getSections().get(tsid+1).getDuration());
-        v0 = velocityAtTheEnd;
-        p = track.getPower();
-        turn = track.getSections().get(tsid+1).getDirection();
-        double dist=0;
-        for(int i = 0; i<dt;i++){
-            dist += physicsModel.distance(velocityAtTheEnd,turn,p,1.0/1000.0);
-            velocityAtTheEnd = physicsModel.average_velocity(velocityAtTheEnd, turn, p, 1.0/1000.0);
-        }
-        LOGGER.info("v0: "+v0+", p: "+p+", dt: "+dt);
-        LOGGER.info("TRACK-DISTANCE OF TS("+tsid+1+") is " +dist+"cm");
-        dt = (track.getSections().get(tsid+1).getDuration());
-        v0 = velocityAtTheEnd;
-        p = track.getPower();
-        turn = track.getSections().get(tsid +1).getDirection();
-        for(int i = 0; i<dt;i++){
-            velocityAtTheEnd = physicsModel.average_velocity(v0, turn, p, 1.0/1000.0);
-            v0 = velocityAtTheEnd;
-        }
-        LOGGER.info("v0: "+v0+", p: "+p+", dt: "+dt);
-        LOGGER.info("VELOCITY " +velocityAtTheEnd);
-    }
-
 
     public void printTrack(Round round){
         String track = "";
