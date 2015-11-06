@@ -23,6 +23,7 @@ public class LogMessage {
     long tAfterCalculation;
 
     public LogMessage(SensorEvent event, long tReceived){
+        this.event = event;
         tEvent = event.getTimeStamp();
         this.tReceived = tReceived;
     }
