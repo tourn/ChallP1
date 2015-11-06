@@ -23,7 +23,7 @@ public class LogWriter {
         File logFile = new File("logs/log" + System.currentTimeMillis() + ".json");
         try {
             logWriter = new FileWriter(logFile);
-            logWriter.append("{ raceData: [");
+            logWriter.append("{ \"raceData\": [");
             LOGGER.info("Logging to" + logFile.getAbsolutePath());
         } catch ( IOException e ) {
             LOGGER.error("Could not open logfile", e);
