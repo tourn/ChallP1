@@ -7,6 +7,8 @@ import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
 import visualization.DataChart;
 
+import java.util.ArrayList;
+
 /**
  * Created by mario on 08.10.15.
  */
@@ -40,8 +42,8 @@ public class PilotToVisualConnector implements PilotToVisualConnection{
 
 
     @Override
-    public void carUpdate(int trackSectionIndex, int offset, double percentageDistance) {
-        dataChart.updateCarPosition(trackSectionIndex, offset, percentageDistance);
+    public void carUpdate(int trackSectionIndex, double percentageDistance) {
+        dataChart.updateCarPosition(trackSectionIndex, percentageDistance);
     }
 
     @Override
