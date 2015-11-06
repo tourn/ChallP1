@@ -175,19 +175,23 @@ public class TrackAnalyzer {
         });
     }
 
+    private void saveDistanceIntoOtherTrackSection(Round round, TrackSection trackSection){
+        int sId = round.getTrackSections().indexOf(trackSection);
+        if(sId<1){
+            round.getTrackSections().get(sId+1).setDistance(round.getTrackSections().get(sId+1).getDistance()+trackSection.getDistance());
+        }
+        else{
+            round.getTrackSections().get(sId-1).setDistance(round.getTrackSections().get(sId-1).getDistance()+trackSection.getDistance());
+        }
+    }
+
     protected void removeFaultGoingStraightTrackSections(List<Round> tempRoundList, int faultyGoingStraightTime){
         //remove "fault" "GOING STRAIGHT" trackSections, sections, which are not longer than <faultyGoingStraightTime> ms.
         iterateEachRound(tempRoundList, round -> {
             for(Iterator<TrackSection> trackSectionIterator = round.getTrackSections().iterator(); trackSectionIterator.hasNext(); ) {
                 TrackSection trackSection = trackSectionIterator.next();
                 if(trackSection.getDuration() < faultyGoingStraightTime && trackSection.getDirection().equals(State.STRAIGHT)){
-                    int sId = round.getTrackSections().indexOf(trackSection);
-                    if(sId<1){
-                        round.getTrackSections().get(sId+1).setDistance(round.getTrackSections().get(sId+1).getDistance()+trackSection.getDistance());
-                    }
-                    else{
-                        round.getTrackSections().get(sId-1).setDistance(round.getTrackSections().get(sId-1).getDistance()+trackSection.getDistance());
-                    }
+                    saveDistanceIntoOtherTrackSection(round,trackSection);
                     trackSectionIterator.remove();
                 }
             }
@@ -200,13 +204,7 @@ public class TrackAnalyzer {
             for(Iterator<TrackSection> trackSectionIterator = round.getTrackSections().iterator(); trackSectionIterator.hasNext(); ) {
                 TrackSection trackSection = trackSectionIterator.next();
                 if(trackSection.getDuration() < faultyTurnTime && trackSection.getDirection().equals(State.TURN)){
-                    int sId = round.getTrackSections().indexOf(trackSection);
-                    if(sId<1){
-                        round.getTrackSections().get(sId+1).setDistance(round.getTrackSections().get(sId+1).getDistance()+trackSection.getDistance());
-                    }
-                    else{
-                        round.getTrackSections().get(sId-1).setDistance(round.getTrackSections().get(sId-1).getDistance()+trackSection.getDistance());
-                    }
+                    saveDistanceIntoOtherTrackSection(round,trackSection);
                     trackSectionIterator.remove();
                 }
             }
@@ -263,7 +261,7 @@ public class TrackAnalyzer {
             calculatedRound.addTrackSection(tempRoundList.get(0).getTrackSections().get(i).getDirection(),0);
         }
         for(int i=0; i<tempRoundList.get(0).getCountOfTrackVelocities(); i++){
-            calculatedRound.addTrackVelocity(0,0);
+            calculatedRound.addTrackVelocity(0, 0);
         }
         for(Iterator<Round> roundIterator = tempRoundList.iterator(); roundIterator.hasNext();){
             Round round = roundIterator.next();
@@ -356,7 +354,7 @@ public class TrackAnalyzer {
             long offset = trackVelocity.getTimeStamp()-trackSection.getTimeStamp();
             //LOGGER.info("offset: " +offset+", TVTS: " + trackVelocity.getTimeStamp() + ", TSTS: " + trackSection.getTimeStamp());
             Track.Position p = new Track.Position(trackSection,offset);
-            p.setPercentage((double)offset/(double)trackSection.getDuration());
+            p.setPercentage((double) offset / (double) trackSection.getDuration());
             //LOGGER.info("offset: " + offset + "ms, TracksectionID: " + round.getTrackSections().indexOf(trackSection));
             LOGGER.info("CHECKPOINT %: " + p.getPercentage());
             track.getCheckpoints().add(p);
