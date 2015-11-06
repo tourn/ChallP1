@@ -124,7 +124,7 @@ public class DataChart extends ApplicationFrame {
         holeduration=0;
         Object[] objects = new Object[track.getSections().size()];
         for (int i = 0; i < track.getSections().size(); i++) {
-            model.addColumn(i + ": " + Math.round(track.getSections().get(i).getDistance()));
+            model.addColumn(i + ": " + Math.round(track.getSections().get(i).getDistance()) + " - " + track.getSections().get(i).getDirection());
             objects[i] = track.getSections().get(i).getDuration();
             holeduration += track.getSections().get(i).getDuration();
         }
