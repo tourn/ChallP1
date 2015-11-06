@@ -51,8 +51,6 @@ public class JavaPilotActor extends UntypedActor {
 
     public JavaPilotActor(PilotProperties properties) {
 
-        logwriter = new LogWriter();
-
         this.properties = properties;
 
         createInitialTopology();
@@ -103,14 +101,19 @@ public class JavaPilotActor extends UntypedActor {
                 SectionUpdate update = (SectionUpdate) message;
                 visualConnection.sectionUpdate(update.getSectionIndex(), update.getSection());
             } else if (message instanceof LogMessage){
-                logwriter.append(message);
+                if(logwriter != null) {
+                    logwriter.append(message);
+                }
             }
 
             // ------
             if (message instanceof RaceStartMessage) {
+                logwriter = new LogWriter();
                 handleRaceStart((RaceStartMessage) message);
 
             } else if (message instanceof RaceStopMessage) {
+                logwriter.close();
+                logwriter = null;
                 handleRaceStop((RaceStopMessage) message);
 
             } else if (message instanceof SensorEvent) {

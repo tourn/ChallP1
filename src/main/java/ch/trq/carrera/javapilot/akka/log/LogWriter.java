@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Created by tourn on 6.11.15.
@@ -19,8 +21,9 @@ public class LogWriter {
     private boolean firstLogEntry = true;
 
     public LogWriter() {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
-        File logFile = new File("logs/log" + System.currentTimeMillis() + ".json");
+        File logFile = new File("logs/log" + format.format(new Date()) + ".json");
         try {
             logWriter = new FileWriter(logFile);
             logWriter.append("{ \"raceData\": [");
@@ -55,10 +58,5 @@ public class LogWriter {
         } catch (IOException e) {
             LOGGER.error("Error closing logfile", e);
         }
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        close();
     }
 }
