@@ -16,6 +16,6 @@ public interface PilotToVisualConnection {
     void send(VelocityMessage message);
     void initializeTrack(Track track);
     void sectionUpdate(int index, TrackSection section);
-    void carUpdate(int trackSectionIndex, int offset, double percentageDistance);
+    void carUpdate(int trackSectionIndex, double percentageDistance);
     void newRoundMessage(RoundTimeMessage message);
 }

@@ -393,7 +393,7 @@ public class TrackAnalyzer {
         double distance = 0;
         for(int i = 0; i<dtime;i++){
             v0 = trackPhysicsModel.average_velocity(v0, turn, power, 1.0/1000.0);
-            distance += tempVelocity * 1.0/1000.0;
+            distance += v0 * 1.0/1000.0;
         }
         return distance;
     }

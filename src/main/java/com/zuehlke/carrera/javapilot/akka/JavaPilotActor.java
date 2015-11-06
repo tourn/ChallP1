@@ -104,7 +104,7 @@ public class JavaPilotActor extends UntypedActor {
             } else if (message instanceof CarUpdate){
                 //LOGGER.info("SENDING: SID: " + ((CarUpdate) message).getTrackIndex() + ", Offset: " + ((CarUpdate) message).getOffset() + "ms, Percentage: " + ((CarUpdate) message).getPercentage() + "%");
                 CarUpdate update = (CarUpdate) message;
-                visualConnection.carUpdate(update.getTrackIndex(), (int) update.getOffset(), update.getPercentage());
+                visualConnection.carUpdate(update.getTrackIndex(),  update.getPercentage());
             } else if (message instanceof SectionUpdate){
                 SectionUpdate update = (SectionUpdate) message;
                 visualConnection.sectionUpdate(update.getSectionIndex(), update.getSection());

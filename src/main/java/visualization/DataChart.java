@@ -3,11 +3,12 @@ package visualization;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.List;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
-import ch.qos.logback.core.pattern.color.BlueCompositeConverter;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
 import com.zuehlke.carrera.relayapi.messages.RoundTimeMessage;
@@ -20,7 +21,6 @@ import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -50,9 +50,11 @@ public class DataChart extends ApplicationFrame {
     private XYSeriesCollection speeddata;
     private DefaultTableModel model;
     private Rectangle2D.Float rect = new Rectangle2D.Float(0, 0, 0, 0);
+    private ArrayList<Rectangle2D.Double> checkpoints = new ArrayList<>();
     private double holeduration = 0;
     private boolean notfirst = false;
     private StandardXYItemRenderer renderer;
+    private int[] sectionbegins;
 
     /**
      * @param title the frame title.
@@ -61,6 +63,7 @@ public class DataChart extends ApplicationFrame {
     public DataChart(final String title) {
 
         super(title);
+        setResizable(false);
         this.series = new XYSeries("Sensor Z Model");
         this.secondPhaseSerie1 = new XYSeries("Sensor Z Round");
         secondPhaseSerie2 = new XYSeries("Sensor Z 2 Round");
@@ -88,7 +91,14 @@ public class DataChart extends ApplicationFrame {
                 Graphics2D g = (Graphics2D) graphics;
                 Color myColor = new Color(255, 53, 51, 180);
                 g.setColor(myColor);
+                //print CarPos
                 g.fill(rect);
+                //print Checkpoints
+                myColor = new Color(0, 102, 255, 180);
+                g.setColor(myColor);
+                for (Rectangle2D check : checkpoints) {
+                    g.fill(check);
+                }
             }
         };
 
@@ -97,7 +107,7 @@ public class DataChart extends ApplicationFrame {
         panel1.add(chartPanelModel);
         //panel1.add(chartPanelRound);
         panel1.setPreferredSize(new Dimension(1200, 900));
-        panel2.setPreferredSize(new Dimension(1200, 900));
+        panel2.setPreferredSize(new Dimension(1400, 900));
 
         container.add(panel1);
 
@@ -111,9 +121,10 @@ public class DataChart extends ApplicationFrame {
     public void initDataTable(Track track) {
         this.track = track;
         model = new DefaultTableModel();
+        holeduration=0;
         Object[] objects = new Object[track.getSections().size()];
         for (int i = 0; i < track.getSections().size(); i++) {
-            model.addColumn(i + ": " + Math.round(track.getSections().get(i).getDistance()));
+            model.addColumn(i + ": " + Math.round(track.getSections().get(i).getDistance()) + " - " + track.getSections().get(i).getDirection());
             objects[i] = track.getSections().get(i).getDuration();
             holeduration += track.getSections().get(i).getDuration();
         }
@@ -122,6 +133,7 @@ public class DataChart extends ApplicationFrame {
         panel2.add(table, BorderLayout.CENTER);
         panel2.add(table.getTableHeader(), BorderLayout.NORTH);
         model.addRow(objects);
+        insertCheckpoints();
         panel2.repaint();
     }
 
@@ -144,6 +156,7 @@ public class DataChart extends ApplicationFrame {
         }
     }
 
+
     public void newRoundMessage(RoundTimeMessage m) {
         if (notfirst) {
             tmpSeries = secondPhaseSerie1;
@@ -159,15 +172,38 @@ public class DataChart extends ApplicationFrame {
         }
     }
 
-    public void updateCarPosition(int tracksection, int offset, double percentageDistance) {
-        int twidth = table.getWidth();
+    public void insertCheckpoints() {
         int xtable = table.getX();
         int ytable = table.getY();
-        int sectionwidth = twidth / table.getColumnCount();
+        double xrectl = 0;
+        double xrectr = 10;
+        int sectionwidth = 0;
+        List<Track.Position> checkpoints = track.getCheckpoints();
 
-        double prozentualoffeset = (double) offset / (double) track.getSections().get(tracksection).getDuration();
+        sectionbegins = new int[track.getSections().size()];
 
-        double xrectl = xtable + tracksection * sectionwidth + prozentualoffeset * sectionwidth;
+        for (int i = 0; i < track.getSections().size(); i++) {
+            if (i > 0) {
+                sectionbegins[i] = sectionbegins[i - 1] + table.getColumnModel().getColumn(i - 1).getMinWidth();
+            } else {
+                sectionbegins[i] = 0;
+            }
+        }
+
+        for (Track.Position p : checkpoints) {
+            sectionwidth = table.getColumnModel().getColumn(track.getSections().indexOf(p.getSection())).getMinWidth();
+            xrectl = xtable + sectionbegins[track.getSections().indexOf(p.getSection())] + p.getPercentage() * sectionwidth;
+            this.checkpoints.add(new Rectangle2D.Double(xrectl, ytable - 30, xrectr, ytable + 50));
+        }
+    }
+
+    public void updateCarPosition(int tracksection, double percentageDistance) {
+        int xtable = table.getX();
+        int ytable = table.getY();
+        int sectionwidth = table.getColumnModel().getColumn(tracksection).getMinWidth();
+
+
+        double xrectl = xtable + sectionbegins[tracksection] + percentageDistance * sectionwidth;
         double xrectr = 10;
 
         rect.setRect(xrectl, ytable - 10, xrectr, ytable + 15);
