@@ -107,6 +107,11 @@ public class SpeedOptimizer extends UntypedActor {
     private void popluateLog(LogMessage log){
         log.setPower(positionTracker.getPower());
         log.setActorDescription(actorDescription);
+        log.setVelocity(positionTracker.getVelocity());
+        log.setPositionRelative(positionTracker.getPos().getDistanceOffset());
+        log.setPositionAbsolute(positionTracker.calculateAbsoluteDistance());
+        log.setTrackSectionId(positionTracker.getSectionIndex());
+        log.settAfterCalculation(System.currentTimeMillis());
     }
 
     public String getActorDescription(){
