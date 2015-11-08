@@ -7,6 +7,7 @@ import ch.trq.carrera.javapilot.akka.log.LogMessage;
 import ch.trq.carrera.javapilot.akka.positiontracker.CarUpdate;
 import ch.trq.carrera.javapilot.akka.positiontracker.PositionTracker;
 import ch.trq.carrera.javapilot.akka.positiontracker.SectionUpdate;
+import ch.trq.carrera.javapilot.akka.trackanalyzer.State;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
 import com.zuehlke.carrera.javapilot.akka.PowerAction;
@@ -47,7 +48,7 @@ public class SpeedOptimizer extends UntypedActor {
             @Override
             public void onUpdate(int sectionIndex, TrackSection section) {
                 pilot.tell(new SectionUpdate(section, sectionIndex), getSelf());
-                if(section.getDirection().equals("TURN")){
+                if(section.getDirection().equals(State.TURN)){
                     changePower(maxPower);
                 }else{
                     changePower(maxTurnPower);
