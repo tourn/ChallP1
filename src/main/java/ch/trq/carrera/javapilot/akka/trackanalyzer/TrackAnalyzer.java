@@ -13,404 +13,110 @@ import java.util.function.Consumer;
  * Created by Frank on 22.09.2015.
  */
 public class TrackAnalyzer {
-    protected ArrayList<Round> rounds;
-    protected Round tempRound = new Round(0,0);
-    protected TrackSection tempTrackSection = new TrackSection(State.TURN,0);
-
-    protected boolean isNewRound;
-    protected int newPilotPower;
-
-    private double tempDistance=0;
-    private double tempVelocity=0;
-
+    private List<TrackSection> trackSections = new ArrayList<>();
+    private List<TrackVelocity> trackVelocities = new ArrayList<>();
+    private TrackSection tempTrackSection;
     private final Logger LOGGER = LoggerFactory.getLogger(TrackAnalyzer.class);
-    private TrackPhysicsModel trackPhysicsModel = new TrackPhysicsModel();
 
-    public TrackAnalyzer() {
-        rounds = new ArrayList<Round>();
-        isNewRound = false;
+    private int faultyGoingStraightTime = 200;
+    private int faultyTurnTime = 250;
+    private int ignoredTrackSections = 3;
+    private int trackVelocitiesPerRound = 4;
+    private int minTrackSectionsPerRound = 4;
+
+
+    public TrackAnalyzer(){
+
     }
 
-
     /**
-     * Sets the status, that there has started a new Round. The TrackAnalyzer will end the last round at the next
-     * TrackSection and setup a new Round
      *
-     * @param  pilotPower  the Pilot-Power from the last Round
-     */
-    public void newRound(int pilotPower){
-        isNewRound = true;
-        newPilotPower = pilotPower;
-    }
-
-    /**
-     * Creates a new Track-Section with the Direction and the start-time-stamp and adds it to the round.
-     * Calculates and sets also the duration of the last Tracksection.
-     * If there is a new round (after Calling newRound), it creates also a new round before adding the new track-section
-     * to the round.
-     *
-     * @param direction The Direction of the track-section
-     * @param timeStamp The start-time-stamp of the next tracksection
-     */
-    public void addTrackSectionToRound(State direction, long timeStamp){
-        tempTrackSection.setDistance(tempDistance);
-        tempDistance = 0;
-        if(isNewRound){
-            isNewRound = false;
-            tempTrackSection.setDuration(timeStamp - tempTrackSection.getTimeStamp());
-            tempRound.setEndRoundTimeStamp(timeStamp);
-            rounds.add(tempRound);
-            tempRound = new Round(timeStamp,newPilotPower);
-        }else{
-            tempTrackSection.setDuration(timeStamp - tempTrackSection.getTimeStamp());
-        }
-        tempTrackSection = new TrackSection(direction,timeStamp);
-        tempRound.addTrackSection(tempTrackSection);
-    }
-
-    /**
-     * Creates a new track-velocity and adds it to the actual round
      *
      * @param velocity The velocity from the velocity-sensor-message
      * @param timeStamp The received time-stamp from the velocity-sensor-message
      */
-    public void addTrackVelocitiesToRound(double velocity, long timeStamp){
-        tempRound.addTrackVelocity(new TrackVelocity(velocity, timeStamp));
-        LOGGER.info("Velocity: " + velocity + ", calculated: " + tempVelocity + ", difference: " + Math.abs(velocity-tempVelocity));
-        tempVelocity=velocity;
+    public void addTrackVelocity(double velocity, long timeStamp){
+        trackVelocities.add(new TrackVelocity(velocity, timeStamp));
     }
 
-    /**
-     * Calculates the distance and velocity which has changed in dtime
-     *
-     * @param dtime delta-Time in ms
-     * @param power The Power which was used in this time
-     * @param turn The direction-state
-     */
-    public void updateDistance(long dtime, int power, State turn){
-        for(int i = 0; i<dtime;i++){
-            tempVelocity = trackPhysicsModel.average_velocity(tempVelocity, turn, power, 1.0/1000.0);
-            tempDistance += tempVelocity * 1.0/1000.0;
-        }
-    }
 
-    /**
-     * @return The amount of all completed rounds in the TrackAnalyzer
-     */
-    public int getCompletedRoundsCount(){
-        return rounds.size();
-    }
-
-    /**
-     * Prints the last completed round
-     */
-    public void printLastRound(){
-        printRound(rounds.size()-1);
-    }
-
-    /**
-     * Prints the round with this round-id
-     *
-     * @param roundnr The id of the round which will be printed
-     */
-    public void printRound(int roundnr){
-        if (roundnr < getCompletedRoundsCount()){
-            Round round = rounds.get(roundnr);
-            LOGGER.info("Round Nr. " + roundnr);
-            printRound(round);
-        } else {
-            LOGGER.info("Round Nr. " + roundnr + "doesn't exist!");
-        }
-    }
-
-    /**
-     * Prints the round into the console (Logger). The Information of the round which wil be printed are:
-     * <ul></ul>
-     *  <li>Roundtime
-     *  <li>List of all TrackVelocities with their velocity and timestamp
-     *  <li>List of all Tracksections with their direction, duration and timestamp
-     * </ul>
-     *
-     * @param round The round which will be printed
-     */
-    public void printRound(Round round){
-        LOGGER.info("===================================================================");
-        LOGGER.info("Time: " + round.getRoundTime() + "ms");
-        int n = 0;
-        for(Iterator<TrackVelocity> i = round.getTrackVelocites().iterator(); i.hasNext();){
-            TrackVelocity trackVelocity = i.next();
-            LOGGER.info("Velocity" + n + ": " + trackVelocity.getVelocity() + ", TimeStamp: " + trackVelocity.getTimeStamp());
-            n++;
-        }
-        for(Iterator<TrackSection> i = round.getTrackSections().iterator(); i.hasNext();){
-            TrackSection trackSection = i.next();
-            LOGGER.info("Direction: " + trackSection.getDirection() + ", Distance: " + trackSection.getDistance() + "cm , Duration:" + trackSection.getDuration() + "ms, TimeStamp: " + trackSection.getTimeStamp());
-        }
-        LOGGER.info("===================================================================");
-        printTrack(round);
-    }
-
-    // CALCULATE TRACK PRIVATE METHODS -- begin
-    private void iterateEachRound(List<Round> tempRoundList,Consumer<Round> c){
-        for(Iterator<Round> roundIterator = tempRoundList.iterator(); roundIterator.hasNext(); ) {
-            Round round = roundIterator.next();
-            c.accept(round);
-        }
-    }
-
-    protected void mergeAndRecalculateTrackSections(List<Round> tempRoundList){
-        //merge same directions (which follows each other)!!!
-        iterateEachRound(tempRoundList, round -> {
-            for (int i = 0; i < round.getCountOfTrackSections(); i++) {
-                if (i < round.getCountOfTrackSections() - 1) {
-                    if (round.getTrackSections().get(i).getDirection().equals(round.getTrackSections().get(i + 1).getDirection())) {
-                        round.getTrackSections().get(i).setDistance(round.getTrackSections().get(i).getDistance()+round.getTrackSections().get(i+1).getDistance());
-                        round.getTrackSections().remove(i + 1);
-                        i--;
+    public void addTrackSection(State state, long timeStamp){
+        if(tempTrackSection != null){
+            tempTrackSection.setDuration(timeStamp - tempTrackSection.getTimeStamp());
+            switch(tempTrackSection.getDirection()){
+                case STRAIGHT:
+                    if(tempTrackSection.getDuration()<faultyGoingStraightTime){
+                        if(getLastTrackSection()!=null){
+                            getLastTrackSection().addDuration(tempTrackSection.getDuration());
+                        }
+                    }else if(getLastTrackSection()!=null && getLastTrackSection().getDirection()==State.STRAIGHT){
+                        getLastTrackSection().addDuration(tempTrackSection.getDuration());
+                    }else{
+                        trackSections.add(tempTrackSection);
                     }
-                }
+                    break;
+                case LEFT:
+                case RIGHT:
+                    if(tempTrackSection.getDuration()<faultyTurnTime){
+                        if(getLastTrackSection()!=null){
+                            getLastTrackSection().addDuration(tempTrackSection.getDuration());
+                        }
+                    }else if(getLastTrackSection()!=null && (getLastTrackSection().getDirection()==State.LEFT || getLastTrackSection().getDirection()==State.RIGHT)){
+                        getLastTrackSection().addDuration(tempTrackSection.getDuration());
+                    }else{
+                        trackSections.add(tempTrackSection);
+                    }
+                    break;
             }
-        });
-        //RECALCULATE THE DURATION FOR EACH TRACKSECTION!!!
-        iterateEachRound(tempRoundList, round -> {
-            // If the first TrackSection dont have the same startTimeStamp like the RoundStartTimeStamp, recalculate this
-            if(round.getTrackSections().get(0).getTimeStamp()!= round.getStartRoundTimeStamp()){
-                round.getTrackSections().get(0).setDuration(round.getTrackSections().get(0).getDuration() + round.getTrackSections().get(0).getTimeStamp() - round.getStartRoundTimeStamp());
-                round.getTrackSections().get(0).setTimeStamp(round.getStartRoundTimeStamp());
-            }
-            for (int i = 0; i < round.getCountOfTrackSections(); i++) {
-                if (i < round.getCountOfTrackSections() - 1) {
-                    round.getTrackSections().get(i).setDuration(round.getTrackSections().get(i + 1).getTimeStamp() - round.getTrackSections().get(i).getTimeStamp());
-                } else {
-                    round.getTrackSections().get(i).setDuration(round.getEndRoundTimeStamp() - round.getTrackSections().get(i).getTimeStamp());
-                }
-            }
-        });
+        }
+        tempTrackSection = new TrackSection(state,timeStamp);
+        tryToFindRoundCycle();
+        //printTrackSections();
     }
 
-    private void saveDistanceIntoOtherTrackSection(Round round, TrackSection trackSection){
-        int sId = round.getTrackSections().indexOf(trackSection);
-        if(sId<1){
-            round.getTrackSections().get(sId+1).setDistance(round.getTrackSections().get(sId+1).getDistance()+trackSection.getDistance());
-        }
-        else{
-            round.getTrackSections().get(sId-1).setDistance(round.getTrackSections().get(sId-1).getDistance()+trackSection.getDistance());
+    private void tryToFindRoundCycle(){
+        if(foundTrackCycle()){
+            LOGGER.info("FOUND TRACK CYCLE: " + (trackSections.size()-ignoredTrackSections)/2 + " sections");
         }
     }
 
-    protected void removeFaultGoingStraightTrackSections(List<Round> tempRoundList, int faultyGoingStraightTime){
-        //remove "fault" "GOING STRAIGHT" trackSections, sections, which are not longer than <faultyGoingStraightTime> ms.
-        iterateEachRound(tempRoundList, round -> {
-            for(Iterator<TrackSection> trackSectionIterator = round.getTrackSections().iterator(); trackSectionIterator.hasNext(); ) {
-                TrackSection trackSection = trackSectionIterator.next();
-                if(trackSection.getDuration() < faultyGoingStraightTime && trackSection.getDirection().equals(State.STRAIGHT)){
-                    saveDistanceIntoOtherTrackSection(round,trackSection);
-                    trackSectionIterator.remove();
-                }
-            }
-        });
-    }
-
-    protected void removeFaultTurnTrackSections(List<Round> tempRoundList, int faultyTurnTime){
-        //remove "fault" "Turn" trackSections, sections, which are not longer than <faultyTurnTime> ms.
-        iterateEachRound(tempRoundList, round -> {
-            for(Iterator<TrackSection> trackSectionIterator = round.getTrackSections().iterator(); trackSectionIterator.hasNext(); ) {
-                TrackSection trackSection = trackSectionIterator.next();
-                if(trackSection.getDuration() < faultyTurnTime && trackSection.getDirection().equals(State.TURN)){
-                    saveDistanceIntoOtherTrackSection(round,trackSection);
-                    trackSectionIterator.remove();
-                }
-            }
-        });
-    }
-
-    protected boolean haveSameAmountOfTrackSections(List<Round> tempRoundList){
-        //Check that all rounds have the same count of TrackSections
-        int trackSectionCounter = tempRoundList.get(0).getCountOfTrackSections();
-        for(Iterator<Round> roundIterator = tempRoundList.iterator(); roundIterator.hasNext(); ) {
-            Round round = roundIterator.next();
-            if(round.getCountOfTrackSections()!=trackSectionCounter){
-                //ERROR FAIL
-                LOGGER.info("Track-Calculation failed. Not the same amout of Tracksections");
-                return false;
-            }
-        }
-        return true;
-    }
-
-    protected boolean haveAllRoundsSameDirections(List<Round> tempRoundList){
-        //TODO: Check that all rounds have the same Tracksection-Directions
-        for (int i = 0; i < tempRoundList.get(0).getCountOfTrackSections(); i++) {
-            State direction = tempRoundList.get(0).getTrackSections().get(i).getDirection();
-            for (Iterator<Round> roundIterator = tempRoundList.iterator(); roundIterator.hasNext(); ) {
-                Round round = roundIterator.next();
-                if (!(round.getTrackSections().get(i).getDirection().equals(direction))) {
-                    //ERROR FAIL
-                    LOGGER.info("Track-Calculation failed. Not the same TrackDirections");
-                    LOGGER.info("WE GOT A BIG PROBLEM");
+    private boolean foundTrackCycle(){
+        if(trackSections.size()>=ignoredTrackSections+2*minTrackSectionsPerRound && (trackSections.size()-ignoredTrackSections)%2==0){
+            int halfTrackSectionCount = (trackSections.size()-ignoredTrackSections)/2;
+            for(int i = ignoredTrackSections; i < ignoredTrackSections+halfTrackSectionCount; i++){
+                if(trackSections.get(i).getDirection()!=trackSections.get(i+halfTrackSectionCount).getDirection()){
                     return false;
                 }
             }
+            return true;
+        }else{
+            return false;
         }
-        return true;
-    }
-
-    protected void useLowestTrackSectionRoundOnly(List<Round> tempRoundList){
-        // If Calculation failed -> the calculatet track will be the track with the lowest Tracksection;
-        Round roundWithLowestTrackSection = tempRoundList.get(0);
-        for(Round round : tempRoundList){
-            if(round.getCountOfTrackSections() < roundWithLowestTrackSection.getCountOfTrackSections()){
-                roundWithLowestTrackSection = round;
-            }
-        }
-        tempRoundList.clear();
-        tempRoundList.add(roundWithLowestTrackSection);
-    }
-
-    protected Round createCalculatedRound(List<Round> tempRoundList){
-        Round calculatedRound = new Round(0,tempRoundList.get(0).getPilotPower());
-
-        for(int i=0; i<tempRoundList.get(0).getCountOfTrackSections(); i++){
-            calculatedRound.addTrackSection(tempRoundList.get(0).getTrackSections().get(i).getDirection(),0);
-        }
-        for(int i=0; i<tempRoundList.get(0).getCountOfTrackVelocities(); i++){
-            calculatedRound.addTrackVelocity(0, 0);
-        }
-        for(Iterator<Round> roundIterator = tempRoundList.iterator(); roundIterator.hasNext();){
-            Round round = roundIterator.next();
-            for(int i=0; i<round.getCountOfTrackSections(); i++){
-                calculatedRound.getTrackSections().get(i).setDuration(calculatedRound.getTrackSections().get(i).getDuration() + round.getTrackSections().get(i).getDuration());
-                calculatedRound.getTrackSections().get(i).setTimeStamp((calculatedRound.getTrackSections().get(i).getTimeStamp() + (round.getTrackSections().get(i).getTimeStamp() - round.getStartRoundTimeStamp())));
-                //LOGGER.info("TS: "+calculatedRound.getTrackSections().get(1).getTimeStamp());
-                calculatedRound.getTrackSections().get(i).setDistance(calculatedRound.getTrackSections().get(i).getDistance() + round.getTrackSections().get(i).getDistance());
-            }
-            for(int i=0; i<round.getCountOfTrackVelocities(); i++){
-                calculatedRound.getTrackVelocites().get(i).setVelocity(calculatedRound.getTrackVelocites().get(i).getVelocity()+round.getTrackVelocites().get(i).getVelocity());
-                calculatedRound.getTrackVelocites().get(i).setTimeStamp((calculatedRound.getTrackVelocites().get(i).getTimeStamp() + (round.getTrackVelocites().get(i).getTimeStamp() - round.getStartRoundTimeStamp())));
-            }
-        }
-        for(int i=0; i<calculatedRound.getCountOfTrackSections(); i++) {
-            calculatedRound.getTrackSections().get(i).setDuration(calculatedRound.getTrackSections().get(i).getDuration() / tempRoundList.size());
-            calculatedRound.getTrackSections().get(i).setTimeStamp(calculatedRound.getTrackSections().get(i).getTimeStamp() / tempRoundList.size());
-            calculatedRound.getTrackSections().get(i).setDistance(calculatedRound.getTrackSections().get(i).getDistance() / tempRoundList.size());
-        }
-        for(int i=0; i<calculatedRound.getCountOfTrackVelocities(); i++){
-            calculatedRound.getTrackVelocites().get(i).setVelocity(calculatedRound.getTrackVelocites().get(i).getVelocity() / tempRoundList.size());
-            calculatedRound.getTrackVelocites().get(i).setTimeStamp(calculatedRound.getTrackVelocites().get(i).getTimeStamp() / tempRoundList.size());
-        }
-        // SetRoundTime
-        int roundTime=0;
-        for(int i=0;i<calculatedRound.getCountOfTrackSections();i++){
-            roundTime+=calculatedRound.getTrackSections().get(i).getDuration();
-        }
-        calculatedRound.setEndRoundTimeStamp(roundTime);
-        return calculatedRound;
-    }
-    // CALCULATE TRACK PRIVATE METHODS -- end
-
-
-    /**
-     * Merges and calculate from the completed rounds in an average round which starts at time Zero. This
-     * round will transformed afterwards in a Track
-     *
-     * @param  startRoundNr  The amount of rounds which will be skipped at the beginning
-     * @param  faultyGoingStraightTime The minimal duration for Straight-TrackSections. Each Straight-TrackSection
-     *                                 below this duration will be removed.
-     * @param  faultyTurnTime The minimal duration for Turn-TrackSections. Each Turn-TrackSection below this duration
-     *                        will be removed.
-     * @return      The calculated Track
-     * @see         Track
-     */
-    public Track calculateTrack(int startRoundNr,int faultyGoingStraightTime, int faultyTurnTime){
-        List<Round> tempRoundList = new ArrayList<Round>(rounds);
-
-        // Remove all Rounds until startRoundNr.
-        for(int i = 0; i < startRoundNr; i++){
-            tempRoundList.remove(0);
-        }
-
-        removeFaultGoingStraightTrackSections(tempRoundList,faultyGoingStraightTime);
-
-        mergeAndRecalculateTrackSections(tempRoundList);
-
-        removeFaultTurnTrackSections(tempRoundList,faultyTurnTime);
-
-        mergeAndRecalculateTrackSections(tempRoundList);
-
-        if(!(haveSameAmountOfTrackSections(tempRoundList) &&haveAllRoundsSameDirections(tempRoundList))) {
-            useLowestTrackSectionRoundOnly(tempRoundList);
-        }
-
-        Round calculatedRound = createCalculatedRound(tempRoundList);
-
-
-        printRound(calculatedRound);
-        printTrack(calculatedRound);
-        return generateTrack(calculatedRound);
     }
 
 
-
-    protected Track generateTrack(Round round){
-        List<Double> velocities = new ArrayList<>();
-        Track track = new Track();
-        round.getTrackSections().stream().forEach(s -> track.getSections().add(s));
-        for(TrackVelocity trackVelocity : round.getTrackVelocites()){
-            //velocities.add(trackVelocity.getVelocity());
-            int trackSectionId=0;
-            for(int i=0;i<round.getTrackSections().size();i++){
-                if(round.getTrackSections().get(i).getTimeStamp()<trackVelocity.getTimeStamp() && round.getTrackSections().get(i).getTimeStamp()+round.getTrackSections().get(i).getDuration()>trackVelocity.getTimeStamp()){
-                    trackSectionId=i;
-                }
-            }
-            TrackSection trackSection = round.getTrackSections().get(trackSectionId);
-            long offset = trackVelocity.getTimeStamp()-trackSection.getTimeStamp();
-            long offset2 = trackSection.getDuration()-offset;
-            double distanceOffset2 = calculateDistance(offset2,trackSection.getDirection(),trackVelocity.getVelocity(),round.getPilotPower());
-            double distanceOffset = trackSection.getDistance()-distanceOffset2;
-            //LOGGER.info("offset: " +offset+", TVTS: " + trackVelocity.getTimeStamp() + ", TSTS: " + trackSection.getTimeStamp());
-            Track.Position p = new Track.Position(trackSection,offset);
-            p.setDistanceOffset(distanceOffset);
-            p.setPercentage(distanceOffset/trackSection.getDistance());
-            //LOGGER.info("0-1: "+ distanceOffset + ", 1-2: " + distanceOffset2 + ", 0-2: " + trackSection.getDistance());
-            //p.setPercentage((double) offset / (double) trackSection.getDuration());
-            //LOGGER.info("offset: " + offset + "ms, TracksectionID: " + round.getTrackSections().indexOf(trackSection));
-            LOGGER.info("CHECKPOINT %: " + p.getPercentage());
-            track.getCheckpoints().add(p);
+    private TrackSection getLastTrackSection(){
+        if(trackSections.size()==0){
+            return null;
         }
-        track.setPower(round.getPilotPower());
-        return track;
+        return trackSections.get(trackSections.size()-1);
     }
 
-    private double calculateDistance(long dtime, State turn, double v0, int power){
-        double distance = 0;
-        for(int i = 0; i<dtime;i++){
-            v0 = trackPhysicsModel.average_velocity(v0, turn, power, 1.0/1000.0);
-            distance += v0 * 1.0/1000.0;
-        }
-        return distance;
-    }
-
-    public void printTrack(Round round){
-        String track = "";
-        long time = round.getStartRoundTimeStamp();
-        char dir;
-        for(int i=0; i<round.getCountOfTrackSections(); i++){
-            switch(round.getTrackSections().get(i).getDirection()){
+    private void printTrackSections(){
+        String s="";
+        for(TrackSection trackSection : trackSections){
+            switch(trackSection.getDirection()){
                 case STRAIGHT:
-                    dir = '-';
+                    s+="S";
                     break;
-                case TURN:
-                    dir = 'X';
+                case LEFT:
+                    s+="L";
                     break;
-                default:
-                    dir = '#';
-            }
-            for(int j=0; j<round.getTrackSections().get(i).getDuration()/100;j++){
-                track += dir;
+                case RIGHT:
+                    s+="R";
+                    break;
             }
         }
-        LOGGER.info("\n"+track);
+        LOGGER.info("\n"+s);
     }
-
 }

@@ -44,4 +44,8 @@ public class TrackSection {
     public void setDistance(double distance) {
         this.distance = distance;
     }
+
+    public void addDuration(long dDuration){
+        duration += dDuration;
+    }
 }

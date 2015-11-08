@@ -60,7 +60,7 @@ public class TrackLearner extends UntypedActor {
     }
 
     private void handleVelocityMessage(VelocityMessage message) {
-        trackAnalyzer.addTrackVelocitiesToRound(message.getVelocity(),message.getTimeStamp());
+        trackAnalyzer.addTrackVelocity(message.getVelocity(),message.getTimeStamp());
     }
 
     private void handleSensorEvent(SensorEvent event) {
@@ -71,32 +71,34 @@ public class TrackLearner extends UntypedActor {
         }else{
             switch (state) {
                 case STRAIGHT:
-                    straightAction();
+                    straightAction(event.getTimeStamp());
                     break;
                 case RIGHT:
                 case LEFT:
-                    turnAction();
+                    turnAction(event.getTimeStamp());
                     break;
             }
         }
-
-            pilot.tell(new PowerAction(power), getSelf());
+        pilot.tell(new PowerAction(power), getSelf());
     }
 
-    private void straightAction() {
+    private void straightAction(long timeStamp) {
         if (gyroZ.currentMean() > TURN_THRESHOLD) {
             state = State.RIGHT;
-            LOGGER.info("RIGHT TURN");
+            trackAnalyzer.addTrackSection(state,timeStamp);
+            //LOGGER.info("RIGHT TURN");
         }else if(-gyroZ.currentMean() > TURN_THRESHOLD){
             state = State.LEFT;
-            LOGGER.info("LEFT TURN");
+            trackAnalyzer.addTrackSection(state,timeStamp);
+            //LOGGER.info("LEFT TURN");
         }
     }
 
-    private void turnAction() {
+    private void turnAction(long timeStamp) {
         if (Math.abs(gyroZ.currentMean()) < TURN_THRESHOLD) {
             state = State.STRAIGHT;
-            LOGGER.info("GOING STRAIGHT");
+            trackAnalyzer.addTrackSection(state,timeStamp);
+            //LOGGER.info("GOING STRAIGHT");
         }
     }
 
@@ -107,7 +109,7 @@ public class TrackLearner extends UntypedActor {
         }else{
             power += increasePowerRate;
         }
-        LOGGER.info("MY POWER: " + power);
+        //LOGGER.info("MY POWER: " + power);
     }
 
     /*private ThresholdConfiguration configuration;

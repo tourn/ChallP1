@@ -10,7 +10,7 @@ import static org.junit.Assert.*;
 /**
  * Created by Frank on 03.11.2015.
  */
-public class TrackAnalyzerTest {
+/*public class TrackAnalyzerTest {
 
     private TrackAnalyzer trackAnalyzer;
     private static Round roundWaste;
@@ -311,4 +311,4 @@ public class TrackAnalyzerTest {
         assertEquals("Track should have the same count of TrackSections like the round",round1.getCountOfTrackSections(),track.getSections().size());
 
     }
-}
+}*/
