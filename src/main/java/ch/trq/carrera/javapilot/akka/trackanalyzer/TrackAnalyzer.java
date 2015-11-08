@@ -18,6 +18,8 @@ public class TrackAnalyzer {
     private TrackSection tempTrackSection;
     private final Logger LOGGER = LoggerFactory.getLogger(TrackAnalyzer.class);
 
+    private TrackRecognitionCallback onTrackRecognized;
+
     private int faultyGoingStraightTime = 200;
     private int faultyTurnTime = 250;
     private int ignoredTrackSections = 3;
@@ -76,7 +78,12 @@ public class TrackAnalyzer {
 
     private void tryToFindRoundCycle(){
         if(foundTrackCycle()){
+            if(onTrackRecognized != null){
+                Track track = null;
+                onTrackRecognized.onTrackRecognized(track);
+            }
             LOGGER.info("FOUND TRACK CYCLE: " + (trackSections.size()-ignoredTrackSections)/2 + " sections");
+            printTrackSections();
         }
     }
 
@@ -94,13 +101,22 @@ public class TrackAnalyzer {
         }
     }
 
-
     private TrackSection getLastTrackSection(){
         if(trackSections.size()==0){
             return null;
         }
         return trackSections.get(trackSections.size()-1);
     }
+
+
+    public static abstract class TrackRecognitionCallback{
+        public abstract void onTrackRecognized(Track track);
+    }
+
+    public void setOnTrackRecognized(TrackRecognitionCallback onTrackRecognized){
+        this.onTrackRecognized = onTrackRecognized;
+    }
+
 
     private void printTrackSections(){
         String s="";
