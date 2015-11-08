@@ -79,7 +79,7 @@ public class TrackAnalyzer {
     private void tryToFindRoundCycle(){
         if(foundTrackCycle()){
             if(onTrackRecognized != null){
-                Track track = null;
+                Track track = buildTrack();
                 onTrackRecognized.onTrackRecognized(track);
             }
             LOGGER.info("FOUND TRACK CYCLE: " + (trackSections.size()-ignoredTrackSections)/2 + " sections");
@@ -108,6 +108,43 @@ public class TrackAnalyzer {
         return trackSections.get(trackSections.size()-1);
     }
 
+    private Track buildTrack(){
+        removeIgnoredTrackSections();
+        removeIgnoredTrackVelocities();
+        Track track = new Track();
+        track.getSections().addAll(getAveragesTrackSectionData());
+        return track;
+    }
+
+    private void removeIgnoredTrackSections(){
+        for(int i = 0; i<ignoredTrackSections; i++){
+            trackSections.remove(0);
+        }
+    }
+
+    private void removeIgnoredTrackVelocities(){
+        while(trackVelocities.get(0).getTimeStamp()<trackSections.get(0).getTimeStamp()){
+            trackVelocities.remove(0);
+        }
+    }
+
+    private List<TrackSection> getAveragesTrackSectionData(){
+        List<TrackSection> list = new ArrayList<>();
+        int trackSectionsPerRound = trackSections.size()/2;
+        for(int i = 0; i < trackSectionsPerRound; i++){
+            long timeStamp;
+            if(i==0){
+                timeStamp = 0;
+            }else{
+                timeStamp = list.get(i-1).getTimeStamp()+list.get(i-1).getDuration();
+            }
+            State state = trackSections.get(i).getDirection();
+            TrackSection trackSection = new TrackSection(state,timeStamp);
+            trackSection.setDuration((trackSections.get(i).getDuration()+trackSections.get(i+trackSectionsPerRound).getDuration())/2);
+            list.add(trackSection);
+        }
+        return list;
+    }
 
     public static abstract class TrackRecognitionCallback{
         public abstract void onTrackRecognized(Track track);
@@ -116,7 +153,6 @@ public class TrackAnalyzer {
     public void setOnTrackRecognized(TrackRecognitionCallback onTrackRecognized){
         this.onTrackRecognized = onTrackRecognized;
     }
-
 
     private void printTrackSections(){
         String s="";
