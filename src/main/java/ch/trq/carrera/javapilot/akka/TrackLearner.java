@@ -22,14 +22,102 @@ import visualization.DataChart;
  */
 public class TrackLearner extends UntypedActor {
 
-    private ThresholdConfiguration configuration;
+    private ActorRef pilot;
+    private FloatingHistory gyroZ;
+    private TrackAnalyzer trackAnalyzer = new TrackAnalyzer();
+    private State state = State.STRAIGHT;
+    private static double TURN_THRESHOLD = 1000;
+    private final Logger LOGGER = LoggerFactory.getLogger(TrackLearner.class);
+
+    private int power;
+    private int increasePowerRate = 2;
+    private int amountOverMovePower =10;
+
+    private boolean hasStartedMoving = false;
+
+    public TrackLearner(ActorRef pilot, int startPower, int startRoundNr, int amountOfRounds, int faultyGoingStraightTime, int faultyTurnTime, int floatingHistorySize) {
+        this.pilot = pilot;
+        this.power = startPower;
+        gyroZ = new FloatingHistory(floatingHistorySize);
+
+    }
+
+    public static Props props ( ActorRef pilot, int power, int startRoundNr, int amountOfRounds, int faultyGoingStraightTime, int faultyTurnTime, int floatingHistorySize ) {
+        return Props.create( TrackLearner.class, ()->new TrackLearner( pilot, power, startRoundNr, amountOfRounds, faultyGoingStraightTime, faultyTurnTime, floatingHistorySize));
+    }
+
+
+    @Override
+    public void onReceive(Object message) throws Exception {
+
+        if ( message instanceof SensorEvent ) {
+            handleSensorEvent((SensorEvent) message);
+        } else if ( message instanceof VelocityMessage) {
+            handleVelocityMessage((VelocityMessage) message);
+        } else {
+            unhandled(message);
+        }
+    }
+
+    private void handleVelocityMessage(VelocityMessage message) {
+        trackAnalyzer.addTrackVelocitiesToRound(message.getVelocity(),message.getTimeStamp());
+    }
+
+    private void handleSensorEvent(SensorEvent event) {
+        gyroZ.shift(event.getG()[2]);
+
+        if(!hasStartedMoving){
+            carHasNotStarted();
+        }else{
+            switch (state) {
+                case STRAIGHT:
+                    straightAction();
+                    break;
+                case RIGHT:
+                case LEFT:
+                    turnAction();
+                    break;
+            }
+        }
+
+            pilot.tell(new PowerAction(power), getSelf());
+    }
+
+    private void straightAction() {
+        if (gyroZ.currentMean() > TURN_THRESHOLD) {
+            state = State.RIGHT;
+            LOGGER.info("RIGHT TURN");
+        }else if(-gyroZ.currentMean() > TURN_THRESHOLD){
+            state = State.LEFT;
+            LOGGER.info("LEFT TURN");
+        }
+    }
+
+    private void turnAction() {
+        if (Math.abs(gyroZ.currentMean()) < TURN_THRESHOLD) {
+            state = State.STRAIGHT;
+            LOGGER.info("GOING STRAIGHT");
+        }
+    }
+
+    private void carHasNotStarted() {
+        hasStartedMoving = gyroZ.currentMean() > 10;
+        if(hasStartedMoving){
+            power += amountOverMovePower;
+        }else{
+            power += increasePowerRate;
+        }
+        LOGGER.info("MY POWER: " + power);
+    }
+
+    /*private ThresholdConfiguration configuration;
     private int power;
     private ActorRef pilot;
 
     private final Logger LOGGER = LoggerFactory.getLogger(TrackLearner.class);
 
     private State state = State.STRAIGHT;
-    private FloatingHistory gyroZ;/* = new FloatingHistory(8);*/
+    private FloatingHistory gyroZ;
     private static double TURN_THRESHOLD = 1000;
     private static long previousTimestamp = 0;
     private static int roundCounter = 0;
@@ -119,5 +207,5 @@ public class TrackLearner extends UntypedActor {
                     previousTimestamp = event.getTimeStamp();
                 }
         }
-    }
+    }*/
 }

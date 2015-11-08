@@ -5,5 +5,7 @@ package ch.trq.carrera.javapilot.akka.trackanalyzer;
  */
 public enum State{
     STRAIGHT,
+    LEFT,
+    RIGHT,
     TURN
 }

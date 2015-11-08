@@ -47,7 +47,7 @@ public class JavaPilotActor extends UntypedActor {
     }
 
     private void createInitialTopology(){
-        createTopology(TrackLearner.props(getSelf(), 100,2,1,300,150,4));
+        createTopology(TrackLearner.props(getSelf(), 50,2,1,300,150,4));
     }
 
     private void createTopology(Props props) {
