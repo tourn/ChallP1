@@ -112,7 +112,10 @@ public class TrackAnalyzer {
         removeIgnoredTrackSections();
         removeIgnoredTrackVelocities();
         Track track = new Track();
-        track.getSections().addAll(getAveragesTrackSectionData());
+        List<TrackSection> trackSectionList = getAveragesTrackSectionData();
+        track.getSections().addAll(trackSectionList);
+        List<TrackVelocity> trackVelocityList = getAverageTrackVelocityData();
+        track.getCheckpoints().addAll(createCheckpoints(trackSectionList,trackVelocityList));
         return track;
     }
 
@@ -143,6 +146,33 @@ public class TrackAnalyzer {
             trackSection.setDuration((trackSections.get(i).getDuration()+trackSections.get(i+trackSectionsPerRound).getDuration())/2);
             list.add(trackSection);
         }
+        return list;
+    }
+
+    private List<TrackVelocity> getAverageTrackVelocityData(){
+        List<TrackVelocity> tvlist = new ArrayList<>(trackVelocities);
+        List<TrackVelocity> list = new ArrayList<>();
+        long t1 = trackSections.get(0).getTimeStamp();
+        long t2 = trackSections.get(trackSections.size()/2-1).getTimeStamp();
+        for(TrackVelocity tv : tvlist){
+            if(tv.getTimeStamp()<t2){
+                tv.setTimeStamp(tv.getTimeStamp()-t1);
+            }else{
+                tv.setTimeStamp(tv.getTimeStamp()-t2);
+            }
+        }
+        for(int i = 0; i<tvlist.size()/2;i++){
+            long timestamp = (tvlist.get(i).getTimeStamp()+tvlist.get(i+tvlist.size()/2).getTimeStamp())/2;
+            double velocity = (tvlist.get(i).getVelocity()+tvlist.get(i+tvlist.size()/2).getVelocity())/2;
+            TrackVelocity tv = new TrackVelocity(velocity,timestamp);
+            list.add(tv);
+        }
+        return list;
+    }
+
+    private List<Track.Position> createCheckpoints(List<TrackSection> trackSectionList, List<TrackVelocity> trackVelocityList){
+        List<Track.Position> list = new ArrayList<>();
+        //TODO
         return list;
     }
 
