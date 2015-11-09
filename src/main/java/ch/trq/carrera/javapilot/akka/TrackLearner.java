@@ -7,6 +7,8 @@ import akka.actor.UntypedActor;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Round;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.State;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
+import ch.trq.carrera.javapilot.math.PhysicModel;
+import ch.trq.carrera.javapilot.math.PhysicModelCalculator;
 import com.zuehlke.carrera.javapilot.akka.PowerAction;
 import com.zuehlke.carrera.javapilot.akka.experimental.ThresholdConfiguration;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackAnalyzer;
@@ -26,6 +28,8 @@ public class TrackLearner extends UntypedActor {
     private ActorRef pilot;
     private FloatingHistory gyroZ;
     private TrackAnalyzer trackAnalyzer;
+    private PhysicModel physicModel;
+    private PhysicModelCalculator physicModelCalculator;
     private State state = State.STRAIGHT;
     private static double TURN_THRESHOLD = 800;
     private final Logger LOGGER = LoggerFactory.getLogger(TrackLearner.class);
@@ -43,15 +47,20 @@ public class TrackLearner extends UntypedActor {
         this.power = startPower;
         gyroZ = new FloatingHistory(floatingHistorySize);
 
+        physicModel = new PhysicModel();
+
         trackAnalyzer = new TrackAnalyzer();
 
         trackAnalyzer.setOnTrackRecognized(new TrackAnalyzer.TrackRecognitionCallback() {
             @Override
             public void onTrackRecognized(Track track) {
                 trackRecognitionFinished = true;
+                track.setPower(power);
+                physicModelCalculator = new PhysicModelCalculator(track);
+                physicModelCalculator.calculateTrackPhysics();
                 power += powerIncreaseForPhysicCalculation;
                 LOGGER.info("Track Received");
-                pilot.tell(track, ActorRef.noSender());
+                //pilot.tell(track, ActorRef.noSender());
             }
         });
     }
@@ -126,6 +135,7 @@ public class TrackLearner extends UntypedActor {
     private void carHasNotStarted() {
         hasStartedMoving = gyroZ.currentMean() > 10;
         if(hasStartedMoving){
+            physicModel.setStartPower(power);
             power += amountOverMovePower;
         }else{
             power += increasePowerRate;
