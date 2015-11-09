@@ -113,7 +113,7 @@ public class DataChart extends ApplicationFrame {
     public void initDataTable(Track track) {
         this.track = track;
         model = new DefaultTableModel();
-        holeduration=0;
+        holeduration = 0;
         Object[] objects = new Object[track.getSections().size()];
         for (int i = 0; i < track.getSections().size(); i++) {
             model.addColumn(i + ": " + Math.round(track.getSections().get(i).getDistance()) + " - " + track.getSections().get(i).getDirection());
@@ -148,7 +148,7 @@ public class DataChart extends ApplicationFrame {
         }
     }
 
-    public void resetDataChart(){
+    public void resetDataChart() {
         secondPhaseSerie.clear();
         firstPhaseSerie.clear();
         tmpSeries.clear();
@@ -158,8 +158,10 @@ public class DataChart extends ApplicationFrame {
         resetTable();
     }
 
-    private void resetTable(){
+    private void resetTable() {
         panel2.removeAll();
+        checkpoints.clear();
+        rect.setRect(0, 0, 0, 0);
         panel2.repaint();
     }
 
