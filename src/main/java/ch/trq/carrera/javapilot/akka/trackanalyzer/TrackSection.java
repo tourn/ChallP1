@@ -13,6 +13,8 @@ public class TrackSection {
 
     private int id;
 
+    private double friction;
+
     public TrackSection(State direction, long timeStamp){
         this.direction = direction;
         this.timeStamp = timeStamp;
@@ -49,6 +51,14 @@ public class TrackSection {
 
     public int getId() {
         return id;
+    }
+
+    public double getFriction() {
+        return friction;
+    }
+
+    public void setFriction(double friction) {
+        this.friction = friction;
     }
 
     public void setId(int id) {
