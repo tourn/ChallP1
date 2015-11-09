@@ -20,7 +20,7 @@ public class TrackAnalyzer {
 
     private TrackRecognitionCallback onTrackRecognized;
 
-    private int faultyGoingStraightTime = 200;
+    private int faultyGoingStraightTime = 180;
     private int faultyTurnTime = 250;
     private int ignoredTrackSections = 3;
     private int trackVelocitiesPerRound = 4;
@@ -78,17 +78,22 @@ public class TrackAnalyzer {
 
     private void tryToFindRoundCycle(){
         if(foundTrackCycle()){
+            printTrackSections();
             if(onTrackRecognized != null){
                 Track track = buildTrack();
                 onTrackRecognized.onTrackRecognized(track);
             }
-            LOGGER.info("FOUND TRACK CYCLE: " + (trackSections.size()-ignoredTrackSections)/2 + " sections");
-            printTrackSections();
+            LOGGER.info("FOUND TRACK CYCLE: " + (trackSections.size() - ignoredTrackSections)/2 + " sections");
+            //printTrackSections();
         }
     }
 
     private boolean foundTrackCycle(){
-        if(trackSections.size()>=ignoredTrackSections+2*minTrackSectionsPerRound && (trackSections.size()-ignoredTrackSections)%2==0){
+        if(trackSections.size()==ignoredTrackSections) {
+            if(getLastTrackSection().getDirection()!=State.STRAIGHT){
+                ignoredTrackSections+=1;
+            }
+        }if(trackSections.size()>=ignoredTrackSections+2*minTrackSectionsPerRound && (trackSections.size()-ignoredTrackSections)%2==0){
             int halfTrackSectionCount = (trackSections.size()-ignoredTrackSections)/2;
             for(int i = ignoredTrackSections; i < ignoredTrackSections+halfTrackSectionCount; i++){
                 if(trackSections.get(i).getDirection()!=trackSections.get(i+halfTrackSectionCount).getDirection()){
@@ -146,6 +151,9 @@ public class TrackAnalyzer {
             trackSection.setDuration((trackSections.get(i).getDuration()+trackSections.get(i+trackSectionsPerRound).getDuration())/2);
             list.add(trackSection);
         }
+        for(int i = 0; i < list.size(); i++){
+            list.get(i).setId(i);
+        }
         return list;
     }
 
@@ -153,7 +161,7 @@ public class TrackAnalyzer {
         List<TrackVelocity> tvlist = new ArrayList<>(trackVelocities);
         List<TrackVelocity> list = new ArrayList<>();
         long t1 = trackSections.get(0).getTimeStamp();
-        long t2 = trackSections.get(trackSections.size()/2-1).getTimeStamp();
+        long t2 = trackSections.get(trackSections.size()/2).getTimeStamp();
         for(TrackVelocity tv : tvlist){
             if(tv.getTimeStamp()<t2){
                 tv.setTimeStamp(tv.getTimeStamp()-t1);
@@ -167,12 +175,59 @@ public class TrackAnalyzer {
             TrackVelocity tv = new TrackVelocity(velocity,timestamp);
             list.add(tv);
         }
+        for(int i = 0; i < list.size(); i++){
+            list.get(i).setId(i);
+        }
         return list;
     }
 
     private List<Track.Position> createCheckpoints(List<TrackSection> trackSectionList, List<TrackVelocity> trackVelocityList){
         List<Track.Position> list = new ArrayList<>();
         //TODO
+        int c=0;
+        long t=0;
+        for(TrackVelocity trackVelocity : trackVelocityList) {
+            Track.Position position;
+            for (int i = 0; i < trackSectionList.size(); i++) {
+                if (trackVelocity.getTimeStamp() < trackSectionList.get(i).getTimeStamp()) {
+                    if(trackSectionList.get(i-1).getDirection()!=State.STRAIGHT){
+                        position = new Track.Position(trackSectionList.get(i), 0);
+                    }else{
+                        if(trackSectionList.get(i).getTimeStamp()-trackVelocity.getTimeStamp()<500){
+                            // ans Ende des Secttion i-1 setzen
+                            position = new Track.Position(trackSectionList.get(i-1), trackSectionList.get(i-1).getDuration());
+                        }else{
+                            // bisschen nach hinten schieben
+                            trackVelocity.setTimeStamp(trackVelocity.getTimeStamp()+500);
+                            position = new Track.Position(trackSectionList.get(i-1), trackVelocity.getTimeStamp()-trackSectionList.get(i-1).getTimeStamp());
+                        }
+                    }
+                    /*if ((trackVelocity.getTimeStamp() - trackSectionList.get(i - 1).getTimeStamp()) / trackSectionList.get(i - 1).getDuration() > 0.85) {
+                        trackVelocity.setTimeStamp(trackSectionList.get(i).getTimeStamp());
+                        position = new Track.Position(trackSectionList.get(i), 0);
+                    } else {
+                        long offset = (long) ((double) trackSectionList.get(i - 1).getDuration() / 100.0 * 0.15) + trackVelocity.getTimeStamp() - trackSectionList.get(i - 1).getTimeStamp();
+                        position = new Track.Position(trackSectionList.get(i - 1), offset);
+                    }*/
+                    list.add(position);
+                    break;
+                }else if(i == trackSectionList.size()-1){
+                    if(trackSectionList.get(i).getDirection()!=State.STRAIGHT){
+                        position = new Track.Position(trackSectionList.get(0), 0);
+                    }else{
+                        if(trackSectionList.get(i).getTimeStamp()+trackSectionList.get(i).getDuration()-trackVelocity.getTimeStamp()<500){
+                            // ans Ende der Section i setzen
+                            position = new Track.Position(trackSectionList.get(i), trackSectionList.get(i).getDuration());
+                        }else{
+                            // bisschen nach hinten schieben
+                            trackVelocity.setTimeStamp(trackVelocity.getTimeStamp()+500);
+                            position = new Track.Position(trackSectionList.get(i), trackVelocity.getTimeStamp()-trackSectionList.get(i).getTimeStamp());
+                        }
+                    }
+                    list.add(position);
+                }
+            }
+        }
         return list;
     }
 

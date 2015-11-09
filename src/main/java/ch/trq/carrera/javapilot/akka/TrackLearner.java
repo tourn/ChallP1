@@ -27,7 +27,7 @@ public class TrackLearner extends UntypedActor {
     private FloatingHistory gyroZ;
     private TrackAnalyzer trackAnalyzer;
     private State state = State.STRAIGHT;
-    private static double TURN_THRESHOLD = 1000;
+    private static double TURN_THRESHOLD = 800;
     private final Logger LOGGER = LoggerFactory.getLogger(TrackLearner.class);
 
     private int power;

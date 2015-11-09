@@ -11,6 +11,8 @@ public class TrackSection {
 
     private double distance=0;
 
+    private int id;
+
     public TrackSection(State direction, long timeStamp){
         this.direction = direction;
         this.timeStamp = timeStamp;
@@ -43,6 +45,14 @@ public class TrackSection {
 
     public void setDistance(double distance) {
         this.distance = distance;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public void addDuration(long dDuration){

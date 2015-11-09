@@ -6,6 +6,7 @@ package ch.trq.carrera.javapilot.akka.trackanalyzer;
 public class TrackVelocity {
     private double velocity;
     private long timeStamp;
+    private int id;
 
     public TrackVelocity(double velocity, long timeStamp){
         this.velocity = velocity;
@@ -21,4 +22,12 @@ public class TrackVelocity {
 
     public void setVelocity(double velocity) { this.velocity = velocity; }
     public void setTimeStamp(long timeStamp) { this.timeStamp = timeStamp; }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 }
