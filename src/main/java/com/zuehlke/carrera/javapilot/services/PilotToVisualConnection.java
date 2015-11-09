@@ -1,5 +1,6 @@
 package com.zuehlke.carrera.javapilot.services;
 
+import ch.trq.carrera.javapilot.akka.positiontracker.NewRoundUpdate;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
 import com.zuehlke.carrera.relayapi.messages.RoundTimeMessage;
@@ -17,5 +18,5 @@ public interface PilotToVisualConnection {
     void initializeTrack(Track track);
     void sectionUpdate(int index, TrackSection section);
     void carUpdate(int trackSectionIndex, double percentageDistance);
-    void newRoundMessage(RoundTimeMessage message);
+    void newRoundMessage(NewRoundUpdate message);
 }

@@ -6,8 +6,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.function.Consumer;
 
 /**
  * Created by Frank on 22.09.2015.

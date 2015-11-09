@@ -51,7 +51,7 @@ public class TrackLearner extends UntypedActor {
                 trackRecognitionFinished = true;
                 power += powerIncreaseForPhysicCalculation;
                 LOGGER.info("Track Received");
-                //pilot.tell(track, ActorRef.noSender());
+                pilot.tell(track, ActorRef.noSender());
             }
         });
     }

@@ -1,13 +1,11 @@
 package com.zuehlke.carrera.javapilot.services;
 
+import ch.trq.carrera.javapilot.akka.positiontracker.NewRoundUpdate;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
-import com.zuehlke.carrera.relayapi.messages.RoundTimeMessage;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
 import visualization.DataChart;
-
-import java.util.ArrayList;
 
 /**
  * Created by mario on 08.10.15.
@@ -47,7 +45,7 @@ public class PilotToVisualConnector implements PilotToVisualConnection{
     }
 
     @Override
-    public void newRoundMessage(RoundTimeMessage message) {
+    public void newRoundMessage(NewRoundUpdate message) {
         dataChart.newRoundMessage(message);
     }
 }

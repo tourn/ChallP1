@@ -4,6 +4,7 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import ch.trq.carrera.javapilot.akka.positiontracker.CarUpdate;
+import ch.trq.carrera.javapilot.akka.positiontracker.NewRoundUpdate;
 import ch.trq.carrera.javapilot.akka.positiontracker.PositionTracker;
 import ch.trq.carrera.javapilot.akka.positiontracker.SectionUpdate;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
@@ -16,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *  Currently not optimizing anything, merely a placeholder.
+ * Currently not optimizing anything, merely a placeholder.
  */
 public class SpeedOptimizer extends UntypedActor {
 
@@ -41,13 +42,20 @@ public class SpeedOptimizer extends UntypedActor {
             }
         });
 
+        positionTracker.setOnNewRound(new PositionTracker.NewRoundCallback() {
+            @Override
+            public void onUpdate(long roundtime) {
+                pilot.tell(new NewRoundUpdate(roundtime), getSelf());
+            }
+        });
+
         positionTracker.setOnSectionChange(new PositionTracker.SectionChangeCallback() {
             @Override
             public void onUpdate(int sectionIndex, TrackSection section) {
                 pilot.tell(new SectionUpdate(section, sectionIndex), getSelf());
-                if(section.getDirection().equals("TURN")){
+                if (section.getDirection().equals("TURN")) {
                     changePower(maxPower);
-                }else{
+                } else {
                     changePower(maxTurnPower);
                 }
             }
@@ -55,27 +63,27 @@ public class SpeedOptimizer extends UntypedActor {
         changePower(maxTurnPower);
     }
 
-    public static Props props ( ActorRef pilot, Track track ) {
-        return Props.create( SpeedOptimizer.class, ()->new SpeedOptimizer( pilot, track ));
+    public static Props props(ActorRef pilot, Track track) {
+        return Props.create(SpeedOptimizer.class, () -> new SpeedOptimizer(pilot, track));
     }
 
     @Override
     public void onReceive(Object message) throws Exception {
         //TODO send updates for completed tracksection, position update
-        if ( message instanceof SensorEvent ) {
+        if (message instanceof SensorEvent) {
             handleSensorEvent((SensorEvent) message);
-        } else if ( message instanceof VelocityMessage) {
-                handleVelocityMessage((VelocityMessage) message);
-        } else if ( message instanceof RoundTimeMessage) {
-        handleRoundTimeMessage((RoundTimeMessage) message);
-        }else {
+        } else if (message instanceof VelocityMessage) {
+            handleVelocityMessage((VelocityMessage) message);
+        } else if (message instanceof RoundTimeMessage) {
+            handleRoundTimeMessage((RoundTimeMessage) message);
+        } else {
             unhandled(message);
         }
     }
 
     private void handleRoundTimeMessage(RoundTimeMessage message) {
         // ignore for now
-        positionTracker.roundTimeUpdate(message);
+        //positionTracker.roundTimeUpdate(message);
     }
 
     private void handleVelocityMessage(VelocityMessage message) {
@@ -85,19 +93,19 @@ public class SpeedOptimizer extends UntypedActor {
 
     private void handleSensorEvent(SensorEvent event) {
         positionTracker.update(event);
-        if(!positionTracker.isTurn()) {
+        if (!positionTracker.isTurn()) {
             if (positionTracker.getPercentageDistance() > 0.5) {
                 changePower(minPower);
             } else {
                 changePower(maxPower);
             }
-        }else {
+        } else {
             changePower(maxTurnPower);
         }
         //pilot.tell ( new PowerAction(power), getSelf());
     }
 
-    private void changePower(int power){
+    private void changePower(int power) {
         pilot.tell(new PowerAction(power), getSelf());
         positionTracker.setPower(power);
     }

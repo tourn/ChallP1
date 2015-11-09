@@ -7,6 +7,7 @@ import akka.japi.Creator;
 import ch.trq.carrera.javapilot.akka.SpeedOptimizer;
 import ch.trq.carrera.javapilot.akka.TrackLearner;
 import ch.trq.carrera.javapilot.akka.positiontracker.CarUpdate;
+import ch.trq.carrera.javapilot.akka.positiontracker.NewRoundUpdate;
 import ch.trq.carrera.javapilot.akka.positiontracker.SectionUpdate;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import com.zuehlke.carrera.javapilot.akka.experimental.ThresholdConfiguration;
@@ -86,10 +87,12 @@ public class JavaPilotActor extends UntypedActor {
             } else if (message instanceof CarUpdate){
                 //LOGGER.info("SENDING: SID: " + ((CarUpdate) message).getTrackIndex() + ", Offset: " + ((CarUpdate) message).getOffset() + "ms, Percentage: " + ((CarUpdate) message).getPercentage() + "%");
                 CarUpdate update = (CarUpdate) message;
-                visualConnection.carUpdate(update.getTrackIndex(),  update.getPercentage());
+                visualConnection.carUpdate(update.getTrackIndex(), update.getPercentage());
             } else if (message instanceof SectionUpdate){
                 SectionUpdate update = (SectionUpdate) message;
                 visualConnection.sectionUpdate(update.getSectionIndex(), update.getSection());
+            }else if(message instanceof NewRoundUpdate){
+                this.visualConnection.newRoundMessage((NewRoundUpdate)message);
             }
 
             // ------
@@ -123,7 +126,6 @@ public class JavaPilotActor extends UntypedActor {
                 sensorEntryPoint.forward(message, getContext());
 
             } else if (message instanceof RoundTimeMessage) {
-                visualConnection.newRoundMessage((RoundTimeMessage) message);
                 handleRoundTime((RoundTimeMessage) message);
 
             } else if (message instanceof String) {

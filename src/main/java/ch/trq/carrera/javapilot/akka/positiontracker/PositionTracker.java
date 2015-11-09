@@ -19,6 +19,7 @@ public class PositionTracker {
     private long tLastUpdate = -1;
     private UpdateCallback onUpdate;
     private SectionChangeCallback onSectionChange;
+    private NewRoundCallback onNewRound;
     private Track.Position pos;
     private int sectionIndex;
     private FloatingHistory gyroZ = new FloatingHistory(8);
@@ -72,6 +73,9 @@ public class PositionTracker {
                 onSectionChange.onUpdate(sectionIndex, pos.getSection());
             }
             sectionIndex = (sectionIndex +1) % track.getSections().size();
+            if(sectionIndex == 0){
+                enteredNewRound(e.getTimeStamp());
+            }
             TrackSection next = track.getSections().get(sectionIndex);
             pos.setSection(next);
             pos.setDurationOffset(0); //add overshoot?
@@ -82,6 +86,14 @@ public class PositionTracker {
             //LOGGER.info("SENDING: SID: " + sectionIndex + ", Offset: " + pos.getDurationOffset() + "ms, Percentage: " + pos.getPercentage() + "%");
             onUpdate.onUpdate(sectionIndex, pos.getDurationOffset(),pos.getPercentage());
         }
+    }
+
+
+
+    public void enteredNewRound(long roundTimeStamp){
+        long oldRoundTime = roundTimeStamp - roundStartTimeStamp;
+        roundStartTimeStamp = roundTimeStamp;
+        onNewRound.onUpdate(oldRoundTime);
     }
 
     private boolean sectionChanged(){
@@ -154,6 +166,14 @@ public class PositionTracker {
 
     public static abstract class SectionChangeCallback{
         public abstract void onUpdate(int sectionIndex, TrackSection section);
+    }
+
+    public static abstract class NewRoundCallback{
+        public abstract void onUpdate(long roundtime);
+    }
+
+    public void setOnNewRound(NewRoundCallback onNewRound){
+        this.onNewRound = onNewRound;
     }
 
     public void setOnSectionChange(SectionChangeCallback onSectionChange) {

@@ -9,6 +9,7 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
+import ch.trq.carrera.javapilot.akka.positiontracker.NewRoundUpdate;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
 import com.zuehlke.carrera.relayapi.messages.RoundTimeMessage;
@@ -157,7 +158,7 @@ public class DataChart extends ApplicationFrame {
     }
 
 
-    public void newRoundMessage(RoundTimeMessage m) {
+    public void newRoundMessage(NewRoundUpdate m) {
         if (notfirst) {
             tmpSeries = secondPhaseSerie1;
             secondPhaseSerie1.clear();
