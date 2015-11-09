@@ -11,7 +11,6 @@ import javax.swing.table.DefaultTableModel;
 
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
-import com.zuehlke.carrera.relayapi.messages.RoundTimeMessage;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
 import org.jfree.chart.ChartFactory;
@@ -30,31 +29,27 @@ public class DataChart extends ApplicationFrame {
 
     private final JPanel panel2;
     private final JPanel container;
-    private final JFreeChart chartModel;
-    private final JFreeChart chartRound;
-    private final XYSeriesCollection datasetRound1;
-    private final XYSeriesCollection datasetModel;
-    private final XYSeries secondPhaseSerie2;
-    private final XYSeriesCollection datasetRound2;
+    private final JFreeChart chart;
+    private final XYSeriesCollection datasetGyroZ;
+    //speed not shown at the moment
+    private final XYSeriesCollection datasetSpeed;
     private JTable table;
     private Track track;
-    private int second = 0;
     /**
      * The time series data.
      */
     private long absolut_time = -1;
-    private XYSeries series;
-    private XYSeries secondPhaseSerie1;
+    private XYSeries firstPhaseSerie;
+    private XYSeries secondPhaseSerie;
     private XYSeries tmpSeries;
-    private XYSeries speedSeries;
-    private XYSeriesCollection speeddata;
     private DefaultTableModel model;
     private Rectangle2D.Float rect = new Rectangle2D.Float(0, 0, 0, 0);
     private ArrayList<Rectangle2D.Double> checkpoints = new ArrayList<>();
     private double holeduration = 0;
-    private boolean notfirst = false;
+    private boolean first = true;
     private StandardXYItemRenderer renderer;
     private int[] sectionbegins;
+    private XYSeries speedSeries;
 
     /**
      * @param title the frame title.
@@ -64,21 +59,18 @@ public class DataChart extends ApplicationFrame {
 
         super(title);
         setResizable(false);
-        this.series = new XYSeries("Sensor Z Model");
-        this.secondPhaseSerie1 = new XYSeries("Sensor Z Round");
-        secondPhaseSerie2 = new XYSeries("Sensor Z 2 Round");
+        this.firstPhaseSerie = new XYSeries("Sensor Z Model");
+        this.secondPhaseSerie = new XYSeries("Sensor Z Round");
         this.speedSeries = new XYSeries("Speed");
-        datasetModel = new XYSeriesCollection(this.series);
-        datasetRound1 = new XYSeriesCollection(this.secondPhaseSerie1);
-        datasetRound2 = new XYSeriesCollection(this.secondPhaseSerie2);
-        speeddata = new XYSeriesCollection(this.speedSeries);
-        chartModel = createChart(datasetModel);
-        chartRound = createChart(datasetRound2);
+        datasetGyroZ = new XYSeriesCollection(this.firstPhaseSerie);
+        datasetGyroZ.addSeries(this.secondPhaseSerie);
+        //speed not shown at the moment
+        datasetSpeed = new XYSeriesCollection(this.speedSeries);
+        chart = createChart(datasetGyroZ);
         JFrame trackframe = new JFrame();
         trackframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        final ChartPanel chartPanelModel = new ChartPanel(chartModel);
-        final ChartPanel chartPanelRound = new ChartPanel(chartRound);
+        final ChartPanel chartPanelModel = new ChartPanel(chart);
 
         container = new JPanel();
         container.setLayout(new BoxLayout(container, BoxLayout.X_AXIS));
@@ -106,8 +98,8 @@ public class DataChart extends ApplicationFrame {
         //chartPanelRound.setPreferredSize(new Dimension(1200, 450));
         panel1.add(chartPanelModel);
         //panel1.add(chartPanelRound);
-        panel1.setPreferredSize(new Dimension(1200, 900));
-        panel2.setPreferredSize(new Dimension(1400, 900));
+        panel1.setPreferredSize(new Dimension(1200, 500));
+        panel2.setPreferredSize(new Dimension(1400, 500));
 
         container.add(panel1);
 
@@ -156,19 +148,33 @@ public class DataChart extends ApplicationFrame {
         }
     }
 
+    public void resetDataChart(){
+        secondPhaseSerie.clear();
+        firstPhaseSerie.clear();
+        tmpSeries.clear();
+        tmpSeries = firstPhaseSerie;
+        first = true;
+        absolut_time = -1;
+        resetTable();
+    }
 
-    public void newRoundMessage(RoundTimeMessage m) {
-        if (notfirst) {
-            tmpSeries = secondPhaseSerie1;
-            secondPhaseSerie1.clear();
-            absolut_time = -1;
+    private void resetTable(){
+        panel2.removeAll();
+        panel2.repaint();
+    }
+
+
+    public void newRoundMessage() {
+        if (first) {
+            first = false;
         } else {
-            notfirst = true;
             renderer = new StandardXYItemRenderer();
-            XYPlot plot = chartModel.getXYPlot();
-            plot.setDataset(1, datasetRound1);
+            XYPlot plot = chart.getXYPlot();
             renderer.setSeriesPaint(1, Color.BLUE);
             plot.setRenderer(1, renderer);
+            tmpSeries = secondPhaseSerie;
+            secondPhaseSerie.clear();
+            absolut_time = -1;
         }
     }
 
@@ -231,7 +237,7 @@ public class DataChart extends ApplicationFrame {
         ((DateAxis) axis).setDateFormatOverride(new SimpleDateFormat("ss"));
         axis = plot.getRangeAxis();
         axis.setRange(-5000, 6000);
-        tmpSeries = this.series;
+        tmpSeries = this.firstPhaseSerie;
         return result;
     }
 
@@ -240,7 +246,7 @@ public class DataChart extends ApplicationFrame {
     }
 
     public void insertSensorData(SensorEvent message) {
-        if (notfirst) {
+        if (!first) {
             if (absolut_time == -1) {
                 absolut_time = message.getTimeStamp();
             }

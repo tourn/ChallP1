@@ -48,6 +48,11 @@ public class PilotToVisualConnector implements PilotToVisualConnection{
 
     @Override
     public void newRoundMessage(RoundTimeMessage message) {
-        dataChart.newRoundMessage(message);
+        dataChart.newRoundMessage();
+    }
+
+    @Override
+    public void reset() {
+        dataChart.resetDataChart();
     }
 }

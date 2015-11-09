@@ -32,6 +32,7 @@ public class DataVisService {
     }
 
     public DataChart getVisualizer(){
+
         return visualizer;
     }
 }

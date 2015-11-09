@@ -18,4 +18,5 @@ public interface PilotToVisualConnection {
     void sectionUpdate(int index, TrackSection section);
     void carUpdate(int trackSectionIndex, double percentageDistance);
     void newRoundMessage(RoundTimeMessage message);
+    void reset();
 }
