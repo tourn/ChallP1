@@ -16,6 +16,8 @@ public class PhysicModel {
 
     private int startPower;
 
+    private double g = 981.0;
+
     public PhysicModel(){
 
     }
@@ -28,5 +30,36 @@ public class PhysicModel {
         this.startPower = startPower;
     }
 
+    // Calculation
+
+    /**
+     * @param v0 the speed at the beginning of the period in cm/s
+     * @param trackSection the TrackSection
+     * @param power  the digital power value at the start of the period
+     * @param time timespan in ms
+     * @return the velocity after the time period
+     */
+    public double getVelocity(double v0, TrackSection trackSection, int power, long time){
+        for(int i = 0; i < time; i++){
+            //v0 += ...
+        }
+        return v0;
+    }
+
+    /**
+     * @param v0 the speed at the beginning of the period in cm/s
+     * @param trackSection the TrackSection
+     * @param power  the digital power value at the start of the period
+     * @param time timespan in ms
+     * @return the Distance over the period
+     */
+    public double getDistance(double v0, TrackSection trackSection, int power, long time){
+        double distance = 0;
+        for(int i = 0; i < time; i++){
+            //v0 = ...
+            distance += v0*1/1000;
+        }
+        return distance;
+    }
 
 }

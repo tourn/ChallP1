@@ -50,6 +50,7 @@ public class Track {
         private long durationOffset;
         private double distanceOffset;
         private double percentage;
+        private double velocity;
 
         public Position(TrackSection section, long durationOffset) {
 
@@ -88,6 +89,14 @@ public class Track {
 
         public void setDistanceOffset(double distanceOffset) {
             this.distanceOffset = distanceOffset;
+        }
+
+        public double getVelocity() {
+            return velocity;
+        }
+
+        public void setVelocity(double velocity) {
+            this.velocity = velocity;
         }
     }
 }

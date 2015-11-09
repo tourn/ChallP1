@@ -193,6 +193,7 @@ public class TrackAnalyzer {
                             position = new Track.Position(trackSectionList.get(i-1), trackVelocity.getTimeStamp()-trackSectionList.get(i-1).getTimeStamp());
                         }
                     }
+                    position.setVelocity(trackVelocity.getVelocity());
                     list.add(position);
                     break;
                 }else if(i == trackSectionList.size()-1){
@@ -210,6 +211,7 @@ public class TrackAnalyzer {
                             position = new Track.Position(trackSectionList.get(i), trackVelocity.getTimeStamp()-trackSectionList.get(i).getTimeStamp());
                         }
                     }
+                    position.setVelocity(trackVelocity.getVelocity());
                     list.add(position);
                 }
             }

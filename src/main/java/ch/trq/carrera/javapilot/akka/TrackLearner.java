@@ -56,7 +56,7 @@ public class TrackLearner extends UntypedActor {
             public void onTrackRecognized(Track track) {
                 trackRecognitionFinished = true;
                 track.setPower(power);
-                physicModelCalculator = new PhysicModelCalculator(track);
+                physicModelCalculator = new PhysicModelCalculator(track,physicModel);
                 physicModelCalculator.calculateTrackPhysics();
                 power += powerIncreaseForPhysicCalculation;
                 LOGGER.info("Track Received");
