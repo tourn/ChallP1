@@ -85,7 +85,13 @@ public class PhysicModelCalculator {
             long t = list.get(1).getDurationOffset()-list.get(0).getDurationOffset();
             LOGGER.info("v0: " + v0 + "cm/s, v1: " + v1 + "cm/s, t: " + t + "ms, Power: " + track.getPower());
         }else{
-            LOGGER.info("STRAIGHT WITH MORE THAN TWO VELOCITY-SENSORS ... NOT HANDLED ATM!!!");
+            String s = "";
+            for(int i = 0; i < list.size();i++){
+                s+="v"+i+": "+list.get(i).getVelocity()+"cm/s ("+list.get(i).getDurationOffset()+"ms), ";
+            }
+            s+="Power: "+track.getPower();
+            LOGGER.info(s);
+            //LOGGER.info("STRAIGHT WITH MORE THAN TWO VELOCITY-SENSORS ... NOT HANDLED ATM!!!");
         }
     }
 
