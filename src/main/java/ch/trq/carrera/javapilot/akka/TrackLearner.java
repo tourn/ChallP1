@@ -49,19 +49,6 @@ public class TrackLearner extends UntypedActor {
         this.pilot = pilot;
         this.currentPower = START_POWER;
         gyroZ = new FloatingHistory(GYROZ_HISTORY_SIZE);
-
-
-        trackAnalyzer.setOnTrackRecognized(new TrackAnalyzer.TrackRecognitionCallback() {
-            @Override
-            public void onTrackRecognized(Track track) {
-                trackRecognitionFinished = true;
-                track.setPower(currentPower);
-                physicModelCalculator = new PhysicModelCalculator(track,physicModel);
-                physicModelCalculator.calculateTrackPhysics();
-                LOGGER.info("Track Received");
-                //pilot.tell(track, ActorRef.noSender());
-            }
-        });
     }
 
     public static Props props ( ActorRef pilot) {
@@ -71,7 +58,6 @@ public class TrackLearner extends UntypedActor {
 
     @Override
     public void onReceive(Object message) throws Exception {
-
         if ( message instanceof SensorEvent) {
             handleSensorEvent((SensorEvent) message);
         } else if ( message instanceof VelocityMessage) {
@@ -95,20 +81,29 @@ public class TrackLearner extends UntypedActor {
             if(!isMoving){
                 tryStartMoving();
             }else{
-                switch (turnState) {
-                    case STRAIGHT:
-                        straightAction(event.getTimeStamp());
-                        break;
-                    case RIGHT:
-                    case LEFT:
-                        turnAction(event.getTimeStamp());
-                        break;
-                }
+                checkDirectionChange(event);
+            }
+            if(trackAnalyzer.detectCycle()){
+                onTrackRecognized(trackAnalyzer.buildTrack());
             }
         }else{
-
+            //TODO: could we already calculate friction on a straight with 3 velocity sensors? If no, use Frank's strategy:
+            //stop in a straight with 2 sensors and start again.
         }
         pilot.tell(new PowerAction(currentPower), getSelf());
+    }
+
+    private void checkDirectionChange(SensorEvent event){
+        switch (turnState) {
+            case STRAIGHT:
+                straightAction(event.getTimeStamp());
+                break;
+            case RIGHT:
+            case LEFT:
+                turnAction(event.getTimeStamp());
+                break;
+        }
+
     }
 
     private void straightAction(long timeStamp) {
@@ -141,5 +136,14 @@ public class TrackLearner extends UntypedActor {
             currentPower += MOVE_TRY_POWER_INCREASE;
         }
         //LOGGER.info("MY POWER: " + currentPower);
+    }
+
+    public void onTrackRecognized(Track track) {
+        trackRecognitionFinished = true;
+        track.setPower(currentPower);
+        physicModelCalculator = new PhysicModelCalculator(track,physicModel);
+        physicModelCalculator.calculateTrackPhysics();
+        LOGGER.info("Track built");
+        //pilot.tell(track, ActorRef.noSender());
     }
 }

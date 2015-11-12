@@ -16,8 +16,6 @@ public class TrackAnalyzer {
     private List<TrackVelocity> trackVelocities = new ArrayList<>();
     private TrackSection currentTrackSection;
 
-    private TrackRecognitionCallback onTrackRecognized;
-
     private final int minStraightDuration;
     private final int minTurnDuration;
     private final int minTrackSections;
@@ -45,7 +43,6 @@ public class TrackAnalyzer {
             finalizeTrackSection(currentTrackSection, timeStamp);
         }
         currentTrackSection = new TrackSection(state,timeStamp);
-        tryToFindRoundCycle();
     }
 
     private void finalizeTrackSection(TrackSection section, long timestamp){
@@ -82,18 +79,7 @@ public class TrackAnalyzer {
         }
     }
 
-    private void tryToFindRoundCycle(){
-        if(foundTrackCycle()){
-            printTrackSections();
-            LOGGER.info("FOUND TRACK CYCLE: " + (trackSections.size() - ignoredTrackSections)/2 + " sections");
-            if(onTrackRecognized != null){
-                Track track = buildTrack();
-                onTrackRecognized.onTrackRecognized(track);
-            }
-        }
-    }
-
-    private boolean foundTrackCycle(){
+    public boolean detectCycle(){
         if(trackSections.size()==ignoredTrackSections) {
             if(getLastTrackSection().getDirection()!=State.STRAIGHT){
                 ignoredTrackSections+=1;
@@ -105,6 +91,7 @@ public class TrackAnalyzer {
                     return false;
                 }
             }
+            LOGGER.info("FOUND TRACK CYCLE: " + (trackSections.size() - ignoredTrackSections)/2 + " sections");
             return true;
         }else{
             return false;
@@ -118,7 +105,7 @@ public class TrackAnalyzer {
         return trackSections.get(trackSections.size()-1);
     }
 
-    private Track buildTrack(){
+    public Track buildTrack(){
         removeIgnoredTrackSections();
         removeIgnoredTrackVelocities();
         Track track = new Track();
@@ -232,29 +219,21 @@ public class TrackAnalyzer {
         return list;
     }
 
-    public static abstract class TrackRecognitionCallback{
-        public abstract void onTrackRecognized(Track track);
-    }
-
-    public void setOnTrackRecognized(TrackRecognitionCallback onTrackRecognized){
-        this.onTrackRecognized = onTrackRecognized;
-    }
-
     private void printTrackSections(){
-        String s="";
+        StringBuilder builder = new StringBuilder();
         for(TrackSection trackSection : trackSections){
             switch(trackSection.getDirection()){
                 case STRAIGHT:
-                    s+="S";
+                    builder.append("S");
                     break;
                 case LEFT:
-                    s+="L";
+                    builder.append("L");
                     break;
                 case RIGHT:
-                    s+="R";
+                    builder.append("R");
                     break;
             }
         }
-        LOGGER.info("\n"+s);
+        LOGGER.info(builder.toString());
     }
 }
