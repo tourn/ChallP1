@@ -136,7 +136,7 @@ public class TrackPhysicsModel {
     public double motor_force(int p) {
         return p * e;
     }
-
+    //e = m * 100 / dt_for_acc_to100_at_p150 / 50.0f;
     /**
      * @param v0 the speed at the start of the period
      * @param ri the inverse radius at the start of the period
