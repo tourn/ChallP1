@@ -33,6 +33,7 @@ public class DataChart extends ApplicationFrame {
     private final XYSeriesCollection datasetGyroZ;
     //speed not shown at the moment
     private final XYSeriesCollection datasetSpeed;
+    private final JFrame trackframe;
     private JTable table;
     private Track track;
     /**
@@ -46,7 +47,7 @@ public class DataChart extends ApplicationFrame {
     private Rectangle2D.Float rect = new Rectangle2D.Float(0, 0, 0, 0);
     private ArrayList<Rectangle2D.Double> checkpoints = new ArrayList<>();
     private double holeduration = 0;
-    private boolean first = true;
+    private boolean trackanalyzerphase = true;
     private StandardXYItemRenderer renderer;
     private int[] sectionbegins;
     private XYSeries speedSeries;
@@ -67,7 +68,7 @@ public class DataChart extends ApplicationFrame {
         //speed not shown at the moment
         datasetSpeed = new XYSeriesCollection(this.speedSeries);
         chart = createChart(datasetGyroZ);
-        JFrame trackframe = new JFrame();
+        trackframe = new JFrame();
         trackframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         final ChartPanel chartPanelModel = new ChartPanel(chart);
@@ -105,7 +106,8 @@ public class DataChart extends ApplicationFrame {
 
         trackframe.setContentPane(panel2);
         trackframe.pack();
-        trackframe.setVisible(true);
+        trackframe.setVisible(false);
+        setVisible(false);
 
         setContentPane(container);
     }
@@ -126,7 +128,13 @@ public class DataChart extends ApplicationFrame {
         panel2.add(table.getTableHeader(), BorderLayout.NORTH);
         model.addRow(objects);
         insertCheckpoints();
+        setFramesVisible();
         panel2.repaint();
+    }
+
+    private void setFramesVisible(){
+        setVisible(true);
+        trackframe.setVisible(true);
     }
 
     public void resizeTableColumn() {
@@ -153,7 +161,7 @@ public class DataChart extends ApplicationFrame {
         firstPhaseSerie.clear();
         tmpSeries.clear();
         tmpSeries = firstPhaseSerie;
-        first = true;
+        trackanalyzerphase = true;
         absolut_time = -1;
         resetTable();
     }
@@ -167,8 +175,8 @@ public class DataChart extends ApplicationFrame {
 
 
     public void newRoundMessage() {
-        if (first) {
-            first = false;
+        if (trackanalyzerphase) {
+            trackanalyzerphase = false;
         } else {
             renderer = new StandardXYItemRenderer();
             XYPlot plot = chart.getXYPlot();
@@ -248,7 +256,7 @@ public class DataChart extends ApplicationFrame {
     }
 
     public void insertSensorData(SensorEvent message) {
-        if (!first) {
+        if (!trackanalyzerphase) {
             if (absolut_time == -1) {
                 absolut_time = message.getTimeStamp();
             }

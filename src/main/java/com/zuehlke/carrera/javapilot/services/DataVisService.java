@@ -28,7 +28,6 @@ public class DataVisService {
         visualizer = new DataChart("Sensor Data");
         visualizer.pack();
         RefineryUtilities.centerFrameOnScreen(visualizer);
-        visualizer.setVisible(true);
     }
 
     public DataChart getVisualizer(){
