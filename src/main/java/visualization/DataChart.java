@@ -36,25 +36,21 @@ public class DataChart extends ApplicationFrame {
     private final JFrame trackframe;
     private JTable table;
     private Track track;
-    /**
-     * The time series data.
-     */
+
     private long absolut_time = -1;
+
     private XYSeries firstPhaseSerie;
     private XYSeries secondPhaseSerie;
-    private XYSeries tmpSeries;
+    private XYSeries speedSeries;
+    private XYSeries runningSerie;
     private DefaultTableModel model;
+
     private Rectangle2D.Float rect = new Rectangle2D.Float(0, 0, 0, 0);
     private ArrayList<Rectangle2D.Double> checkpoints = new ArrayList<>();
     private double holeduration = 0;
     private boolean trackanalyzerphase = true;
     private StandardXYItemRenderer renderer;
     private int[] sectionbegins;
-    private XYSeries speedSeries;
-
-    /**
-     * @param title the frame title.
-     */
 
     public DataChart(final String title) {
 
@@ -65,8 +61,10 @@ public class DataChart extends ApplicationFrame {
         this.speedSeries = new XYSeries("Speed");
         datasetGyroZ = new XYSeriesCollection(this.firstPhaseSerie);
         datasetGyroZ.addSeries(this.secondPhaseSerie);
+
         //speed not shown at the moment
         datasetSpeed = new XYSeriesCollection(this.speedSeries);
+
         chart = createChart(datasetGyroZ);
         trackframe = new JFrame();
         trackframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -147,20 +145,20 @@ public class DataChart extends ApplicationFrame {
         }
     }
 
-    public void updateDataTable(int index, TrackSection section) {
-        if (index == 0) {
+    public void updateDataTable(int sectionIndex, TrackSection section) {
+        if (sectionIndex == 0) {
             Object[] objects = {section.getDuration()};
             model.insertRow(0, objects);
         } else {
-            model.setValueAt(section.getDuration(), 0, index);
+            model.setValueAt(section.getDuration(), 0, sectionIndex);
         }
     }
 
     public void resetDataChart() {
         secondPhaseSerie.clear();
         firstPhaseSerie.clear();
-        tmpSeries.clear();
-        tmpSeries = firstPhaseSerie;
+        runningSerie.clear();
+        runningSerie = firstPhaseSerie;
         trackanalyzerphase = true;
         absolut_time = -1;
         resetTable();
@@ -182,7 +180,7 @@ public class DataChart extends ApplicationFrame {
             XYPlot plot = chart.getXYPlot();
             renderer.setSeriesPaint(1, Color.BLUE);
             plot.setRenderer(1, renderer);
-            tmpSeries = secondPhaseSerie;
+            runningSerie = secondPhaseSerie;
             secondPhaseSerie.clear();
             absolut_time = -1;
         }
@@ -213,25 +211,19 @@ public class DataChart extends ApplicationFrame {
         }
     }
 
-    public void updateCarPosition(int tracksection, double percentageDistance) {
+    public void updateCarPosition(int sectionIndex, double percentageDistance) {
         int xtable = table.getX();
         int ytable = table.getY();
-        int sectionwidth = table.getColumnModel().getColumn(tracksection).getMinWidth();
+        int sectionwidth = table.getColumnModel().getColumn(sectionIndex).getMinWidth();
 
 
-        double xrectl = xtable + sectionbegins[tracksection] + percentageDistance * sectionwidth;
+        double xrectl = xtable + sectionbegins[sectionIndex] + percentageDistance * sectionwidth;
         double xrectr = 10;
 
         rect.setRect(xrectl, ytable - 10, xrectr, ytable + 15);
         panel2.repaint();
     }
 
-    /**
-     * Creates a sample chart.
-     *
-     * @param dataset the dataset.
-     * @return A sample chart.
-     */
     private JFreeChart createChart(final XYDataset dataset) {
         final JFreeChart result = ChartFactory.createTimeSeriesChart(
                 "Sensor Data",
@@ -247,7 +239,7 @@ public class DataChart extends ApplicationFrame {
         ((DateAxis) axis).setDateFormatOverride(new SimpleDateFormat("ss"));
         axis = plot.getRangeAxis();
         axis.setRange(-5000, 6000);
-        tmpSeries = this.firstPhaseSerie;
+        runningSerie = this.firstPhaseSerie;
         return result;
     }
 
@@ -260,7 +252,7 @@ public class DataChart extends ApplicationFrame {
             if (absolut_time == -1) {
                 absolut_time = message.getTimeStamp();
             }
-            this.tmpSeries.add(Math.abs(absolut_time - message.getTimeStamp()), message.getG()[2]);
+            this.runningSerie.add(Math.abs(absolut_time - message.getTimeStamp()), message.getG()[2]);
         }
     }
 }
