@@ -29,8 +29,13 @@ public class TrackLearner extends UntypedActor {
     private static final int START_POWER = 50;
     private static final int GYROZ_HISTORY_SIZE = 4;
 
+
+    private static final int MIN_STRAIGHT_DURATION = 180;
+    private static final int MIN_TURN_DURATION = 250;
+    private static final int MIN_TRACK_SECTIONS = 4;
+
     private ActorRef pilot;
-    private TrackAnalyzer trackAnalyzer = new TrackAnalyzer();
+    private TrackAnalyzer trackAnalyzer = new TrackAnalyzer(MIN_STRAIGHT_DURATION, MIN_TURN_DURATION, MIN_TRACK_SECTIONS);
     private PhysicModel physicModel = new PhysicModel();
     private PhysicModelCalculator physicModelCalculator;
 

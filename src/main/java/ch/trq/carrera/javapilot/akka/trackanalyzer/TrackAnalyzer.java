@@ -1,6 +1,5 @@
 package ch.trq.carrera.javapilot.akka.trackanalyzer;
 
-import ch.trq.carrera.javapilot.math.TrackPhysicsModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,21 +10,24 @@ import java.util.ArrayList;
  * Created by Frank on 22.09.2015.
  */
 public class TrackAnalyzer {
+    private final Logger LOGGER = LoggerFactory.getLogger(TrackAnalyzer.class);
+
     private List<TrackSection> trackSections = new ArrayList<>();
     private List<TrackVelocity> trackVelocities = new ArrayList<>();
-    private TrackSection tempTrackSection;
-    private final Logger LOGGER = LoggerFactory.getLogger(TrackAnalyzer.class);
+    private TrackSection currentTrackSection;
 
     private TrackRecognitionCallback onTrackRecognized;
 
-    private int faultyGoingStraightTime = 180;
-    private int faultyTurnTime = 250;
+    private final int minStraightDuration;
+    private final int minTurnDuration;
+    private final int minTrackSections;
+
     private int ignoredTrackSections = 3;
-    private int minTrackSectionsPerRound = 4;
 
-
-    public TrackAnalyzer(){
-
+    public TrackAnalyzer(int minStraightDuration, int minTurnDuration, int minTrackSections) {
+        this.minStraightDuration = minStraightDuration;
+        this.minTurnDuration = minTurnDuration;
+        this.minTrackSections = minTrackSections;
     }
 
     /**
@@ -39,33 +41,44 @@ public class TrackAnalyzer {
     }
 
     public void addTrackSection(State state, long timeStamp){
-        if(tempTrackSection != null){
-            tempTrackSection.setDuration(timeStamp - tempTrackSection.getTimeStamp());
-            switch(tempTrackSection.getDirection()){
-                case STRAIGHT:
-                    mergeRecalculateAndAddIfNecessary(faultyGoingStraightTime,
-                            getLastTrackSection() != null && getLastTrackSection().getDirection()==State.STRAIGHT);
-                    break;
-                case LEFT:
-                case RIGHT:
-                    mergeRecalculateAndAddIfNecessary(faultyTurnTime,
-                            getLastTrackSection()!=null && getLastTrackSection().getDirection()!=State.STRAIGHT);
-                    break;
-            }
+        if(currentTrackSection != null){
+            finalizeTrackSection(currentTrackSection, timeStamp);
         }
-        tempTrackSection = new TrackSection(state,timeStamp);
+        currentTrackSection = new TrackSection(state,timeStamp);
         tryToFindRoundCycle();
     }
 
-    private void mergeRecalculateAndAddIfNecessary(int faultyTime, boolean b){
-        if(tempTrackSection.getDuration()<faultyTime){
-            if(getLastTrackSection()!=null){
-                getLastTrackSection().addDuration(tempTrackSection.getDuration());
-            }
-        }else if(b){
-            getLastTrackSection().addDuration(tempTrackSection.getDuration());
-        }else{
-            trackSections.add(tempTrackSection);
+    private void finalizeTrackSection(TrackSection section, long timestamp){
+        section.setDuration(timestamp - section.getTimeStamp());
+        if(shouldMerge(getLastTrackSection(), section)){
+            getLastTrackSection().addDuration(section.getDuration());
+        } else {
+            trackSections.add(section);
+        }
+    }
+
+    private boolean shouldMerge(TrackSection previous, TrackSection current){
+        if(previous == null){
+            return false;
+        }
+        if(current == null){
+            throw new IllegalArgumentException();
+        }
+        int minDuration = minDuration(current.getDirection());
+        if(current.getDuration() < minDuration){
+            return true;
+        }
+        if(previous.isTurn() && current.isTurn()){
+            return true;
+        }
+        return false;
+    }
+
+    private int minDuration(State direction){
+        if(direction == State.STRAIGHT){
+            return minStraightDuration;
+        } else {
+            return minTurnDuration;
         }
     }
 
@@ -85,7 +98,7 @@ public class TrackAnalyzer {
             if(getLastTrackSection().getDirection()!=State.STRAIGHT){
                 ignoredTrackSections+=1;
             }
-        }if(trackSections.size()>=ignoredTrackSections+2*minTrackSectionsPerRound && (trackSections.size()-ignoredTrackSections)%2==0){
+        }if(trackSections.size()>=ignoredTrackSections+2* minTrackSections && (trackSections.size()-ignoredTrackSections)%2==0){
             int halfTrackSectionCount = (trackSections.size()-ignoredTrackSections)/2;
             for(int i = ignoredTrackSections; i < ignoredTrackSections+halfTrackSectionCount; i++){
                 if(trackSections.get(i).getDirection()!=trackSections.get(i+halfTrackSectionCount).getDirection()){

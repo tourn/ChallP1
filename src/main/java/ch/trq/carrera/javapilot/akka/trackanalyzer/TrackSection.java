@@ -68,4 +68,12 @@ public class TrackSection {
     public void addDuration(long dDuration){
         duration += dDuration;
     }
+
+    public boolean isStraight(){
+        return direction == State.STRAIGHT;
+    }
+
+    public boolean isTurn(){
+        return !isStraight();
+    }
 }
