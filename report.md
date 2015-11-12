@@ -68,3 +68,7 @@ permalink: /report/
   * Code mit apache commons lib implementieren
 * Track Analyzer refactoren (2h f)
 * Geschwindigkeitsberechnung implementieren und debuggen (3h dfm)
+
+### 11.11.15
+* Physikmodel flexibilisierung (3h fm)
+  * Formeln für Motorefficency und Frictionfactor
