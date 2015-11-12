@@ -12,7 +12,6 @@ import javax.swing.table.DefaultTableModel;
 import ch.trq.carrera.javapilot.akka.positiontracker.NewRoundUpdate;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
-import com.zuehlke.carrera.relayapi.messages.RoundTimeMessage;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
 import org.jfree.chart.ChartFactory;
@@ -31,55 +30,47 @@ public class DataChart extends ApplicationFrame {
 
     private final JPanel panel2;
     private final JPanel container;
-    private final JFreeChart chartModel;
-    private final JFreeChart chartRound;
-    private final XYSeriesCollection datasetRound1;
-    private final XYSeriesCollection datasetModel;
-    private final XYSeries secondPhaseSerie2;
-    private final XYSeriesCollection datasetRound2;
+    private final JFreeChart chart;
+    private final XYSeriesCollection datasetGyroZ;
+    //speed not shown at the moment
+    private final XYSeriesCollection datasetSpeed;
+    private final JFrame trackframe;
     private JTable table;
     private Track track;
-    private int second = 0;
-    /**
-     * The time series data.
-     */
+
     private long absolut_time = -1;
-    private XYSeries series;
-    private XYSeries secondPhaseSerie1;
-    private XYSeries tmpSeries;
+
+    private XYSeries firstPhaseSerie;
+    private XYSeries secondPhaseSerie;
     private XYSeries speedSeries;
-    private XYSeriesCollection speeddata;
+    private XYSeries runningSerie;
     private DefaultTableModel model;
+
     private Rectangle2D.Float rect = new Rectangle2D.Float(0, 0, 0, 0);
     private ArrayList<Rectangle2D.Double> checkpoints = new ArrayList<>();
     private double holeduration = 0;
-    private boolean notfirst = false;
+    private boolean trackanalyzerphase = true;
     private StandardXYItemRenderer renderer;
     private int[] sectionbegins;
-
-    /**
-     * @param title the frame title.
-     */
 
     public DataChart(final String title) {
 
         super(title);
         setResizable(false);
-        this.series = new XYSeries("Sensor Z Model");
-        this.secondPhaseSerie1 = new XYSeries("Sensor Z Round");
-        secondPhaseSerie2 = new XYSeries("Sensor Z 2 Round");
+        this.firstPhaseSerie = new XYSeries("Sensor Z Model");
+        this.secondPhaseSerie = new XYSeries("Sensor Z Round");
         this.speedSeries = new XYSeries("Speed");
-        datasetModel = new XYSeriesCollection(this.series);
-        datasetRound1 = new XYSeriesCollection(this.secondPhaseSerie1);
-        datasetRound2 = new XYSeriesCollection(this.secondPhaseSerie2);
-        speeddata = new XYSeriesCollection(this.speedSeries);
-        chartModel = createChart(datasetModel);
-        chartRound = createChart(datasetRound2);
-        JFrame trackframe = new JFrame();
+        datasetGyroZ = new XYSeriesCollection(this.firstPhaseSerie);
+        datasetGyroZ.addSeries(this.secondPhaseSerie);
+
+        //speed not shown at the moment
+        datasetSpeed = new XYSeriesCollection(this.speedSeries);
+
+        chart = createChart(datasetGyroZ);
+        trackframe = new JFrame();
         trackframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        final ChartPanel chartPanelModel = new ChartPanel(chartModel);
-        final ChartPanel chartPanelRound = new ChartPanel(chartRound);
+        final ChartPanel chartPanelModel = new ChartPanel(chart);
 
         container = new JPanel();
         container.setLayout(new BoxLayout(container, BoxLayout.X_AXIS));
@@ -107,14 +98,15 @@ public class DataChart extends ApplicationFrame {
         //chartPanelRound.setPreferredSize(new Dimension(1200, 450));
         panel1.add(chartPanelModel);
         //panel1.add(chartPanelRound);
-        panel1.setPreferredSize(new Dimension(1200, 900));
-        panel2.setPreferredSize(new Dimension(1400, 900));
+        panel1.setPreferredSize(new Dimension(1200, 500));
+        panel2.setPreferredSize(new Dimension(1400, 500));
 
         container.add(panel1);
 
         trackframe.setContentPane(panel2);
         trackframe.pack();
-        trackframe.setVisible(true);
+        trackframe.setVisible(false);
+        setVisible(false);
 
         setContentPane(container);
     }
@@ -122,10 +114,10 @@ public class DataChart extends ApplicationFrame {
     public void initDataTable(Track track) {
         this.track = track;
         model = new DefaultTableModel();
-        holeduration=0;
+        holeduration = 0;
         Object[] objects = new Object[track.getSections().size()];
         for (int i = 0; i < track.getSections().size(); i++) {
-            model.addColumn(i + ": " + Math.round(track.getSections().get(i).getDistance()));
+            model.addColumn(i + ": " + Math.round(track.getSections().get(i).getDistance()) + " - " + track.getSections().get(i).getDirection());
             objects[i] = track.getSections().get(i).getDuration();
             holeduration += track.getSections().get(i).getDuration();
         }
@@ -135,7 +127,13 @@ public class DataChart extends ApplicationFrame {
         panel2.add(table.getTableHeader(), BorderLayout.NORTH);
         model.addRow(objects);
         insertCheckpoints();
+        setFramesVisible();
         panel2.repaint();
+    }
+
+    private void setFramesVisible(){
+        setVisible(true);
+        trackframe.setVisible(true);
     }
 
     public void resizeTableColumn() {
@@ -148,28 +146,43 @@ public class DataChart extends ApplicationFrame {
         }
     }
 
-    public void updateDataTable(int index, TrackSection section) {
-        if (index == 0) {
+    public void updateDataTable(int sectionIndex, TrackSection section) {
+        if (sectionIndex == 0) {
             Object[] objects = {section.getDuration()};
             model.insertRow(0, objects);
         } else {
-            model.setValueAt(section.getDuration(), 0, index);
+            model.setValueAt(section.getDuration(), 0, sectionIndex);
         }
     }
 
+    public void resetDataChart() {
+        secondPhaseSerie.clear();
+        firstPhaseSerie.clear();
+        runningSerie.clear();
+        runningSerie = firstPhaseSerie;
+        trackanalyzerphase = true;
+        absolut_time = -1;
+        resetTable();
+    }
+
+    private void resetTable() {
+        panel2.removeAll();
+        checkpoints.clear();
+        rect.setRect(0, 0, 0, 0);
+        panel2.repaint();
+    }
 
     public void newRoundMessage(NewRoundUpdate m) {
-        if (notfirst) {
-            tmpSeries = secondPhaseSerie1;
-            secondPhaseSerie1.clear();
-            absolut_time = -1;
+        if (trackanalyzerphase) {
+            trackanalyzerphase = false;
         } else {
-            notfirst = true;
             renderer = new StandardXYItemRenderer();
-            XYPlot plot = chartModel.getXYPlot();
-            plot.setDataset(1, datasetRound1);
+            XYPlot plot = chart.getXYPlot();
             renderer.setSeriesPaint(1, Color.BLUE);
             plot.setRenderer(1, renderer);
+            runningSerie = secondPhaseSerie;
+            secondPhaseSerie.clear();
+            absolut_time = -1;
         }
     }
 
@@ -198,25 +211,19 @@ public class DataChart extends ApplicationFrame {
         }
     }
 
-    public void updateCarPosition(int tracksection, double percentageDistance) {
+    public void updateCarPosition(int sectionIndex, double percentageDistance) {
         int xtable = table.getX();
         int ytable = table.getY();
-        int sectionwidth = table.getColumnModel().getColumn(tracksection).getMinWidth();
+        int sectionwidth = table.getColumnModel().getColumn(sectionIndex).getMinWidth();
 
 
-        double xrectl = xtable + sectionbegins[tracksection] + percentageDistance * sectionwidth;
+        double xrectl = xtable + sectionbegins[sectionIndex] + percentageDistance * sectionwidth;
         double xrectr = 10;
 
         rect.setRect(xrectl, ytable - 10, xrectr, ytable + 15);
         panel2.repaint();
     }
 
-    /**
-     * Creates a sample chart.
-     *
-     * @param dataset the dataset.
-     * @return A sample chart.
-     */
     private JFreeChart createChart(final XYDataset dataset) {
         final JFreeChart result = ChartFactory.createTimeSeriesChart(
                 "Sensor Data",
@@ -232,7 +239,7 @@ public class DataChart extends ApplicationFrame {
         ((DateAxis) axis).setDateFormatOverride(new SimpleDateFormat("ss"));
         axis = plot.getRangeAxis();
         axis.setRange(-5000, 6000);
-        tmpSeries = this.series;
+        runningSerie = this.firstPhaseSerie;
         return result;
     }
 
@@ -241,11 +248,11 @@ public class DataChart extends ApplicationFrame {
     }
 
     public void insertSensorData(SensorEvent message) {
-        if (notfirst) {
+        if (!trackanalyzerphase) {
             if (absolut_time == -1) {
                 absolut_time = message.getTimeStamp();
             }
-            this.tmpSeries.add(Math.abs(absolut_time - message.getTimeStamp()), message.getG()[2]);
+            this.runningSerie.add(Math.abs(absolut_time - message.getTimeStamp()), message.getG()[2]);
         }
     }
 }

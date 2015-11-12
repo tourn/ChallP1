@@ -20,6 +20,7 @@ public class PositionTracker {
     private UpdateCallback onUpdate;
     private SectionChangeCallback onSectionChange;
     private NewRoundCallback onNewRound;
+
     private Track.Position pos;
     private int sectionIndex;
     private FloatingHistory gyroZ = new FloatingHistory(8);
@@ -41,6 +42,7 @@ public class PositionTracker {
         sectionIndex = 0;
         velocityPositionId = -1;
     }
+
 
     private double calculateDistance(long dtime, State turn){
         double distance = 0;
@@ -189,6 +191,10 @@ public class PositionTracker {
     }
     public int getPower(){
         return power;
+    }
+
+    public Track.Position getPos() {
+        return pos;
     }
 
     public boolean isTurn(){

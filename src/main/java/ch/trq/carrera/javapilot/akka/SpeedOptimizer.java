@@ -3,10 +3,12 @@ package ch.trq.carrera.javapilot.akka;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
+import ch.trq.carrera.javapilot.akka.log.LogMessage;
 import ch.trq.carrera.javapilot.akka.positiontracker.CarUpdate;
 import ch.trq.carrera.javapilot.akka.positiontracker.NewRoundUpdate;
 import ch.trq.carrera.javapilot.akka.positiontracker.PositionTracker;
 import ch.trq.carrera.javapilot.akka.positiontracker.SectionUpdate;
+import ch.trq.carrera.javapilot.akka.trackanalyzer.State;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
 import com.zuehlke.carrera.javapilot.akka.PowerAction;
@@ -29,6 +31,7 @@ public class SpeedOptimizer extends UntypedActor {
     private int maxTurnPower = 150;
     private int maxPower = 200;
     private PositionTracker positionTracker;
+    private String actorDescription;
 
     public SpeedOptimizer(ActorRef pilot, Track track) {
         this.pilot = pilot;
@@ -53,7 +56,7 @@ public class SpeedOptimizer extends UntypedActor {
             @Override
             public void onUpdate(int sectionIndex, TrackSection section) {
                 pilot.tell(new SectionUpdate(section, sectionIndex), getSelf());
-                if (section.getDirection().equals("TURN")) {
+                if(section.getDirection().equals(State.TURN)){
                     changePower(maxPower);
                 } else {
                     changePower(maxTurnPower);
@@ -61,6 +64,8 @@ public class SpeedOptimizer extends UntypedActor {
             }
         });
         changePower(maxTurnPower);
+
+        actorDescription = getActorDescription();
     }
 
     public static Props props(ActorRef pilot, Track track) {
@@ -92,6 +97,7 @@ public class SpeedOptimizer extends UntypedActor {
     }
 
     private void handleSensorEvent(SensorEvent event) {
+        LogMessage log = new LogMessage(event, System.currentTimeMillis());
         positionTracker.update(event);
         if (!positionTracker.isTurn()) {
             if (positionTracker.getPercentageDistance() > 0.5) {
@@ -103,6 +109,19 @@ public class SpeedOptimizer extends UntypedActor {
             changePower(maxTurnPower);
         }
         //pilot.tell ( new PowerAction(power), getSelf());
+        popluateLog(log);
+        pilot.tell(log, getSelf());
+    }
+
+    private void popluateLog(LogMessage log){
+        log.setPower(positionTracker.getPower());
+        log.setActorDescription(actorDescription);
+        log.setPositionRelative(positionTracker.getPos().getDistanceOffset());
+        log.settAfterCalculation(System.currentTimeMillis());
+    }
+
+    public String getActorDescription(){
+        return "SpeedOptimizer";
     }
 
     private void changePower(int power) {

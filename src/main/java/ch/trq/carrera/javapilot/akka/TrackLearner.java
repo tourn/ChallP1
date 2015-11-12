@@ -3,7 +3,7 @@ package ch.trq.carrera.javapilot.akka;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
-//import com.sun.tools.internal.jxc.ap.Const;
+import ch.trq.carrera.javapilot.akka.log.LogMessage;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.State;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import ch.trq.carrera.javapilot.math.PhysicModel;
@@ -38,6 +38,7 @@ public class TrackLearner extends UntypedActor {
     private TrackAnalyzer trackAnalyzer = new TrackAnalyzer(MIN_STRAIGHT_DURATION, MIN_TURN_DURATION, MIN_TRACK_SECTIONS);
     private PhysicModel physicModel = new PhysicModel();
     private PhysicModelCalculator physicModelCalculator;
+    private final String actorDescription;
 
     private State turnState = State.STRAIGHT;
     private FloatingHistory gyroZ;
@@ -45,10 +46,12 @@ public class TrackLearner extends UntypedActor {
     private boolean isMoving = false;
     private boolean trackRecognitionFinished = false;
 
+
     public TrackLearner(ActorRef pilot) {
         this.pilot = pilot;
         this.currentPower = START_POWER;
         gyroZ = new FloatingHistory(GYROZ_HISTORY_SIZE);
+        actorDescription = getActorDescription();
     }
 
     public static Props props ( ActorRef pilot) {
@@ -76,6 +79,8 @@ public class TrackLearner extends UntypedActor {
     }
 
     private void handleSensorEvent(SensorEvent event) {
+        LogMessage log = new LogMessage(event, System.currentTimeMillis());
+
         gyroZ.shift(event.getG()[2]);
         if(!trackRecognitionFinished){
             if(!isMoving){
@@ -91,6 +96,9 @@ public class TrackLearner extends UntypedActor {
             //stop in a straight with 2 sensors and start again.
         }
         pilot.tell(new PowerAction(currentPower), getSelf());
+
+        populateLog(log);
+        pilot.tell(log, ActorRef.noSender());
     }
 
     private void checkDirectionChange(SensorEvent event){
@@ -103,7 +111,6 @@ public class TrackLearner extends UntypedActor {
                 turnAction(event.getTimeStamp());
                 break;
         }
-
     }
 
     private void straightAction(long timeStamp) {
@@ -145,5 +152,20 @@ public class TrackLearner extends UntypedActor {
         physicModelCalculator.calculateTrackPhysics();
         LOGGER.info("Track built");
         //pilot.tell(track, ActorRef.noSender());
+    }
+
+    private void populateLog(LogMessage log){
+        log.setPower(currentPower);
+        log.setActorDescription(actorDescription);
+        log.settAfterCalculation(System.currentTimeMillis());
+
+    }
+
+    private String getActorDescription(){
+        return String.format("TrackLearner power: %d, minStraightDuration: %d, minTurnDuration: %d",
+                currentPower,
+                MIN_STRAIGHT_DURATION,
+                MIN_TURN_DURATION
+        );
     }
 }
