@@ -17,42 +17,40 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *  An actor driving with constant power, learning the structure of the track
+ *  An actor driving with constant currentPower, learning the structure of the track
  */
 public class TrackLearner extends UntypedActor {
+    private final Logger LOGGER = LoggerFactory.getLogger(TrackLearner.class);
 
     private static final int MOVE_START_GYROZ_THRESHOLD = 10;
     private static final int MOVE_START_POWER_INCREASE = 10;
     private static final double TURN_THRESHOLD = 800;
     private static final int MOVE_TRY_POWER_INCREASE = 1;
+    private static final int START_POWER = 50;
+    private static final int GYROZ_HISTORY_SIZE = 4;
 
     private ActorRef pilot;
-    private FloatingHistory gyroZ;
-    private TrackAnalyzer trackAnalyzer;
-    private PhysicModel physicModel;
+    private TrackAnalyzer trackAnalyzer = new TrackAnalyzer();
+    private PhysicModel physicModel = new PhysicModel();
     private PhysicModelCalculator physicModelCalculator;
+
     private State turnState = State.STRAIGHT;
-    private final Logger LOGGER = LoggerFactory.getLogger(TrackLearner.class);
-
-    private int power;
-
+    private FloatingHistory gyroZ;
+    private int currentPower;
     private boolean isMoving = false;
     private boolean trackRecognitionFinished = false;
 
-    public TrackLearner(ActorRef pilot, int startPower, int startRoundNr, int amountOfRounds, int faultyGoingStraightTime, int faultyTurnTime, int floatingHistorySize) {
+    public TrackLearner(ActorRef pilot) {
         this.pilot = pilot;
-        this.power = startPower;
-        gyroZ = new FloatingHistory(floatingHistorySize);
+        this.currentPower = START_POWER;
+        gyroZ = new FloatingHistory(GYROZ_HISTORY_SIZE);
 
-        physicModel = new PhysicModel();
-
-        trackAnalyzer = new TrackAnalyzer();
 
         trackAnalyzer.setOnTrackRecognized(new TrackAnalyzer.TrackRecognitionCallback() {
             @Override
             public void onTrackRecognized(Track track) {
                 trackRecognitionFinished = true;
-                track.setPower(power);
+                track.setPower(currentPower);
                 physicModelCalculator = new PhysicModelCalculator(track,physicModel);
                 physicModelCalculator.calculateTrackPhysics();
                 LOGGER.info("Track Received");
@@ -61,8 +59,8 @@ public class TrackLearner extends UntypedActor {
         });
     }
 
-    public static Props props ( ActorRef pilot, int power, int startRoundNr, int amountOfRounds, int faultyGoingStraightTime, int faultyTurnTime, int floatingHistorySize ) {
-        return Props.create( TrackLearner.class, ()->new TrackLearner( pilot, power, startRoundNr, amountOfRounds, faultyGoingStraightTime, faultyTurnTime, floatingHistorySize));
+    public static Props props ( ActorRef pilot) {
+        return Props.create( TrackLearner.class, ()->new TrackLearner(pilot));
     }
 
 
@@ -105,7 +103,7 @@ public class TrackLearner extends UntypedActor {
         }else{
 
         }
-        pilot.tell(new PowerAction(power), getSelf());
+        pilot.tell(new PowerAction(currentPower), getSelf());
     }
 
     private void straightAction(long timeStamp) {
@@ -132,11 +130,11 @@ public class TrackLearner extends UntypedActor {
         isMoving = gyroZ.currentMean() > MOVE_START_GYROZ_THRESHOLD;
 
         if(isMoving){
-            physicModel.setStartPower(power);
-            power += MOVE_START_POWER_INCREASE;
+            physicModel.setStartPower(currentPower);
+            currentPower += MOVE_START_POWER_INCREASE;
         }else{
-            power += MOVE_TRY_POWER_INCREASE;
+            currentPower += MOVE_TRY_POWER_INCREASE;
         }
-        //LOGGER.info("MY POWER: " + power);
+        //LOGGER.info("MY POWER: " + currentPower);
     }
 }
