@@ -8,6 +8,7 @@ Nachdem wir Vormittags noch kurz einen Logger zusammengebaut haben, der unsere F
 
 ### Allgemein
 * Runden Start/Ende-Event abfangen und Zustand entsprechend anpassen (z.B beim Rundenanfang loeschen)
+* Konstanten entfernen - Werte sollen gelernt werden (z.B mit Auto zuerst schnell gas geben, zum herauszufinden, welches Modell man hat)
 
 ### Trackanalyzer
 * Funktionioniert im Moment mit RoundEndMessage - Stattdessen sollte er mit Cycle Detection arbeiten

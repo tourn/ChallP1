@@ -72,3 +72,8 @@ permalink: /report/
 ### 11.11.15
 * Physikmodel flexibilisierung (3h fm)
   * Formeln für Motorefficency und Frictionfactor
+
+### 12.11.15
+* Physikmodell (3h fm)
+* Code Review & Refactoring (3h d)
+* Branches mergen (1h md)
