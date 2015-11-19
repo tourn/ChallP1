@@ -69,6 +69,16 @@ permalink: /report/
 * Track Analyzer refactoren (2h f)
 * Geschwindigkeitsberechnung implementieren und debuggen (3h dfm)
 
+### 6.11.15
+* Grundgerüst Physikmodell erarbeiten (4h f)
+* TrackLearner & TrackAnalyzer neu schreiben/überarbeiten (2h f)
+ 
+### 7.11.15
+* TrackLearner & TrackAnalyzer neu schreiben/überarbeiten (6h f)
+
+### 8.11.15
+* TrackAnalyzer verbessern (2h f)
+
 ### 11.11.15
 * Physikmodel flexibilisierung (3h fm)
   * Formeln für Motorefficency und Frictionfactor
