@@ -2,6 +2,7 @@ package ch.trq.carrera.javapilot.math;
 
 import ch.trq.carrera.javapilot.akka.trackanalyzer.State;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
+import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -155,5 +156,32 @@ public class PhysicModelCalculator {
 
     private void showTurnBetweenToVelocitySensors(double v0, double v1, long t){
         LOGGER.info("v0: " + v0 + "cm/s, v1: " + v1 + "cm/s, t: " + t + "ms, Power: " + track.getPower());
+    }
+
+    public void calculateDistances() {
+        Track.Position position = getFirstCheckpointWithDurationOffsetZero();
+        int posId = track.getCheckpoints().indexOf(position);
+        int tsId = position.getSection().getId();
+        double v = position.getVelocity();
+        if(track.getCheckpoints().get((tsId+1)%track.getCheckpoints().size()).getSection().getId()==tsId){
+            if(position.getSection().getDuration()==track.getCheckpoints().get((tsId + 1) % track.getCheckpoints().size()).getDurationOffset()){
+                double dist=0;
+                for(int i=0; i < position.getSection().getDuration();i++){
+                    v=physicModel.getVelocity(v,position.getSection(),track.getPower(),1);
+                    dist+=v*1.0/1000.0;
+                }
+                position.getSection().setDistance(dist);
+            }
+        }
+
+    }
+
+    private Track.Position getFirstCheckpointWithDurationOffsetZero() {
+        for(Track.Position checkpoint : track.getCheckpoints()){
+            if(checkpoint.getDurationOffset()==0){
+                return checkpoint;
+            }
+        }
+        return null;
     }
 }
