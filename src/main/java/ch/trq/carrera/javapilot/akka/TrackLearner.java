@@ -149,9 +149,15 @@ public class TrackLearner extends UntypedActor {
         trackRecognitionFinished = true;
         track.setPower(currentPower);
         physicModelCalculator = new PhysicModelCalculator(track,physicModel);
-        physicModelCalculator.calculateTrackPhysics();
-        physicModelCalculator.calculateDistances();
-        LOGGER.info("Track built");
+        if(physicModelCalculator.hasStraightWithThreeCheckpoints()){
+            physicModelCalculator.calculateTrackPhysics();
+            physicModelCalculator.calculateDistances();
+            LOGGER.info("Track built with distances");
+        }else{
+            LOGGER.info("Track built without distances");
+            LOGGER.info("Need to get another sensor in Tracksection");
+        }
+
         //pilot.tell(track, ActorRef.noSender());
     }
 

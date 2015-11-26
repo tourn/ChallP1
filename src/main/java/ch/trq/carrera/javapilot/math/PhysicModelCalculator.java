@@ -22,6 +22,21 @@ public class PhysicModelCalculator {
         this.physicModel = physicModel;
     }
 
+    public boolean hasStraightWithThreeCheckpoints(){
+        for(int i = 0; i<track.getSections().size();i++){
+            List<Track.Position> checkpointList = new ArrayList<>();
+            for(Track.Position position : track.getCheckpoints()){
+                if(position.getSection().getId()==i){
+                    checkpointList.add(position);
+                }
+            }
+            if(checkpointList.size()>=3){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void calculateTrackPhysics(){
         List<List<Track.Position>> list = new ArrayList<>();
         for(int i = 0; i<track.getSections().size();i++){
