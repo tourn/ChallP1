@@ -4,6 +4,7 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import ch.trq.carrera.javapilot.akka.log.LogMessage;
+import ch.trq.carrera.javapilot.akka.trackanalyzer.PhysicLearnHelper;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.State;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import ch.trq.carrera.javapilot.math.PhysicModel;
@@ -38,6 +39,7 @@ public class TrackLearner extends UntypedActor {
     private TrackAnalyzer trackAnalyzer = new TrackAnalyzer(MIN_STRAIGHT_DURATION, MIN_TURN_DURATION, MIN_TRACK_SECTIONS);
     private PhysicModel physicModel = new PhysicModel();
     private PhysicModelCalculator physicModelCalculator;
+    private PhysicLearnHelper physicLearnHelper;
     private final String actorDescription;
 
     private State turnState = State.STRAIGHT;
@@ -75,6 +77,10 @@ public class TrackLearner extends UntypedActor {
             trackAnalyzer.addTrackVelocity(message.getVelocity(),message.getTimeStamp());
         }else{
             //TODO
+            physicLearnHelper.handleVelocityMessage();
+            if(physicLearnHelper.isAtDestination){
+                currentPower = 0;
+            }
         }
     }
 
@@ -94,6 +100,10 @@ public class TrackLearner extends UntypedActor {
         }else{
             //TODO: could we already calculate friction on a straight with 3 velocity sensors? If no, use Frank's strategy:
             //stop in a straight with 2 sensors and start again.
+            physicLearnHelper.handleTrackSectionMessage(event.getTimeStamp());
+            if(physicLearnHelper.isAtDestination){
+                currentPower = 0;
+            }
         }
         pilot.tell(new PowerAction(currentPower), getSelf());
 
@@ -156,6 +166,7 @@ public class TrackLearner extends UntypedActor {
         }else{
             LOGGER.info("Track built without distances");
             LOGGER.info("Need to get another sensor in Tracksection");
+            physicLearnHelper = new PhysicLearnHelper(track);
         }
 
         //pilot.tell(track, ActorRef.noSender());
