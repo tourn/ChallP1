@@ -150,6 +150,7 @@ public class TrackLearner extends UntypedActor {
         track.setPower(currentPower);
         physicModelCalculator = new PhysicModelCalculator(track,physicModel);
         physicModelCalculator.calculateTrackPhysics();
+        physicModelCalculator.calculateDistances();
         LOGGER.info("Track built");
         //pilot.tell(track, ActorRef.noSender());
     }

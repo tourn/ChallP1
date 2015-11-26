@@ -111,13 +111,13 @@ public class JavaPilotActor extends UntypedActor {
 
             // ------
             if (message instanceof RaceStartMessage) {
-                logwriter = new LogWriter();
+                //logwriter = new LogWriter();
                 visualConnection.reset();
                 handleRaceStart((RaceStartMessage) message);
 
             } else if (message instanceof RaceStopMessage) {
-                logwriter.close();
-                logwriter = null;
+                //logwriter.close();
+                //logwriter = null;
                 handleRaceStop((RaceStopMessage) message);
 
             } else if (message instanceof SensorEvent) {
