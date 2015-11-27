@@ -90,9 +90,8 @@ public class TrackLearner extends UntypedActor {
                     currentPower = runPower;
                     break;
                 case FINISHED:
-                    //TODO: FIX CALCULATION -> E=0 WTF
-                    double v1 = 0;
                     double dv1 = message.getVelocity();
+                    double v1 = dv1/2;
                     double t1 = physicLearnHelper.getMeasureTime();
                     double v2 = physicLearnHelper.getV2();
                     double dv2 = physicLearnHelper.getDV2();
@@ -102,6 +101,7 @@ public class TrackLearner extends UntypedActor {
                     physicModelCalculator.calcFrictions();
                     physicModelCalculator.calculateDistances();
                     Track track = physicModelCalculator.getTrack();
+                    //TODO: Carposition setzen? PhysikModel mitsenden bzw. nur der E wert
                     pilot.tell(track, ActorRef.noSender());
                     break;
             }
