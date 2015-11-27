@@ -1,6 +1,6 @@
 package ch.trq.carrera.javapilot.math;
 
-import ch.trq.carrera.javapilot.akka.trackanalyzer.State;
+import ch.trq.carrera.javapilot.akka.trackanalyzer.Direction;
 
 /**
  * a very simple model of the physical track properties
@@ -87,18 +87,18 @@ public class TrackPhysicsModel {
         return v0 + acceleration(v0, ri, p) * dt / 2;
     }
 
-    public double average_velocity(double v0, State turn, int p, double dt) {
-        double ri =  State.STRAIGHT == turn ? 0 : turn_radius;
+    public double average_velocity(double v0, Direction turn, int p, double dt) {
+        double ri =  Direction.STRAIGHT == turn ? 0 : turn_radius;
         return average_velocity(v0, ri, p, dt);
     }
 
-    public double velocity(double v0, State turn, int p, double dt) {
-        double ri =  State.STRAIGHT == turn ? 0 : turn_radius;
+    public double velocity(double v0, Direction turn, int p, double dt) {
+        double ri =  Direction.STRAIGHT == turn ? 0 : turn_radius;
         return v0 + acceleration(v0, ri, p) * dt;
     }
 
-    public double distance(double v0, State turn, int p, double dt){
-        double ri =  State.STRAIGHT == turn ? 0 : turn_radius;
+    public double distance(double v0, Direction turn, int p, double dt){
+        double ri =  Direction.STRAIGHT == turn ? 0 : turn_radius;
         double v = average_velocity(v0,ri,p,dt);
         return v*dt;
     }

@@ -1,13 +1,10 @@
 package ch.trq.carrera.javapilot.math;
 
-import ch.trq.carrera.javapilot.akka.trackanalyzer.State;
+import ch.trq.carrera.javapilot.akka.trackanalyzer.Direction;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
 import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -23,8 +20,8 @@ public class PhysicTest {
 
     @Before
     public void initialize(){
-        straight = new TrackSection(State.STRAIGHT,0);
-        turn = new TrackSection(State.LEFT,0);
+        straight = new TrackSection(Direction.STRAIGHT,0);
+        turn = new TrackSection(Direction.LEFT,0);
         physicModel = new PhysicModel();
     }
 

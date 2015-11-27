@@ -23,7 +23,7 @@ public class Round {
     public void addTrackSection(TrackSection trackSection){
         trackSections.add(trackSection);
     }
-    public void addTrackSection(State direction, long timeStamp){
+    public void addTrackSection(Direction direction, long timeStamp){
         trackSections.add(new TrackSection(direction,timeStamp));
     }
 

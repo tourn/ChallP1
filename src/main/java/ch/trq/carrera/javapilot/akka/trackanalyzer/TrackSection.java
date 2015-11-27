@@ -4,7 +4,7 @@ package ch.trq.carrera.javapilot.akka.trackanalyzer;
  * Created by Frank on 22.09.2015.
  */
 public class TrackSection {
-    private State direction;
+    private Direction direction;
     /// Duration in ms
     private long duration=0;
     private long timeStamp;
@@ -15,11 +15,11 @@ public class TrackSection {
 
     private double friction;
 
-    public TrackSection(State direction, long timeStamp){
+    public TrackSection(Direction direction, long timeStamp){
         this.direction = direction;
         this.timeStamp = timeStamp;
     }
-    public void setDirection(State direction){
+    public void setDirection(Direction direction){
         this.direction = direction;
     }
     public void setDuration(long duration){
@@ -29,7 +29,7 @@ public class TrackSection {
         this.timeStamp = timeStamp;
     }
 
-    public State getDirection(){
+    public Direction getDirection(){
         return direction;
     }
 
@@ -70,7 +70,7 @@ public class TrackSection {
     }
 
     public boolean isStraight(){
-        return direction == State.STRAIGHT;
+        return direction == Direction.STRAIGHT;
     }
 
     public boolean isTurn(){

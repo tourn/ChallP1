@@ -4,8 +4,8 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import ch.trq.carrera.javapilot.akka.log.LogMessage;
+import ch.trq.carrera.javapilot.akka.trackanalyzer.Direction;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.PhysicLearnHelper;
-import ch.trq.carrera.javapilot.akka.trackanalyzer.State;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import ch.trq.carrera.javapilot.math.PhysicModel;
 import ch.trq.carrera.javapilot.math.PhysicModelCalculator;
@@ -42,7 +42,7 @@ public class TrackLearner extends UntypedActor {
     private PhysicLearnHelper physicLearnHelper;
     private final String actorDescription;
 
-    private State turnState = State.STRAIGHT;
+    private Direction turnDirection = Direction.STRAIGHT;
     private FloatingHistory gyroZ;
     private int currentPower;
     private boolean isMoving = false;
@@ -112,7 +112,7 @@ public class TrackLearner extends UntypedActor {
     }
 
     private void checkDirectionChange(SensorEvent event){
-        switch (turnState) {
+        switch (turnDirection) {
             case STRAIGHT:
                 straightAction(event.getTimeStamp());
                 break;
@@ -125,20 +125,20 @@ public class TrackLearner extends UntypedActor {
 
     private void straightAction(long timeStamp) {
         if (gyroZ.currentMean() > TURN_THRESHOLD) {
-            turnState = State.RIGHT;
-            trackAnalyzer.addTrackSection(turnState,timeStamp);
+            turnDirection = Direction.RIGHT;
+            trackAnalyzer.addTrackSection(turnDirection,timeStamp);
             //LOGGER.info("RIGHT TURN");
         }else if(-gyroZ.currentMean() > TURN_THRESHOLD){
-            turnState = State.LEFT;
-            trackAnalyzer.addTrackSection(turnState,timeStamp);
+            turnDirection = Direction.LEFT;
+            trackAnalyzer.addTrackSection(turnDirection,timeStamp);
             //LOGGER.info("LEFT TURN");
         }
     }
 
     private void turnAction(long timeStamp) {
         if (Math.abs(gyroZ.currentMean()) < TURN_THRESHOLD) {
-            turnState = State.STRAIGHT;
-            trackAnalyzer.addTrackSection(turnState,timeStamp);
+            turnDirection = Direction.STRAIGHT;
+            trackAnalyzer.addTrackSection(turnDirection,timeStamp);
             //LOGGER.info("GOING STRAIGHT");
         }
     }

@@ -1,8 +1,7 @@
 package ch.trq.carrera.javapilot.math;
 
-import ch.trq.carrera.javapilot.akka.trackanalyzer.State;
+import ch.trq.carrera.javapilot.akka.trackanalyzer.Direction;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
-import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +67,7 @@ public class PhysicModelCalculator {
         }
         double friction = dFriction/(double)count;
         for(int i = 0; i < list.size();i++){
-            if(track.getSections().get(i).getDirection()== State.STRAIGHT && list.get(i).size()<=1){
+            if(track.getSections().get(i).getDirection()== Direction.STRAIGHT && list.get(i).size()<=1){
                 track.getSections().get(i).setFriction(friction);
             }
         }
@@ -128,7 +127,7 @@ public class PhysicModelCalculator {
         }
         double friction = dFriction/(double)count;
         for(int i = 0; i < list.size();i++){
-            if(track.getSections().get(i).getDirection()!= State.STRAIGHT && track.getSections().get(i).getFriction()==0.0){
+            if(track.getSections().get(i).getDirection()!= Direction.STRAIGHT && track.getSections().get(i).getFriction()==0.0){
                 track.getSections().get(i).setFriction(friction);
             }
         }

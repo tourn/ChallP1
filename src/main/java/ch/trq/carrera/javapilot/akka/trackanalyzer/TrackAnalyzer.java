@@ -38,11 +38,11 @@ public class TrackAnalyzer {
         trackVelocities.add(new TrackVelocity(velocity, timeStamp));
     }
 
-    public void addTrackSection(State state, long timeStamp){
+    public void addTrackSection(Direction direction, long timeStamp){
         if(currentTrackSection != null){
             finalizeTrackSection(currentTrackSection, timeStamp);
         }
-        currentTrackSection = new TrackSection(state,timeStamp);
+        currentTrackSection = new TrackSection(direction,timeStamp);
     }
 
     private void finalizeTrackSection(TrackSection section, long timestamp){
@@ -71,8 +71,8 @@ public class TrackAnalyzer {
         return false;
     }
 
-    private int minDuration(State direction){
-        if(direction == State.STRAIGHT){
+    private int minDuration(Direction direction){
+        if(direction == Direction.STRAIGHT){
             return minStraightDuration;
         } else {
             return minTurnDuration;
@@ -81,7 +81,7 @@ public class TrackAnalyzer {
 
     public boolean detectCycle(){
         if(trackSections.size()==ignoredTrackSections) {
-            if(getLastTrackSection().getDirection()!=State.STRAIGHT){
+            if(getLastTrackSection().getDirection()!= Direction.STRAIGHT){
                 ignoredTrackSections+=1;
             }
         }if(trackSections.size()>=ignoredTrackSections+2* minTrackSections && (trackSections.size()-ignoredTrackSections)%2==0){
@@ -138,8 +138,8 @@ public class TrackAnalyzer {
             }else{
                 timeStamp = list.get(i-1).getTimeStamp()+list.get(i-1).getDuration();
             }
-            State state = trackSections.get(i).getDirection();
-            TrackSection trackSection = new TrackSection(state,timeStamp);
+            Direction direction = trackSections.get(i).getDirection();
+            TrackSection trackSection = new TrackSection(direction,timeStamp);
             trackSection.setDuration((trackSections.get(i).getDuration()+trackSections.get(i+trackSectionsPerRound).getDuration())/2);
             list.add(trackSection);
         }
@@ -179,7 +179,7 @@ public class TrackAnalyzer {
             Track.Position position;
             for (int i = 0; i < trackSectionList.size(); i++) {
                 if (trackVelocity.getTimeStamp() < trackSectionList.get(i).getTimeStamp()) {
-                    if(trackSectionList.get(i-1).getDirection()!=State.STRAIGHT){
+                    if(trackSectionList.get(i-1).getDirection()!= Direction.STRAIGHT){
                         trackVelocity.setTimeStamp(trackSectionList.get(i).getTimeStamp());
                         position = new Track.Position(trackSectionList.get(i), 0);
                     }else{
@@ -197,7 +197,7 @@ public class TrackAnalyzer {
                     list.add(position);
                     break;
                 }else if(i == trackSectionList.size()-1){
-                    if(trackSectionList.get(i).getDirection()!=State.STRAIGHT){
+                    if(trackSectionList.get(i).getDirection()!= Direction.STRAIGHT){
                         trackVelocity.setTimeStamp(trackSectionList.get(0).getTimeStamp());
                         position = new Track.Position(trackSectionList.get(0), 0);
                     }else{

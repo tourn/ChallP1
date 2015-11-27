@@ -1,6 +1,6 @@
 package ch.trq.carrera.javapilot.akka.positiontracker;
 
-import ch.trq.carrera.javapilot.akka.trackanalyzer.State;
+import ch.trq.carrera.javapilot.akka.trackanalyzer.Direction;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
 import ch.trq.carrera.javapilot.math.TrackPhysicsModel;
@@ -44,7 +44,7 @@ public class PositionTracker {
     }
 
 
-    private double calculateDistance(long dtime, State turn){
+    private double calculateDistance(long dtime, Direction turn){
         double distance = 0;
         for(int i = 0; i<dtime;i++){
             calculatedVelocity = trackPhysicsModel.average_velocity(calculatedVelocity, turn, power, 1.0/1000.0);
@@ -198,7 +198,7 @@ public class PositionTracker {
     }
 
     public boolean isTurn(){
-        return pos.getSection().getDirection().equals(State.TURN);
+        return pos.getSection().getDirection().equals(Direction.TURN);
     }
 
     public double getPercentageDistance(){
