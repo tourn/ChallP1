@@ -21,6 +21,13 @@ public class PhysicModelCalculator {
         this.physicModel = physicModel;
     }
 
+    public Track getTrack(){
+        return track;
+    }
+    public PhysicModel getPhysicModel(){
+        return physicModel;
+    }
+
     public boolean hasStraightWithThreeCheckpoints(){
         for(int i = 0; i<track.getSections().size();i++){
             List<Track.Position> checkpointList = new ArrayList<>();
@@ -49,9 +56,25 @@ public class PhysicModelCalculator {
         }
 
         straightsWithMoreThanOneVelocitySensor(list);
+        calcFrictions();
+        /*calcFrictionForStraights(list);
+        turnsBetweenTwoVelocitySensors(list);*/
+        LOGGER.info("Startpower for moving: " + physicModel.getStartPower());
+    }
+
+    public void calcFrictions(){
+        List<List<Track.Position>> list = new ArrayList<>();
+        for(int i = 0; i<track.getSections().size();i++){
+            List<Track.Position> checkpointList = new ArrayList<>();
+            for(Track.Position position : track.getCheckpoints()){
+                if(position.getSection().getId()==i){
+                    checkpointList.add(position);
+                }
+            }
+            list.add(checkpointList);
+        }
         calcFrictionForStraights(list);
         turnsBetweenTwoVelocitySensors(list);
-        LOGGER.info("Startpower for moving: " + physicModel.getStartPower());
     }
 
     private void calcFrictionForStraights(List<List<Track.Position>> list){
@@ -162,6 +185,11 @@ public class PhysicModelCalculator {
         double v2 = list.get(1).getVelocity()+dv2/2;
         double p = (double)track.getPower();
 
+        calcConstE(v1,dv1,t1,v2,dv2,t2,p);
+
+    }
+
+    public void calcConstE(double v1,double dv1, double t1,double v2,double dv2, double t2, double p){
         double e = ((dv2*t1-dv1*t2)*v1*v2)/(p*t1*t2*(v1-v2));
 
         physicModel.setE(e);
@@ -284,7 +312,6 @@ public class PhysicModelCalculator {
         tsId=0;
 
         while(tsId<startTsId){
-            while(tsId<track.getSections().size()){
                 //Wenn der nächste Checkpoint auch noch auf der Tracksection ist
                 if(track.getCheckpoints().get((posId+1)%track.getCheckpoints().size()).getSection().getId()==tsId){
                     //Zeit dazwischen ausrechnen
@@ -380,7 +407,6 @@ public class PhysicModelCalculator {
                         isNewTs = true;
                     }
                 }
-            }
         }
     }
 

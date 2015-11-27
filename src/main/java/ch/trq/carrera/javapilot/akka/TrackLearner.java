@@ -48,6 +48,7 @@ public class TrackLearner extends UntypedActor {
     private boolean isMoving = false;
     private boolean trackRecognitionFinished = false;
 
+    private int runPower;
 
     public TrackLearner(ActorRef pilot) {
         this.pilot = pilot;
@@ -77,9 +78,32 @@ public class TrackLearner extends UntypedActor {
             trackAnalyzer.addTrackVelocity(message.getVelocity(),message.getTimeStamp());
         }else{
             //TODO
-            physicLearnHelper.handleVelocityMessage();
-            if(physicLearnHelper.isAtDestination){
-                currentPower = 0;
+            physicLearnHelper.handleVelocityMessage(message.getTimeStamp());
+            switch(physicLearnHelper.state){
+                case MOVE_TO_DESTINATION:
+                    currentPower = runPower;
+                    break;
+                case BRAKE:
+                    currentPower = 0;
+                    break;
+                case MEASURE:
+                    currentPower = runPower;
+                    break;
+                case FINISHED:
+                    //TODO: FIX CALCULATION -> E=0 WTF
+                    double v1 = 0;
+                    double dv1 = message.getVelocity();
+                    double t1 = physicLearnHelper.getMeasureTime();
+                    double v2 = physicLearnHelper.getV2();
+                    double dv2 = physicLearnHelper.getDV2();
+                    double t2 = physicLearnHelper.getT2();
+                    double p = (double)currentPower;
+                    physicModelCalculator.calcConstE(v1, dv1, t1, v2, dv2, t2, p);
+                    physicModelCalculator.calcFrictions();
+                    physicModelCalculator.calculateDistances();
+                    Track track = physicModelCalculator.getTrack();
+                    pilot.tell(track, ActorRef.noSender());
+                    break;
             }
         }
     }
@@ -101,8 +125,16 @@ public class TrackLearner extends UntypedActor {
             //TODO: could we already calculate friction on a straight with 3 velocity sensors? If no, use Frank's strategy:
             //stop in a straight with 2 sensors and start again.
             physicLearnHelper.handleTrackSectionMessage(event.getTimeStamp());
-            if(physicLearnHelper.isAtDestination){
-                currentPower = 0;
+            switch(physicLearnHelper.state){
+                case MOVE_TO_DESTINATION:
+                    currentPower = runPower;
+                    break;
+                case BRAKE:
+                    currentPower = 0;
+                    break;
+                case MEASURE:
+                    currentPower = runPower;
+                    break;
             }
         }
         pilot.tell(new PowerAction(currentPower), getSelf());
@@ -158,11 +190,13 @@ public class TrackLearner extends UntypedActor {
     public void onTrackRecognized(Track track) {
         trackRecognitionFinished = true;
         track.setPower(currentPower);
+        runPower = currentPower;
         physicModelCalculator = new PhysicModelCalculator(track,physicModel);
         if(physicModelCalculator.hasStraightWithThreeCheckpoints()){
             physicModelCalculator.calculateTrackPhysics();
             physicModelCalculator.calculateDistances();
             LOGGER.info("Track built with distances");
+            pilot.tell(track, ActorRef.noSender());
         }else{
             LOGGER.info("Track built without distances");
             LOGGER.info("Need to get another sensor in Tracksection");
