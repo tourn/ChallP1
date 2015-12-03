@@ -72,7 +72,7 @@ permalink: /report/
 ### 6.11.15
 * Grundgerüst Physikmodell erarbeiten (4h f)
 * TrackLearner & TrackAnalyzer neu schreiben/überarbeiten (2h f)
- 
+
 ### 7.11.15
 * TrackLearner & TrackAnalyzer neu schreiben/überarbeiten (6h f)
 
@@ -87,3 +87,6 @@ permalink: /report/
 * Physikmodell (3h fm)
 * Code Review & Refactoring (3h d)
 * Branches mergen (1h md)
+
+### 4.12.15
+* Refactoring (3h dfm)
