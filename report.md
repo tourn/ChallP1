@@ -88,5 +88,11 @@ permalink: /report/
 * Code Review & Refactoring (3h d)
 * Branches mergen (1h md)
 
-### 4.12.15
+### 26.11.15
+* Berechnung der Distanzen aufgrund des Physikmodells
+
+### 27.11.15
+* Anhalte-Technik zur Komplettierung des Gleichungssystem [Physikmodell](http://tourn.github.io/ChallP1/2015/11/11/AdvancedPhysicsModel/)
+
+### 3.12.15
 * Refactoring (3h dfm)
