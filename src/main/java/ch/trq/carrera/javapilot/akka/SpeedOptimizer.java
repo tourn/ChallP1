@@ -10,6 +10,7 @@ import ch.trq.carrera.javapilot.akka.positiontracker.PositionTracker;
 import ch.trq.carrera.javapilot.akka.positiontracker.SectionUpdate;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Direction;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
+import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackAndPhysicModelStorage;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
 import com.zuehlke.carrera.javapilot.akka.PowerAction;
 import com.zuehlke.carrera.relayapi.messages.RoundTimeMessage;
@@ -33,10 +34,10 @@ public class SpeedOptimizer extends UntypedActor {
     private PositionTracker positionTracker;
     private String actorDescription;
 
-    public SpeedOptimizer(ActorRef pilot, Track track) {
+    public SpeedOptimizer(ActorRef pilot, TrackAndPhysicModelStorage storage) {
         this.pilot = pilot;
-        this.track = track;
-        positionTracker = new PositionTracker(track);
+        this.track = storage.getTrack();
+        positionTracker = new PositionTracker(storage.getTrack());
 
         positionTracker.setOnUpdate(new PositionTracker.UpdateCallback() {
             @Override
@@ -68,8 +69,8 @@ public class SpeedOptimizer extends UntypedActor {
         actorDescription = getActorDescription();
     }
 
-    public static Props props(ActorRef pilot, Track track) {
-        return Props.create(SpeedOptimizer.class, () -> new SpeedOptimizer(pilot, track));
+    public static Props props(ActorRef pilot, TrackAndPhysicModelStorage storage) {
+        return Props.create(SpeedOptimizer.class, () -> new SpeedOptimizer(pilot, storage));
     }
 
     @Override

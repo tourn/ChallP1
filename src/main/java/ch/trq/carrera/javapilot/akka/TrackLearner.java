@@ -4,13 +4,10 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import ch.trq.carrera.javapilot.akka.log.LogMessage;
-import ch.trq.carrera.javapilot.akka.trackanalyzer.Direction;
-import ch.trq.carrera.javapilot.akka.trackanalyzer.PhysicLearnHelper;
-import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
+import ch.trq.carrera.javapilot.akka.trackanalyzer.*;
 import ch.trq.carrera.javapilot.math.PhysicModel;
 import ch.trq.carrera.javapilot.math.PhysicModelCalculator;
 import com.zuehlke.carrera.javapilot.akka.PowerAction;
-import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackAnalyzer;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
 import com.zuehlke.carrera.timeseries.FloatingHistory;
@@ -102,7 +99,8 @@ public class TrackLearner extends UntypedActor {
                     physicModelCalculator.calculateDistances();
                     Track track = physicModelCalculator.getTrack();
                     //TODO: Carposition setzen? PhysikModel mitsenden bzw. nur der E wert
-                    pilot.tell(track, ActorRef.noSender());
+                    TrackAndPhysicModelStorage storage = new TrackAndPhysicModelStorage(track,physicModel);
+                    pilot.tell(storage, ActorRef.noSender());
                     break;
             }
         }
@@ -196,7 +194,8 @@ public class TrackLearner extends UntypedActor {
             physicModelCalculator.calculateTrackPhysics();
             physicModelCalculator.calculateDistances();
             LOGGER.info("Track built with distances");
-            pilot.tell(track, ActorRef.noSender());
+            TrackAndPhysicModelStorage storage = new TrackAndPhysicModelStorage(track,physicModel);
+            pilot.tell(storage, ActorRef.noSender());
         }else{
             LOGGER.info("Track built without distances");
             LOGGER.info("Need to get another sensor in Tracksection");

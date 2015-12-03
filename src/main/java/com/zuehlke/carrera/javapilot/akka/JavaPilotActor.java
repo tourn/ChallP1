@@ -12,6 +12,7 @@ import ch.trq.carrera.javapilot.akka.positiontracker.CarUpdate;
 import ch.trq.carrera.javapilot.akka.positiontracker.NewRoundUpdate;
 import ch.trq.carrera.javapilot.akka.positiontracker.SectionUpdate;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
+import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackAndPhysicModelStorage;
 import com.google.gson.Gson;
 import com.zuehlke.carrera.javapilot.akka.experimental.ThresholdConfiguration;
 import com.zuehlke.carrera.javapilot.config.PilotProperties;
@@ -89,11 +90,11 @@ public class JavaPilotActor extends UntypedActor {
 
             if(message instanceof PilotToVisualConnection){
                 this.visualConnection = (PilotToVisualConnection) message;
-            } else if (message instanceof Track){
+            } else if (message instanceof TrackAndPhysicModelStorage){
                 //Switchover to Phase Two
                 LOGGER.info("Recieved Track");
-                this.visualConnection.initializeTrack((Track) message);
-                createTopology(SpeedOptimizer.props(getSelf(), (Track) message));
+                this.visualConnection.initializeTrack(((TrackAndPhysicModelStorage) message).getTrack());
+                createTopology(SpeedOptimizer.props(getSelf(), (TrackAndPhysicModelStorage) message));
             } else if (message instanceof CarUpdate){
                 //LOGGER.info("SENDING: SID: " + ((CarUpdate) message).getTrackIndex() + ", Offset: " + ((CarUpdate) message).getOffset() + "ms, Percentage: " + ((CarUpdate) message).getPercentage() + "%");
                 CarUpdate update = (CarUpdate) message;

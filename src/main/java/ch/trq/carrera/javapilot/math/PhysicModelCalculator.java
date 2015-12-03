@@ -217,16 +217,18 @@ public class PhysicModelCalculator {
                 //Zeit dazwischen ausrechnen
                 long t = 0;
                 if(isNewTs){
-                    t = track.getCheckpoints().get(posId+1).getDurationOffset();
+                    t = track.getCheckpoints().get((posId+1)%track.getCheckpoints().size()).getDurationOffset();
                 }else{
 
-                    t = track.getCheckpoints().get(posId+1).getDurationOffset()-track.getCheckpoints().get(posId).getDurationOffset();
+                    t = track.getCheckpoints().get((posId+1)%track.getCheckpoints().size()).getDurationOffset()-track.getCheckpoints().get(posId).getDurationOffset();
                 }
                 //Distanz "berechnen"
                 for(int i=0; i < t;i++){
                     v=physicModel.getVelocity(v,track.getSections().get(tsId),track.getPower(),1);
                     distance+=v*1.0/1000.0;
                 }
+                //TODO setDISTANCEOFFSET
+                track.getCheckpoints().get((posId+1)%track.getCheckpoints().size()).setDistanceOffset(distance);
 
                 if(track.getSections().get(tsId).getDuration()==track.getCheckpoints().get((posId + 1) % track.getCheckpoints().size()).getDurationOffset()){
                     track.getSections().get(tsId).setDistance(distance);
@@ -238,7 +240,7 @@ public class PhysicModelCalculator {
                 }
 
                 //Geschwindigkeit auf den Gemessenen Wert setzen (...)
-                v = track.getCheckpoints().get(posId+1).getVelocity();
+                v = track.getCheckpoints().get((posId+1)%track.getCheckpoints().size()).getVelocity();
                 //auf die nächste PosId setzen
                 posId = (posId+1)%track.getCheckpoints().size();
 
@@ -265,6 +267,9 @@ public class PhysicModelCalculator {
                                     v=physicModel.getVelocity(v,track.getSections().get(tsId),track.getPower(),1);
                                     distance+=v*1.0/1000.0;
                                 }
+                                //TODO setDISTANCEOFFSET
+                                track.getCheckpoints().get((posId)%track.getCheckpoints().size()).setDistanceOffset(distance);
+
                                 if(track.getSections().get(tsId).getDuration()==track.getCheckpoints().get(posId).getDurationOffset()){
                                     track.getSections().get(tsId).setDistance(distance);
                                     distance = 0;
@@ -280,6 +285,10 @@ public class PhysicModelCalculator {
                                     v=physicModel.getVelocity(v,track.getSections().get(tsId),track.getPower(),1);
                                     distance+=v*1.0/1000.0;
                                 }
+
+                                //TODO setDISTANCEOFFSET
+                                track.getCheckpoints().get((posId)%track.getCheckpoints().size()).setDistanceOffset(distance);
+
                                 track.getSections().get(tsId).setDistance(distance);
                                 distance = 0;
                                 tsId++;
@@ -317,16 +326,18 @@ public class PhysicModelCalculator {
                     //Zeit dazwischen ausrechnen
                     long t = 0;
                     if(isNewTs){
-                        t = track.getCheckpoints().get(posId+1).getDurationOffset();
+                        t = track.getCheckpoints().get((posId+1)%track.getCheckpoints().size()).getDurationOffset();
                     }else{
 
-                        t = track.getCheckpoints().get(posId+1).getDurationOffset()-track.getCheckpoints().get(posId).getDurationOffset();
+                        t = track.getCheckpoints().get((posId+1)%track.getCheckpoints().size()).getDurationOffset()-track.getCheckpoints().get(posId).getDurationOffset();
                     }
                     //Distanz "berechnen"
                     for(int i=0; i < t;i++){
                         v=physicModel.getVelocity(v,track.getSections().get(tsId),track.getPower(),1);
                         distance+=v*1.0/1000.0;
                     }
+                    //TODO setDISTANCEOFFSET
+                    track.getCheckpoints().get((posId+1)%track.getCheckpoints().size()).setDistanceOffset(distance);
 
                     if(track.getSections().get(tsId).getDuration()==track.getCheckpoints().get((posId + 1) % track.getCheckpoints().size()).getDurationOffset()){
                         track.getSections().get(tsId).setDistance(distance);
@@ -365,6 +376,10 @@ public class PhysicModelCalculator {
                                     v=physicModel.getVelocity(v,track.getSections().get(tsId),track.getPower(),1);
                                     distance+=v*1.0/1000.0;
                                 }
+
+                                //TODO setDISTANCEOFFSET
+                                track.getCheckpoints().get((posId)%track.getCheckpoints().size()).setDistanceOffset(distance);
+
                                 if(track.getSections().get(tsId).getDuration()==track.getCheckpoints().get(posId).getDurationOffset()){
                                     track.getSections().get(tsId).setDistance(distance);
                                     distance = 0;
@@ -380,6 +395,10 @@ public class PhysicModelCalculator {
                                     v=physicModel.getVelocity(v,track.getSections().get(tsId),track.getPower(),1);
                                     distance+=v*1.0/1000.0;
                                 }
+
+                                //TODO setDISTANCEOFFSET
+                                track.getCheckpoints().get((posId)%track.getCheckpoints().size()).setDistanceOffset(distance);
+
                                 track.getSections().get(tsId).setDistance(distance);
                                 distance = 0;
                                 tsId++;
