@@ -2,6 +2,7 @@ package ch.trq.carrera.javapilot.math;
 
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Direction;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
+import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -201,246 +202,62 @@ public class PhysicModelCalculator {
     }
 
     public void calculateDistances() {
-        Track.Position position = getFirstCheckpointWithDurationOffsetZero();
-        int posId = track.getCheckpoints().indexOf(position);
-        int tsId = position.getSection().getId();
-        int startTsId = tsId;
-        int startPosId = posId;
-        double v = position.getVelocity();
-        double distance = 0;
+        new DistanceCalculator().calculateTrackModel();
+    }
 
-        boolean isNewTs = true;
+    private class DistanceCalculator {
+        private double v;
 
-        while(tsId<track.getSections().size()){
-            //Wenn der nächste Checkpoint auch noch auf der Tracksection ist
-            if(track.getCheckpoints().get((posId+1)%track.getCheckpoints().size()).getSection().getId()==tsId){
-                //Zeit dazwischen ausrechnen
-                long t = 0;
-                if(isNewTs){
-                    t = track.getCheckpoints().get((posId+1)%track.getCheckpoints().size()).getDurationOffset();
-                }else{
+        private void calculateTrackModel() {
+            Track.Position rootCheckpoint = getFirstCheckpointWithDurationOffsetZero();
+            TrackSection rootTrackSection = rootCheckpoint.getSection();
+            v = rootCheckpoint.getVelocity();
 
-                    t = track.getCheckpoints().get((posId+1)%track.getCheckpoints().size()).getDurationOffset()-track.getCheckpoints().get(posId).getDurationOffset();
-                }
-                //Distanz "berechnen"
-                for(int i=0; i < t;i++){
-                    v=physicModel.getVelocity(v,track.getSections().get(tsId),track.getPower(),1);
-                    distance+=v*1.0/1000.0;
-                }
-                //TODO setDISTANCEOFFSET
-                track.getCheckpoints().get((posId+1)%track.getCheckpoints().size()).setDistanceOffset(distance);
+            for (int i = rootTrackSection.getId(); i < track.getSections().size() + rootTrackSection.getId(); i++) {
+                int sectionIndex = i % track.getSections().size();
+                TrackSection currentSection = track.getSections().get(sectionIndex);
 
-                if(track.getSections().get(tsId).getDuration()==track.getCheckpoints().get((posId + 1) % track.getCheckpoints().size()).getDurationOffset()){
-                    track.getSections().get(tsId).setDistance(distance);
-                    distance = 0;
-                    tsId++;
-                    isNewTs = true;
-                }else{
-                    isNewTs = false;
-                }
-
-                //Geschwindigkeit auf den Gemessenen Wert setzen (...)
-                v = track.getCheckpoints().get((posId+1)%track.getCheckpoints().size()).getVelocity();
-                //auf die nächste PosId setzen
-                posId = (posId+1)%track.getCheckpoints().size();
-
-            }else{
-                    //Wenn der Checkpoint auf der Tracksection ist
-                    if(track.getCheckpoints().get(posId).getSection().getId()==tsId){
-                        //Wenn der Velocity-Checkpoint am anfang ist
-                        if(track.getCheckpoints().get(posId).getDurationOffset()==0){
-                            v = track.getCheckpoints().get(posId).getVelocity();
-                            long t = track.getSections().get(tsId).getDuration();
-                            for(int i=0; i < t;i++){
-                                v=physicModel.getVelocity(v,track.getSections().get(tsId),track.getPower(),1);
-                                distance+=v*1.0/1000.0;
-                            }
-                            track.getSections().get(tsId).setDistance(distance);
-                            distance = 0;
-                            tsId++;
-                            isNewTs = true;
-                        }else{
-                            if(isNewTs){
-                                isNewTs = false;
-                                long t = track.getCheckpoints().get(posId).getDurationOffset();
-                                for(int i=0; i < t;i++){
-                                    v=physicModel.getVelocity(v,track.getSections().get(tsId),track.getPower(),1);
-                                    distance+=v*1.0/1000.0;
-                                }
-                                //TODO setDISTANCEOFFSET
-                                track.getCheckpoints().get((posId)%track.getCheckpoints().size()).setDistanceOffset(distance);
-
-                                if(track.getSections().get(tsId).getDuration()==track.getCheckpoints().get(posId).getDurationOffset()){
-                                    track.getSections().get(tsId).setDistance(distance);
-                                    distance = 0;
-                                    tsId++;
-                                    posId = (posId+1)%track.getCheckpoints().size();
-                                    isNewTs = true;
-                                }else{
-                                    isNewTs = false;
-                                }
-                            }else{
-                                long t = track.getSections().get(tsId).getDuration()-track.getCheckpoints().get(posId).getDurationOffset();
-                                for(int i=0; i < t;i++){
-                                    v=physicModel.getVelocity(v,track.getSections().get(tsId),track.getPower(),1);
-                                    distance+=v*1.0/1000.0;
-                                }
-
-                                //TODO setDISTANCEOFFSET
-                                track.getCheckpoints().get((posId)%track.getCheckpoints().size()).setDistanceOffset(distance);
-
-                                track.getSections().get(tsId).setDistance(distance);
-                                distance = 0;
-                                tsId++;
-                                posId = (posId+1)%track.getCheckpoints().size();
-                                isNewTs = true;
-                            }
-                        }
-                    }else{
-                        long t = track.getSections().get(tsId).getDuration();
-                        for(int i=0; i < t;i++){
-                            v=physicModel.getVelocity(v,track.getSections().get(tsId),track.getPower(),1);
-                            distance+=v*1.0/1000.0;
-                        }
-                        track.getSections().get(tsId).setDistance(distance);
-                        distance = 0;
-                        tsId++;
-                        if(tsId>track.getCheckpoints().get(posId).getSection().getId()){
-                            posId = (posId+1)%track.getCheckpoints().size();
-                            if(track.getCheckpoints().get(posId).getSection().getId()==tsId){
-                                if(track.getCheckpoints().get(posId).getDurationOffset()==0){
-                                    v = track.getCheckpoints().get(posId).getVelocity();
-                                }
-                            }
-                        }
-                        isNewTs = true;
-                    }
+                calculateTrackSection(currentSection);
+            }
+            for(Track.Position p : track.getCheckpoints()){
+                p.setPercentage(p.getDistanceOffset()/p.getSection().getDistance());
             }
         }
 
-        tsId=0;
 
-        while(tsId<startTsId){
-                //Wenn der nächste Checkpoint auch noch auf der Tracksection ist
-                if(track.getCheckpoints().get((posId+1)%track.getCheckpoints().size()).getSection().getId()==tsId){
-                    //Zeit dazwischen ausrechnen
-                    long t = 0;
-                    if(isNewTs){
-                        t = track.getCheckpoints().get((posId+1)%track.getCheckpoints().size()).getDurationOffset();
-                    }else{
-
-                        t = track.getCheckpoints().get((posId+1)%track.getCheckpoints().size()).getDurationOffset()-track.getCheckpoints().get(posId).getDurationOffset();
-                    }
-                    //Distanz "berechnen"
-                    for(int i=0; i < t;i++){
-                        v=physicModel.getVelocity(v,track.getSections().get(tsId),track.getPower(),1);
-                        distance+=v*1.0/1000.0;
-                    }
-                    //TODO setDISTANCEOFFSET
-                    track.getCheckpoints().get((posId+1)%track.getCheckpoints().size()).setDistanceOffset(distance);
-
-                    if(track.getSections().get(tsId).getDuration()==track.getCheckpoints().get((posId + 1) % track.getCheckpoints().size()).getDurationOffset()){
-                        track.getSections().get(tsId).setDistance(distance);
-                        distance = 0;
-                        tsId++;
-                        isNewTs = true;
-                    }else{
-                        isNewTs = false;
-                    }
-
-                    //Geschwindigkeit auf den Gemessenen Wert setzen (...)
-                    v = track.getCheckpoints().get(posId+1).getVelocity();
-                    //auf die nächste PosId setzen
-                    posId = (posId+1)%track.getCheckpoints().size();
-
-                }else{
-                    //Wenn der Checkpoint auf der Tracksection ist
-                    if(track.getCheckpoints().get(posId).getSection().getId()==tsId){
-                        //Wenn der Velocity-Checkpoint am anfang ist
-                        if(track.getCheckpoints().get(posId).getDurationOffset()==0){
-                            v = track.getCheckpoints().get(posId).getVelocity();
-                            long t = track.getSections().get(tsId).getDuration();
-                            for(int i=0; i < t;i++){
-                                v=physicModel.getVelocity(v,track.getSections().get(tsId),track.getPower(),1);
-                                distance+=v*1.0/1000.0;
-                            }
-                            track.getSections().get(tsId).setDistance(distance);
-                            distance = 0;
-                            tsId++;
-                            isNewTs = true;
-                        }else{
-                            if(isNewTs){
-                                isNewTs = false;
-                                long t = track.getCheckpoints().get(posId).getDurationOffset();
-                                for(int i=0; i < t;i++){
-                                    v=physicModel.getVelocity(v,track.getSections().get(tsId),track.getPower(),1);
-                                    distance+=v*1.0/1000.0;
-                                }
-
-                                //TODO setDISTANCEOFFSET
-                                track.getCheckpoints().get((posId)%track.getCheckpoints().size()).setDistanceOffset(distance);
-
-                                if(track.getSections().get(tsId).getDuration()==track.getCheckpoints().get(posId).getDurationOffset()){
-                                    track.getSections().get(tsId).setDistance(distance);
-                                    distance = 0;
-                                    tsId++;
-                                    posId = (posId+1)%track.getCheckpoints().size();
-                                    isNewTs = true;
-                                }else{
-                                    isNewTs = false;
-                                }
-                            }else{
-                                long t = track.getSections().get(tsId).getDuration()-track.getCheckpoints().get(posId).getDurationOffset();
-                                for(int i=0; i < t;i++){
-                                    v=physicModel.getVelocity(v,track.getSections().get(tsId),track.getPower(),1);
-                                    distance+=v*1.0/1000.0;
-                                }
-
-                                //TODO setDISTANCEOFFSET
-                                track.getCheckpoints().get((posId)%track.getCheckpoints().size()).setDistanceOffset(distance);
-
-                                track.getSections().get(tsId).setDistance(distance);
-                                distance = 0;
-                                tsId++;
-                                posId = (posId+1)%track.getCheckpoints().size();
-                                isNewTs = true;
-                            }
-                        }
-                    }else{
-                        long t = track.getSections().get(tsId).getDuration();
-                        for(int i=0; i < t;i++){
-                            v=physicModel.getVelocity(v,track.getSections().get(tsId),track.getPower(),1);
-                            distance+=v*1.0/1000.0;
-                        }
-                        track.getSections().get(tsId).setDistance(distance);
-                        distance = 0;
-                        tsId++;
-                        if(tsId>track.getCheckpoints().get(posId).getSection().getId()){
-                            posId = (posId+1)%track.getCheckpoints().size();
-                            if(track.getCheckpoints().get(posId).getSection().getId()==tsId){
-                                if(track.getCheckpoints().get(posId).getDurationOffset()==0){
-                                    v = track.getCheckpoints().get(posId).getVelocity();
-                                }
-                            }
-                        }
-                        isNewTs = true;
-                    }
-                }
-        }
-    }
-
-    private void calcDistancePercentage(Track track){
-        for(Track.Position p : track.getCheckpoints()){
-           p.setPercentage(p.getDistanceOffset()/p.getSection().getDistance());
-        }
-    }
-
-    private Track.Position getFirstCheckpointWithDurationOffsetZero() {
-        for(Track.Position checkpoint : track.getCheckpoints()){
-            if(checkpoint.getDurationOffset()==0){
-                return checkpoint;
+        private void calculateTrackSection(TrackSection section) {
+            List<Track.Position> checkpoints = track.getCheckpoints(section);
+            long t_offset = 0;
+            double distance = 0;
+            for (Track.Position checkpoint : checkpoints) {
+                distance += calculateSubsection(t_offset, checkpoint.getDurationOffset(), section);
+                t_offset = checkpoint.getDurationOffset();
+                checkpoint.setDistanceOffset(distance);
+                v = checkpoint.getVelocity(); //adjust velocity with measured value
             }
+            distance += calculateSubsection(t_offset, section.getDuration(), section);
+            section.setDistance(distance);
         }
-        return null;
+
+        private double calculateSubsection(long t_from, long t_to, TrackSection section) {
+            double distance = 0;
+            for (long t = t_from; t < t_to; t++) {
+                v = physicModel.getVelocity(v, section, track.getPower(), 1);
+                distance += v * 1.0 / 1000.0;
+            }
+            return distance;
+        }
+
+        private Track.Position getFirstCheckpointWithDurationOffsetZero() {
+            for(Track.Position checkpoint : track.getCheckpoints()){
+                if(checkpoint.getDurationOffset()==0){
+                    return checkpoint;
+                }
+            }
+            //FIXME: the current calculation can't handle this. This could be fixed by calculating backwards in a tracksection
+            return null;
+        }
     }
+
+
 }

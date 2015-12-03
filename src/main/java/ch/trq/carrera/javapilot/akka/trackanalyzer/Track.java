@@ -45,6 +45,17 @@ public class Track {
         this.car = car;
     }
 
+    public List<Track.Position> getCheckpoints(TrackSection section){
+        List<Track.Position> checkpoints = new ArrayList<>();
+        for(Track.Position checkpoint : this.getCheckpoints()){
+            if(checkpoint.getSection().getId() == section.getId()){
+                checkpoints.add(checkpoint);
+            }
+        }
+        return checkpoints;
+    }
+
+
     public static class Position{
         private TrackSection section;
         private long durationOffset;
