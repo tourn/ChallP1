@@ -219,6 +219,8 @@ public class TrackAnalyzer {
         return list;
     }
 
+
+
     private void printTrackSections(){
         StringBuilder builder = new StringBuilder();
         for(TrackSection trackSection : trackSections){

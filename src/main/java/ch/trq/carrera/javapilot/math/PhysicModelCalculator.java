@@ -429,6 +429,12 @@ public class PhysicModelCalculator {
         }
     }
 
+    private void calcDistancePercentage(Track track){
+        for(Track.Position p : track.getCheckpoints()){
+           p.setPercentage(p.getDistanceOffset()/p.getSection().getDistance());
+        }
+    }
+
     private Track.Position getFirstCheckpointWithDurationOffsetZero() {
         for(Track.Position checkpoint : track.getCheckpoints()){
             if(checkpoint.getDurationOffset()==0){
