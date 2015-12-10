@@ -77,14 +77,13 @@ public class TrackLearner extends UntypedActor {
             //TODO
             physicLearnHelper.handleVelocityMessage(message.getTimeStamp());
             switch(physicLearnHelper.state){
-                case MOVE_TO_DESTINATION:
+                case MOVE_TO_CHECKPOINTDESTINATION:
+                case MOVE_TO_HALF_TRACKSECTION:
+                case MEASURE:
                     currentPower = runPower;
                     break;
                 case BRAKE:
                     currentPower = 0;
-                    break;
-                case MEASURE:
-                    currentPower = runPower;
                     break;
                 case FINISHED:
                     double dv1 = message.getVelocity();
@@ -124,14 +123,13 @@ public class TrackLearner extends UntypedActor {
             //stop in a straight with 2 sensors and start again.
             physicLearnHelper.handleTrackSectionMessage(event.getTimeStamp());
             switch(physicLearnHelper.state){
-                case MOVE_TO_DESTINATION:
+                case MOVE_TO_CHECKPOINTDESTINATION:
+                case MOVE_TO_HALF_TRACKSECTION:
+                case MEASURE:
                     currentPower = runPower;
                     break;
                 case BRAKE:
                     currentPower = 0;
-                    break;
-                case MEASURE:
-                    currentPower = runPower;
                     break;
             }
         }

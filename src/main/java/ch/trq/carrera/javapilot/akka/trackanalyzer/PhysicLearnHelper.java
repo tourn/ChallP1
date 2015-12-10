@@ -11,11 +11,13 @@ public class PhysicLearnHelper {
     private Track track;
 
     private static final int WAIT_TIME_FOR_BRAKE = 3000;
+    private static final int TIME_TO_DRIVE_FOR_MEASURE = 1500;
 
     private long startTimeStamp = -1;
     private long timeFromStartToDestination;
     private long startBreakTimeStamp = -1;
     private long startMeasureTimeStamp = -1;
+    private long reachCheckPointTimeStamp = -1;
     private int destinationTsId;
     private int destinationCpId;
 
@@ -36,7 +38,7 @@ public class PhysicLearnHelper {
         destinationTsId = getFirstTrackSectionIdWithTwoVelocitySensors();
         destinationCpId = getCheckpointDestinationId();
         timeFromStartToDestination = track.getSections().get(destinationTsId).getTimeStamp();
-        state = State.MOVE_TO_DESTINATION;
+        state = State.MOVE_TO_CHECKPOINTDESTINATION;
     }
 
     public double getMeasureTime(){
@@ -54,41 +56,44 @@ public class PhysicLearnHelper {
 
     public void handleVelocityMessage(long timeStamp){
         switch(state){
-            case MOVE_TO_DESTINATION:
+            case MOVE_TO_CHECKPOINTDESTINATION:
                 passedVelocityId++;
                 if(passedVelocityId==destinationCpId){
-                    isAtDestination = true;
-                    state = State.BRAKE;
+                    //isAtDestination = true;
+                    if(track.getCheckpoints().get(destinationCpId).getSection().getDuration()>1000){
+                        state = State.MOVE_TO_HALF_TRACKSECTION;
+                    }else{
+                        isAtDestination = true;
+                        state = State.BRAKE;
+                    }
                 }
-                break;
-            case BRAKE:
                 break;
             case MEASURE:
                 state = State.FINISHED;
                 measureTime = timeStamp-startMeasureTimeStamp;
+                break;
+            default:
                 break;
         }
     }
 
     public void handleTrackSectionMessage(long timeStamp){
         switch(state){
-            case MOVE_TO_DESTINATION:
-                if(startTimeStamp==-1){
-                    startTimeStamp = timeStamp;
-                }else if(timeStamp-startTimeStamp>timeFromStartToDestination){
+            case MOVE_TO_HALF_TRACKSECTION:
+                if(reachCheckPointTimeStamp==-1){
+                    reachCheckPointTimeStamp = timeStamp;
+                }else if(track.getCheckpoints().get(destinationCpId).getSection().getDuration()-TIME_TO_DRIVE_FOR_MEASURE<timeStamp-reachCheckPointTimeStamp){
                     isAtDestination = true;
-                    state = State.MOVE_TO_DESTINATION;
+                    state = State.BRAKE;
                 }
                 break;
             case BRAKE:
                 if(startBreakTimeStamp==-1){
                     startBreakTimeStamp = timeStamp;
-                }else if(timeStamp-startTimeStamp>WAIT_TIME_FOR_BRAKE){
+                }else if(timeStamp-startBreakTimeStamp>WAIT_TIME_FOR_BRAKE){
                     startMeasureTimeStamp = timeStamp;
                     state = State.MEASURE;
                 }
-                break;
-            case MEASURE:
                 break;
         }
     }
@@ -118,7 +123,8 @@ public class PhysicLearnHelper {
     }
 
     public enum State{
-        MOVE_TO_DESTINATION,
+        MOVE_TO_CHECKPOINTDESTINATION,
+        MOVE_TO_HALF_TRACKSECTION,
         BRAKE,
         MEASURE,
         FINISHED
