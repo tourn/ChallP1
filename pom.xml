@@ -47,13 +47,13 @@
         <dependency>
             <groupId>com.zuehlke.fastandfurious</groupId>
             <artifactId>fnf.clientapi</artifactId>
-            <version>1.1.7-SNAPSHOT</version>
+            <version>1.1.7</version>
         </dependency>
 
         <dependency>
             <groupId>com.zuehlke.fastandfurious</groupId>
             <artifactId>fnf.simulib</artifactId>
-            <version>0.9.4-SNAPSHOT</version>
+            <version>0.9.5</version>
         </dependency>
 
 
