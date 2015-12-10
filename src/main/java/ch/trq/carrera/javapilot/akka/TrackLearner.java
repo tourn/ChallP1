@@ -98,6 +98,7 @@ public class TrackLearner extends UntypedActor {
                     physicModelCalculator.calculateDistances();
                     Track track = physicModelCalculator.getTrack();
                     //TODO: Carposition setzen? PhysikModel mitsenden bzw. nur der E wert
+                    track.setCar(physicLearnHelper.GetCarPositionOnTrack());
                     TrackAndPhysicModelStorage storage = new TrackAndPhysicModelStorage(track,physicModel);
                     pilot.tell(storage, ActorRef.noSender());
                     break;
@@ -192,6 +193,7 @@ public class TrackLearner extends UntypedActor {
             physicModelCalculator.calculateTrackPhysics();
             physicModelCalculator.calculateDistances();
             LOGGER.info("Track built with distances");
+            track.setCar(new Track.Position(track.getSections().get(0),0));
             TrackAndPhysicModelStorage storage = new TrackAndPhysicModelStorage(track,physicModel);
             pilot.tell(storage, ActorRef.noSender());
         }else{

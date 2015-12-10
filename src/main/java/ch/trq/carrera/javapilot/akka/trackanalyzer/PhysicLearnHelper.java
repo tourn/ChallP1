@@ -129,4 +129,8 @@ public class PhysicLearnHelper {
         MEASURE,
         FINISHED
     }
+
+    public Track.Position GetCarPositionOnTrack(){
+        return new Track.Position(track.getSections().get((destinationTsId+1)%track.getSections().size()),0);
+    }
 }
