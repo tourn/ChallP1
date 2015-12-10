@@ -67,6 +67,7 @@ public class Track {
 
             this.section = section;
             this.durationOffset = durationOffset;
+            this.distanceOffset = 0;
             this.percentage = 0;
         }
 

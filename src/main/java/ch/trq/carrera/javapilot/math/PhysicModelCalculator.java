@@ -201,12 +201,21 @@ public class PhysicModelCalculator {
         LOGGER.info("v0: " + v0 + "cm/s, v1: " + v1 + "cm/s, t: " + t + "ms, Power: " + track.getPower());
     }
 
+    private DistanceCalculator distanceCalculator;
     public void calculateDistances() {
-        new DistanceCalculator().calculateTrackModel();
+        distanceCalculator = new DistanceCalculator();
+        distanceCalculator.calculateTrackModel();
+    }
+
+    public double getV(){
+        return distanceCalculator.getV();
     }
 
     private class DistanceCalculator {
         private double v;
+        public double getV(){
+            return v;
+        }
 
         private void calculateTrackModel() {
             Track.Position rootCheckpoint = getFirstCheckpointWithDurationOffsetZero();

@@ -99,11 +99,23 @@ public class TrackLearner extends UntypedActor {
                     Track track = physicModelCalculator.getTrack();
                     //TODO: Carposition setzen? PhysikModel mitsenden bzw. nur der E wert
                     track.setCar(physicLearnHelper.GetCarPositionOnTrack());
+                    track.getCar().setVelocity(getLastVelocity(track.getCar().getSection(),track));
                     TrackAndPhysicModelStorage storage = new TrackAndPhysicModelStorage(track,physicModel);
                     pilot.tell(storage, ActorRef.noSender());
                     break;
             }
         }
+    }
+
+    private double getLastVelocity(TrackSection trackSection,Track track){
+        double v=0;
+        for(Track.Position checkPoint : track.getCheckpoints()){
+            if(checkPoint.getSection().getId()>=trackSection.getId()){
+                break;
+            }
+            v = checkPoint.getVelocity();
+        }
+        return v;
     }
 
     private void handleSensorEvent(SensorEvent event) {
@@ -194,6 +206,7 @@ public class TrackLearner extends UntypedActor {
             physicModelCalculator.calculateDistances();
             LOGGER.info("Track built with distances");
             track.setCar(new Track.Position(track.getSections().get(0),0));
+            track.getCar().setVelocity(physicModelCalculator.getV());
             TrackAndPhysicModelStorage storage = new TrackAndPhysicModelStorage(track,physicModel);
             pilot.tell(storage, ActorRef.noSender());
         }else{
