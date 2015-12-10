@@ -3,7 +3,7 @@ package ch.trq.carrera.javapilot.akka.positiontracker;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Direction;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
-import ch.trq.carrera.javapilot.math.TrackPhysicsModel;
+import ch.trq.carrera.javapilot.math.PhysicModel;
 import com.zuehlke.carrera.relayapi.messages.RoundTimeMessage;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
@@ -21,160 +21,112 @@ public class PositionTracker {
     private SectionChangeCallback onSectionChange;
     private NewRoundCallback onNewRound;
 
-    private Track.Position pos;
+    private Track.Position carPosition;
     private int sectionIndex;
     private FloatingHistory gyroZ = new FloatingHistory(8);
     private static double TURN_THRESHOLD = 1500;
     private final Logger LOGGER = LoggerFactory.getLogger(PositionTracker.class);
-    private int power=0;
+    private int power = 0;
 
-    private double sectionPercentage=0;
+    private double sectionPercentage = 0;
     private int velocityPositionId;
     private long roundStartTimeStamp;
     private long rountTime;
 
-    private TrackPhysicsModel trackPhysicsModel = new TrackPhysicsModel();
-    double calculatedVelocity = 0;
+    private PhysicModel physicModel = null;
 
-    public PositionTracker(Track track){
+    public PositionTracker(Track track, PhysicModel physicModel) {
         this.track = track;
-        pos = new Track.Position(track.getSections().get(0), 0);
-        sectionIndex = 0;
-        velocityPositionId = -1;
+        carPosition = track.getCarPosition();
+        this.physicModel = physicModel;
+        sectionIndex = carPosition.getSection().getId();
+        velocityPositionId = getNextVelocityPositionId(sectionIndex);
+        carPosition.setVelocity(track.getCheckpoints().get(velocityPositionId).getVelocity());
+    }
+
+    private int getNextVelocityPositionId(int trackSectionId) {
+        for (Track.Position checkpoint : track.getCheckpoints()) {
+            if (checkpoint.getSection().getId() >= trackSectionId) return track.getCheckpoints().indexOf(checkpoint);
+        }
+        return 0;
     }
 
 
-    private double calculateDistance(long dtime, Direction turn){
+    private double calculateDistance(long dtime) {
         double distance = 0;
-        for(int i = 0; i<dtime;i++){
-            calculatedVelocity = trackPhysicsModel.average_velocity(calculatedVelocity, turn, power, 1.0/1000.0);
-            distance += calculatedVelocity * 1.0/1000.0;
+        double calculatedVelocity = carPosition.getVelocity();
+        for (int i = 0; i < dtime; i++) {
+            calculatedVelocity = physicModel.getVelocity(calculatedVelocity, carPosition.getSection(), power, 1);
+            distance += calculatedVelocity * 1.0 / 1000.0;
         }
+        carPosition.setVelocity(calculatedVelocity);
         return distance;
     }
 
-    public void update(SensorEvent e){
-        gyroZ.shift(e.getG()[2]);
-
-        if(tLastUpdate == -1){
+    public void update(SensorEvent e) {
+        if (tLastUpdate == -1) {
             tLastUpdate = e.getTimeStamp();
-            roundStartTimeStamp = e.getTimeStamp();
             return;
         }
-        long offset = e.getTimeStamp() - tLastUpdate;
-        tLastUpdate = e.getTimeStamp();
-        //calculate things
-        pos.setDurationOffset(pos.getDurationOffset() + offset);
-        //<NOT FINAL> TODO
-        //pos.setPercentage(pos.getPercentage()+((double)offset)/((double)pos.getSection().getDuration()));
-        pos.setDistanceOffset(pos.getDistanceOffset()+calculateDistance(offset,pos.getSection().getDirection()));
-        pos.setPercentage(pos.getDistanceOffset()/pos.getSection().getDistance());
-
-        if(sectionChanged()){
-            if(onSectionChange!=null){
-                onSectionChange.onUpdate(sectionIndex, pos.getSection());
-            }
-            sectionIndex = (sectionIndex +1) % track.getSections().size();
-            if(sectionIndex == 0){
-                enteredNewRound(e.getTimeStamp());
-            }
-            TrackSection next = track.getSections().get(sectionIndex);
-            pos.setSection(next);
-            pos.setDurationOffset(0); //add overshoot?
-            pos.setPercentage(0);
-            pos.setDistanceOffset(0);
-        }
-        if(onUpdate != null){
-            //LOGGER.info("SENDING: SID: " + sectionIndex + ", Offset: " + pos.getDurationOffset() + "ms, Percentage: " + pos.getPercentage() + "%");
-            onUpdate.onUpdate(sectionIndex, pos.getDurationOffset(),pos.getPercentage());
+        long timeOffset = e.getTimeStamp() - tLastUpdate;
+        carPosition.setDistanceOffset(carPosition.getDistanceOffset() + calculateDistance(timeOffset));
+        if (sectionChanged()){
+            carPosition.setSection(getNextTrackSection(carPosition.getSection()));
+            carPosition.setPercentage(0);
+            carPosition.setDistanceOffset(0);
+        }else{
+           carPosition.setPercentage(carPosition.getDistanceOffset() / carPosition.getSection().getDistance());
         }
     }
 
+    private TrackSection getNextTrackSection(TrackSection trackSection){
+       return track.getSections().get((trackSection.getId() + 1) % track.getSections().size());
+    }
 
-
-    public void enteredNewRound(long roundTimeStamp){
+    public void enteredNewRound(long roundTimeStamp) {
         long oldRoundTime = roundTimeStamp - roundStartTimeStamp;
         roundStartTimeStamp = roundTimeStamp;
         onNewRound.onUpdate(oldRoundTime);
     }
 
-    private boolean sectionChanged(){
-        //LOGGER.info("Selection changed ???");
-       /*if(pos.getPercentage() > 0.5){
-            if(pos.getSection().getDirection().equals("GOING STRAIGHT") && Math.abs(gyroZ.currentMean()) > TURN_THRESHOLD){
-                LOGGER.info("going into TURN");
-                return true;
-            }
-            if(pos.getSection().getDirection().equals("TURN") && Math.abs(gyroZ.currentMean()) < TURN_THRESHOLD){
-                LOGGER.info("going into GOING STRAIGHT");
-                return true;
-            }
-       }else if(pos.getPercentage()>=1){//100% oder mehr?
-           return true;
-       }*/
-        return pos.getSection().getDistance() < pos.getDistanceOffset();
+    private boolean sectionChanged() {
+        return carPosition.getSection().getDistance() < carPosition.getDistanceOffset();
     }
 
-    public void velocityUpdate(VelocityMessage message){
-        LOGGER.info("Velocity: " + message.getVelocity() + ", calculated: " + calculatedVelocity + ", difference: " + Math.abs(message.getVelocity()-calculatedVelocity));
-        calculatedVelocity = message.getVelocity();
+    public void velocityUpdate(VelocityMessage message) {
+        carPosition.setVelocity(message.getVelocity());
 
-
-        /*if(Math.abs(message.getTimeStamp()-roundStartTimeStamp)<500){
-            velocityPositionId = 0;
-        } else{
-            velocityPositionId = (++velocityPositionId)%track.getCheckpoints().size();
-        }*/
-        velocityPositionId = (++velocityPositionId)%track.getCheckpoints().size();
         LOGGER.info("Sind an Position: " + velocityPositionId);
-        // TODO Zurückgeben auf welcher SectionID das auto sich befindet + wieviel Prozent der Section abgeschlossen ist -> meistens entweder 0.00 oder 1.00, gibt aber ausnahmen
-        if(sectionIndex != getTrackSectionId(velocityPositionId)/*track.getSections().indexOf(track.getCheckpoints().get(velocityPositionId).getSection())*/) {
-            LOGGER.info("WRONG SECTION");
-            setNewSection(track.getCheckpoints().get(velocityPositionId));
-        }else{
-            LOGGER.info("RIGHT SECTION");
-            pos.setPercentage(track.getCheckpoints().get(velocityPositionId).getPercentage());
-            pos.setDistanceOffset(track.getCheckpoints().get(velocityPositionId).getDistanceOffset());
-            pos.setDurationOffset(track.getCheckpoints().get(velocityPositionId).getDurationOffset());
+        if (carPosition.getSection().getId() != getTrackSectionId(velocityPositionId)){
+            carPosition.setSection(getNextTrackSection(carPosition.getSection()));
+            carPosition.setPercentage(0);
+            carPosition.setDistanceOffset(0);
+        } else {
+            carPosition.setPercentage(track.getCheckpoints().get(velocityPositionId).getPercentage());
+            carPosition.setDistanceOffset(track.getCheckpoints().get(velocityPositionId).getDistanceOffset());
+            carPosition.setDurationOffset(track.getCheckpoints().get(velocityPositionId).getDurationOffset());
         }
+
+        velocityPositionId = (++velocityPositionId) % track.getCheckpoints().size();
     }
 
-    private void setNewSection(Track.Position position){
-        if((sectionIndex +1) % track.getSections().size()==getTrackSectionId(velocityPositionId)){
-            if(onSectionChange!=null){
-                onSectionChange.onUpdate(sectionIndex, pos.getSection());
-            }
-        }
-        //sectionIndex = getTrackSectionId(velocityPositionId);
-        pos.setPercentage(position.getPercentage());
-        pos.setSection(position.getSection());
-        pos.setDurationOffset(position.getDurationOffset());
-        pos.setDistanceOffset(position.getDistanceOffset());
-    }
-
-    private int getTrackSectionId(int velocityPositionId){
+    private int getTrackSectionId(int velocityPositionId) {
         return track.getSections().indexOf(track.getCheckpoints().get(velocityPositionId).getSection());
     }
 
-    public void roundTimeUpdate(RoundTimeMessage message){
-        rountTime = message.getRoundDuration();
-        LOGGER.info("LETZTE RUNDENZEIT: " + rountTime);
-        roundStartTimeStamp = message.getTimestamp();
-    }
-
-    public static abstract class UpdateCallback{
+    public static abstract class UpdateCallback {
         public abstract void onUpdate(int sectionIndex, long offset, double percentage);
     }
 
-    public static abstract class SectionChangeCallback{
+    public static abstract class SectionChangeCallback {
         public abstract void onUpdate(int sectionIndex, TrackSection section);
     }
 
-    public static abstract class NewRoundCallback{
+    public static abstract class NewRoundCallback {
         public abstract void onUpdate(long roundtime);
     }
 
-    public void setOnNewRound(NewRoundCallback onNewRound){
+    public void setOnNewRound(NewRoundCallback onNewRound) {
         this.onNewRound = onNewRound;
     }
 
@@ -186,23 +138,24 @@ public class PositionTracker {
         this.onUpdate = onUpdate;
     }
 
-    public void setPower(int power){
+    public void setPower(int power) {
         this.power = power;
     }
-    public int getPower(){
+
+    public int getPower() {
         return power;
     }
 
-    public Track.Position getPos() {
-        return pos;
+    public Track.Position getCarPosition() {
+        return carPosition;
     }
 
-    public boolean isTurn(){
-        return pos.getSection().getDirection().equals(Direction.TURN);
+    public boolean isTurn() {
+        return carPosition.getSection().getDirection().equals(Direction.TURN);
     }
 
-    public double getPercentageDistance(){
+    public double getPercentageDistance() {
         // TODO SOME MORE LOGICs
-        return pos.getPercentage();
+        return carPosition.getPercentage();
     }
 }

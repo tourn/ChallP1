@@ -28,16 +28,16 @@ public class SpeedOptimizer extends UntypedActor {
     private ActorRef pilot;
     private final Track track;
     private int power = 200;
-    private int minPower = 100;
+    private int minPower = 150;
     private int maxTurnPower = 150;
-    private int maxPower = 200;
+    private int maxPower = 150;
     private PositionTracker positionTracker;
     private String actorDescription;
 
     public SpeedOptimizer(ActorRef pilot, TrackAndPhysicModelStorage storage) {
         this.pilot = pilot;
         this.track = storage.getTrack();
-        positionTracker = new PositionTracker(storage.getTrack());
+        positionTracker = new PositionTracker(storage.getTrack(), storage.getPhysicModel());
 
         positionTracker.setOnUpdate(new PositionTracker.UpdateCallback() {
             @Override
@@ -111,13 +111,15 @@ public class SpeedOptimizer extends UntypedActor {
         }
         //pilot.tell ( new PowerAction(power), getSelf());
         popluateLog(log);
+        Track.Position carPosition = positionTracker.getCarPosition();
+        pilot.tell(new CarUpdate(carPosition.getSection().getId(), carPosition.getDurationOffset(), carPosition.getPercentage()), getSelf());
         pilot.tell(log, getSelf());
     }
 
     private void popluateLog(LogMessage log){
         log.setPower(positionTracker.getPower());
         log.setActorDescription(actorDescription);
-        log.setPositionRelative(positionTracker.getPos().getDistanceOffset());
+        log.setPositionRelative(positionTracker.getCarPosition().getDistanceOffset());
         log.settAfterCalculation(System.currentTimeMillis());
     }
 

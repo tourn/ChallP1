@@ -37,7 +37,7 @@ public class Track {
         this.checkpoints = checkpoints;
     }
 
-    public Position getCar() {
+    public Position getCarPosition() {
         return car;
     }
 
