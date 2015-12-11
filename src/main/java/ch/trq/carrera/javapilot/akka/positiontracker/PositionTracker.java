@@ -22,16 +22,13 @@ public class PositionTracker {
     private NewRoundCallback onNewRound;
 
     private Track.Position carPosition;
-    private int sectionIndex;
     private FloatingHistory gyroZ = new FloatingHistory(8);
     private static double TURN_THRESHOLD = 1500;
     private final Logger LOGGER = LoggerFactory.getLogger(PositionTracker.class);
     private int power = 0;
 
-    private double sectionPercentage = 0;
     private int velocityPositionId;
     private long roundStartTimeStamp;
-    private long rountTime;
 
     private PhysicModel physicModel = null;
 
@@ -39,7 +36,7 @@ public class PositionTracker {
         this.track = track;
         carPosition = track.getCarPosition();
         this.physicModel = physicModel;
-        sectionIndex = carPosition.getSection().getId();
+        int sectionIndex = carPosition.getSection().getId();
         velocityPositionId = getNextVelocityPositionId(sectionIndex);
         carPosition.setVelocity(track.getCheckpoints().get(velocityPositionId).getVelocity());
     }
@@ -69,13 +66,14 @@ public class PositionTracker {
             return;
         }
         long timeOffset = e.getTimeStamp() - tLastUpdate;
+        tLastUpdate = e.getTimeStamp();
         carPosition.setDistanceOffset(carPosition.getDistanceOffset() + calculateDistance(timeOffset));
         if (sectionChanged()){
             carPosition.setSection(getNextTrackSection(carPosition.getSection()));
             carPosition.setPercentage(0);
             carPosition.setDistanceOffset(0);
         }else{
-           carPosition.setPercentage(carPosition.getDistanceOffset() / carPosition.getSection().getDistance());
+           carPosition.setPercentage(Math.min(carPosition.getDistanceOffset() / carPosition.getSection().getDistance(),1.0));
         }
     }
 
@@ -90,7 +88,14 @@ public class PositionTracker {
     }
 
     private boolean sectionChanged() {
-        return carPosition.getSection().getDistance() < carPosition.getDistanceOffset();
+        // TODO: Wenn sich laut (Physik)-Berechnung, die Section gewechselt hat, muss noch anhand der Physiksensoren dies überprüft werden.
+        if(carPosition.getSection().getDistance() < carPosition.getDistanceOffset()){
+            if(carPosition.getSection().getId() != track.getCheckpoints().get(velocityPositionId).getSection().getId()){
+               return true;
+            }
+        }
+        return false;
+        //return carPosition.getSection().getDistance() < carPosition.getDistanceOffset();
     }
 
     public void velocityUpdate(VelocityMessage message) {

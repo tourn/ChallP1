@@ -28,9 +28,9 @@ public class SpeedOptimizer extends UntypedActor {
     private ActorRef pilot;
     private final Track track;
     private int power = 200;
-    private int minPower = 150;
-    private int maxTurnPower = 150;
-    private int maxPower = 150;
+    private final int minPower = 150;
+    private final int maxTurnPower = 150;
+    private final int maxPower = 150;
     private PositionTracker positionTracker;
     private String actorDescription;
 
