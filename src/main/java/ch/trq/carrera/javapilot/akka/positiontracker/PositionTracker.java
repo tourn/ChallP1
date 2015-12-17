@@ -1,5 +1,6 @@
 package ch.trq.carrera.javapilot.akka.positiontracker;
 
+import ch.trq.carrera.javapilot.akka.SpeedOptimizer;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Direction;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
@@ -11,11 +12,14 @@ import com.zuehlke.carrera.timeseries.FloatingHistory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Observable;
+
 /**
  * Created by tourn on 22.10.15.
  */
-public class PositionTracker {
+public class PositionTracker extends Observable {
     private final Track track;
+    private final SpeedOptimizer speedOptimizer;
     private long tLastUpdate = -1;
 
     private Track.Position carPosition;
@@ -28,7 +32,8 @@ public class PositionTracker {
 
     private PhysicModel physicModel = null;
 
-    public PositionTracker(Track track, PhysicModel physicModel) {
+    public PositionTracker(Track track, PhysicModel physicModel, SpeedOptimizer speedOptimizer) {
+        this.speedOptimizer = speedOptimizer;
         this.track = track;
         carPosition = track.getCarPosition();
         this.physicModel = physicModel;
@@ -65,6 +70,8 @@ public class PositionTracker {
         tLastUpdate = e.getTimeStamp();
         carPosition.setDistanceOffset(carPosition.getDistanceOffset() + calculateDistance(timeOffset));
         if (sectionChanged()){
+            //FIXME tell this over akka so we don't need reference to speed optimizer
+            speedOptimizer.update(this, carPosition.getSection());
             carPosition.setSection(getNextTrackSection(carPosition.getSection()));
             carPosition.setPercentage(0);
             carPosition.setDistanceOffset(0);
@@ -97,6 +104,7 @@ public class PositionTracker {
 
         LOGGER.info("Sind an Position: " + velocityPositionId);
         if (carPosition.getSection().getId() != getTrackSectionId(velocityPositionId)){
+            speedOptimizer.update(this, carPosition.getSection());
             carPosition.setSection(getTrackSection(velocityPositionId));
             carPosition.setPercentage(0);
             carPosition.setDistanceOffset(0);

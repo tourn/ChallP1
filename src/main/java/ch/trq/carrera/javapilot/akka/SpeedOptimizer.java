@@ -3,12 +3,11 @@ package ch.trq.carrera.javapilot.akka;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
+import ch.trq.carrera.javapilot.akka.history.StrategyParameters;
+import ch.trq.carrera.javapilot.akka.history.TrackHistory;
 import ch.trq.carrera.javapilot.akka.log.LogMessage;
 import ch.trq.carrera.javapilot.akka.positiontracker.CarUpdate;
-import ch.trq.carrera.javapilot.akka.positiontracker.NewRoundUpdate;
 import ch.trq.carrera.javapilot.akka.positiontracker.PositionTracker;
-import ch.trq.carrera.javapilot.akka.positiontracker.SectionUpdate;
-import ch.trq.carrera.javapilot.akka.trackanalyzer.Direction;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackAndPhysicModelStorage;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
@@ -20,10 +19,13 @@ import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Observable;
+import java.util.Observer;
+
 /**
  * Currently not optimizing anything, merely a placeholder.
  */
-public class SpeedOptimizer extends UntypedActor {
+public class SpeedOptimizer extends UntypedActor implements Observer{
 
     private final int ZERO_POWER = 0;
     private final long WAIT_TIME_FOR_PENALTY = 3000;
@@ -39,11 +41,19 @@ public class SpeedOptimizer extends UntypedActor {
     private final int maxPower = 200;
     private PositionTracker positionTracker;
     private String actorDescription;
+    private final TrackHistory history;
+    private StrategyParameters currentStrategyParams;
+    private boolean recoveringFromPenalty = false;
 
     public SpeedOptimizer(ActorRef pilot, TrackAndPhysicModelStorage storage) {
         this.pilot = pilot;
         this.track = storage.getTrack();
-        positionTracker = new PositionTracker(storage.getTrack(), storage.getPhysicModel());
+        positionTracker = new PositionTracker(storage.getTrack(), storage.getPhysicModel(), this);
+        positionTracker.addObserver(this);
+
+        history = new TrackHistory(track);
+        TrackSection currentSection = positionTracker.getCarPosition().getSection();
+        currentStrategyParams = createStrategyParams(history.getValidHistory(currentSection.getId()));
 
         changePower(maxTurnPower);
 
@@ -75,6 +85,7 @@ public class SpeedOptimizer extends UntypedActor {
     }
 
     private void handleVelocityMessage(VelocityMessage message) {
+        recoveringFromPenalty = false;
         positionTracker.velocityUpdate(message);
     }
 
@@ -88,10 +99,10 @@ public class SpeedOptimizer extends UntypedActor {
             }
         }else {
             if (!positionTracker.isTurn()) {
-                if (positionTracker.getPercentageDistance() > 0.5) {
+                if (positionTracker.getPercentageDistance() > currentStrategyParams.getBrakePercentage()) {
                     changePower(minPower);
                 } else {
-                    changePower(maxPower);
+                    changePower(currentStrategyParams.getPower());
                 }
             } else {
                 changePower(maxTurnPower);
@@ -104,10 +115,12 @@ public class SpeedOptimizer extends UntypedActor {
     }
 
     private void handlePenaltyMessage(PenaltyMessage message) {
-        // TODO: Set Power to Zero, Wait 3sek, start again
         changePower(ZERO_POWER);
         reciveLastPenaltyMessageTime = System.currentTimeMillis();
         hasPenalty = true;
+        recoveringFromPenalty = true;
+        currentStrategyParams.setPowerIncreaseFrozen(true);
+        currentStrategyParams.setPenaltyOccurred(true);
 
     }
 
@@ -125,5 +138,39 @@ public class SpeedOptimizer extends UntypedActor {
     private void changePower(int power) {
         pilot.tell(new PowerAction(power), getSelf());
         positionTracker.setPower(power);
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        updateHistory((TrackSection) arg);
+    }
+
+    private void updateHistory(TrackSection section){
+        currentStrategyParams.setDuration(section.getDuration()); //FIXME: duration is currently not set in the section
+        history.addEntry(currentStrategyParams);
+        currentStrategyParams = createStrategyParams(history.getValidHistory(positionTracker.getCarPosition().getSection().getId()));
+
+    }
+
+    private StrategyParameters createStrategyParams(StrategyParameters previous){
+        StrategyParameters params = new StrategyParameters();
+
+        params.setPowerIncreaseFrozen(previous.isPowerIncreaseFrozen());
+        params.setBrakePercentage(previous.getBrakePercentage());
+        params.setSection(previous.getSection());
+
+        int power = previous.getPower();
+        if(previous.isPenaltyOccurred()){
+            power -= 10;
+        } else if(!previous.isPowerIncreaseFrozen()){
+            power += 10;
+        }
+        params.setPower(power);
+
+        if(recoveringFromPenalty){
+            params.setValid(false);
+        }
+
+        return params;
     }
 }

@@ -5,13 +5,13 @@ import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
 /**
  * Created by tourn on 17.12.15.
  */
-public class HistoryEntry {
+public class StrategyParameters {
     private TrackSection section;
     private double brakePercentage;
     private long duration;
     private int power;
-    private boolean penaltyOcurred = false;
-    private boolean recoveringFromPenalty = false;
+    private boolean penaltyOccurred = false;
+    private boolean valid = true;
     private boolean powerIncreaseFrozen = false;
 
     public TrackSection getSection() {
@@ -46,20 +46,20 @@ public class HistoryEntry {
         this.power = power;
     }
 
-    public boolean isPenaltyOcurred() {
-        return penaltyOcurred;
+    public boolean isPenaltyOccurred() {
+        return penaltyOccurred;
     }
 
-    public void setPenaltyOcurred(boolean penaltyOcurred) {
-        this.penaltyOcurred = penaltyOcurred;
+    public void setPenaltyOccurred(boolean penaltyOccurred) {
+        this.penaltyOccurred = penaltyOccurred;
     }
 
-    public boolean isRecoveringFromPenalty() {
-        return recoveringFromPenalty;
+    public boolean isValid() {
+        return valid;
     }
 
-    public void setRecoveringFromPenalty(boolean recoveringFromPenalty) {
-        this.recoveringFromPenalty = recoveringFromPenalty;
+    public void setValid(boolean valid) {
+        this.valid = valid;
     }
 
     public boolean isPowerIncreaseFrozen() {
