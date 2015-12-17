@@ -26,6 +26,10 @@ import org.slf4j.LoggerFactory;
 public class SpeedOptimizer extends UntypedActor {
 
     private final int ZERO_POWER = 0;
+    private final long WAIT_TIME_FOR_PENALTY = 3000;
+
+    private boolean hasPenalty = false;
+    private long reciveLastPenaltyMessageTime = 0; // Computer-System-Time... CARE
 
     private final Logger LOGGER = LoggerFactory.getLogger(SpeedOptimizer.class);
     private ActorRef pilot;
@@ -67,28 +71,32 @@ public class SpeedOptimizer extends UntypedActor {
     }
 
     private void handleRoundTimeMessage(RoundTimeMessage message) {
-        // ignore for now
-        //positionTracker.roundTimeUpdate(message);
+        //ignore
     }
 
     private void handleVelocityMessage(VelocityMessage message) {
-        // ignore for now
         positionTracker.velocityUpdate(message);
     }
 
     private void handleSensorEvent(SensorEvent event) {
         LogMessage log = new LogMessage(event, System.currentTimeMillis());
         positionTracker.update(event);
-        if (!positionTracker.isTurn()) {
-            if (positionTracker.getPercentageDistance() > 0.5) {
-                changePower(minPower);
-            } else {
-                changePower(maxPower);
+        if(hasPenalty){
+            changePower(ZERO_POWER);
+            if(System.currentTimeMillis() - reciveLastPenaltyMessageTime > WAIT_TIME_FOR_PENALTY){
+                hasPenalty = false;
             }
-        } else {
-            changePower(maxTurnPower);
+        }else {
+            if (!positionTracker.isTurn()) {
+                if (positionTracker.getPercentageDistance() > 0.5) {
+                    changePower(minPower);
+                } else {
+                    changePower(maxPower);
+                }
+            } else {
+                changePower(maxTurnPower);
+            }
         }
-        //pilot.tell ( new PowerAction(power), getSelf());
         popluateLog(log);
         Track.Position carPosition = positionTracker.getCarPosition();
         pilot.tell(new CarUpdate(carPosition.getSection().getId(), carPosition.getDurationOffset(), carPosition.getPercentage()), getSelf());
@@ -98,6 +106,9 @@ public class SpeedOptimizer extends UntypedActor {
     private void handlePenaltyMessage(PenaltyMessage message) {
         // TODO: Set Power to Zero, Wait 3sek, start again
         changePower(ZERO_POWER);
+        reciveLastPenaltyMessageTime = System.currentTimeMillis();
+        hasPenalty = true;
+
     }
 
     private void popluateLog(LogMessage log){
