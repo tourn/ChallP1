@@ -72,7 +72,7 @@ public class PhysicModel {
     }
 
     public double getEngineForce(double v0, int power){
-        return power*e/(v0);
+        return power*power*e/((v0)*startPower);
     }
 
 
