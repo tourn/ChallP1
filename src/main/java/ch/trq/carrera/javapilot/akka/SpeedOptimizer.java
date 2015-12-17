@@ -57,7 +57,7 @@ public class SpeedOptimizer extends UntypedActor {
             @Override
             public void onUpdate(int sectionIndex, TrackSection section) {
                 pilot.tell(new SectionUpdate(section, sectionIndex), getSelf());
-                if(section.getDirection().equals(Direction.TURN)){
+                if(!section.getDirection().equals(Direction.STRAIGHT)){
                     changePower(maxPower);
                 } else {
                     changePower(maxTurnPower);

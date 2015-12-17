@@ -6,6 +6,5 @@ package ch.trq.carrera.javapilot.akka.trackanalyzer;
 public enum Direction {
     STRAIGHT,
     LEFT,
-    RIGHT,
-    TURN
+    RIGHT
 }
