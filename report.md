@@ -96,3 +96,12 @@ permalink: /report/
 
 ### 3.12.15
 * Refactoring (3h dfm)
+
+### 10.12.15
+* Neues Phyikmodel in Speedoptimizer eingebracht
+* PositionTracker neu aufgebaut, damit er mit dem neuen Physikmodel arbeitet 
+
+### 17.12.15
+* SpeedOptimizer Strategie konzipiert 
+* TrackHistory implementiert
+* Strategie implementiert
