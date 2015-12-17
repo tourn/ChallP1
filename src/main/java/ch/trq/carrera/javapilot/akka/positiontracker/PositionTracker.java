@@ -25,7 +25,6 @@ public class PositionTracker {
     private int power = 0;
 
     private int velocityPositionId;
-    private long roundStartTimeStamp;
 
     private PhysicModel physicModel = null;
 

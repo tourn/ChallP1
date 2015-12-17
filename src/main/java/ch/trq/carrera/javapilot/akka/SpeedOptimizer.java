@@ -27,7 +27,6 @@ public class SpeedOptimizer extends UntypedActor {
     private final Logger LOGGER = LoggerFactory.getLogger(SpeedOptimizer.class);
     private ActorRef pilot;
     private final Track track;
-    private int power = 200;
     private final int minPower = 120;
     private final int maxTurnPower = 130;
     private final int maxPower = 150;
