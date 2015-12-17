@@ -97,7 +97,7 @@ public class PositionTracker {
 
         LOGGER.info("Sind an Position: " + velocityPositionId);
         if (carPosition.getSection().getId() != getTrackSectionId(velocityPositionId)){
-            carPosition.setSection(getNextTrackSection(carPosition.getSection()));
+            carPosition.setSection(getTrackSection(velocityPositionId));
             carPosition.setPercentage(0);
             carPosition.setDistanceOffset(0);
         } else {
@@ -111,6 +111,10 @@ public class PositionTracker {
 
     private int getTrackSectionId(int velocityPositionId) {
         return track.getSections().indexOf(track.getCheckpoints().get(velocityPositionId).getSection());
+    }
+
+    private TrackSection getTrackSection(int velocityPositionId) {
+        return track.getSections().get(getTrackSectionId(velocityPositionId));
     }
 
     public void setPower(int power) {
