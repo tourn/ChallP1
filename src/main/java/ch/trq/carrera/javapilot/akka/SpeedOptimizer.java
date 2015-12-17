@@ -13,6 +13,7 @@ import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackAndPhysicModelStorage;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
 import com.zuehlke.carrera.javapilot.akka.PowerAction;
+import com.zuehlke.carrera.relayapi.messages.PenaltyMessage;
 import com.zuehlke.carrera.relayapi.messages.RoundTimeMessage;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
@@ -24,12 +25,14 @@ import org.slf4j.LoggerFactory;
  */
 public class SpeedOptimizer extends UntypedActor {
 
+    private final int ZERO_POWER = 0;
+
     private final Logger LOGGER = LoggerFactory.getLogger(SpeedOptimizer.class);
     private ActorRef pilot;
     private final Track track;
-    private final int minPower = 120;
-    private final int maxTurnPower = 130;
-    private final int maxPower = 150;
+    private final int minPower = 200;
+    private final int maxTurnPower = 150;
+    private final int maxPower = 255;
     private PositionTracker positionTracker;
     private String actorDescription;
 
@@ -56,6 +59,8 @@ public class SpeedOptimizer extends UntypedActor {
             handleVelocityMessage((VelocityMessage) message);
         } else if (message instanceof RoundTimeMessage) {
             handleRoundTimeMessage((RoundTimeMessage) message);
+        } else if (message instanceof PenaltyMessage){
+            handlePenaltyMessage((PenaltyMessage) message);
         } else {
             unhandled(message);
         }
@@ -88,6 +93,11 @@ public class SpeedOptimizer extends UntypedActor {
         Track.Position carPosition = positionTracker.getCarPosition();
         pilot.tell(new CarUpdate(carPosition.getSection().getId(), carPosition.getDurationOffset(), carPosition.getPercentage()), getSelf());
         pilot.tell(log, getSelf());
+    }
+
+    private void handlePenaltyMessage(PenaltyMessage message) {
+        // TODO: Set Power to Zero, Wait 3sek, start again
+        changePower(ZERO_POWER);
     }
 
     private void popluateLog(LogMessage log){
