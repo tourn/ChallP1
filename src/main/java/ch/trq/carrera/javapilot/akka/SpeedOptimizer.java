@@ -39,31 +39,6 @@ public class SpeedOptimizer extends UntypedActor {
         this.track = storage.getTrack();
         positionTracker = new PositionTracker(storage.getTrack(), storage.getPhysicModel());
 
-        positionTracker.setOnUpdate(new PositionTracker.UpdateCallback() {
-            @Override
-            public void onUpdate(int sectionIndex, long offset, double percentage) {
-                pilot.tell(new CarUpdate(sectionIndex, offset, percentage), getSelf());
-            }
-        });
-
-        positionTracker.setOnNewRound(new PositionTracker.NewRoundCallback() {
-            @Override
-            public void onUpdate(long roundtime) {
-                pilot.tell(new NewRoundUpdate(roundtime), getSelf());
-            }
-        });
-
-        positionTracker.setOnSectionChange(new PositionTracker.SectionChangeCallback() {
-            @Override
-            public void onUpdate(int sectionIndex, TrackSection section) {
-                pilot.tell(new SectionUpdate(section, sectionIndex), getSelf());
-                if(!section.getDirection().equals(Direction.STRAIGHT)){
-                    changePower(maxPower);
-                } else {
-                    changePower(maxTurnPower);
-                }
-            }
-        });
         changePower(maxTurnPower);
 
         actorDescription = getActorDescription();

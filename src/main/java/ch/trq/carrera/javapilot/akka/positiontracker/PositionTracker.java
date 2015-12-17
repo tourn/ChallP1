@@ -17,9 +17,6 @@ import org.slf4j.LoggerFactory;
 public class PositionTracker {
     private final Track track;
     private long tLastUpdate = -1;
-    private UpdateCallback onUpdate;
-    private SectionChangeCallback onSectionChange;
-    private NewRoundCallback onNewRound;
 
     private Track.Position carPosition;
     private FloatingHistory gyroZ = new FloatingHistory(8);
@@ -81,11 +78,6 @@ public class PositionTracker {
        return track.getSections().get((trackSection.getId() + 1) % track.getSections().size());
     }
 
-    public void enteredNewRound(long roundTimeStamp) {
-        long oldRoundTime = roundTimeStamp - roundStartTimeStamp;
-        roundStartTimeStamp = roundTimeStamp;
-        onNewRound.onUpdate(oldRoundTime);
-    }
 
     private boolean sectionChanged() {
         // TODO: Wenn sich laut (Physik)-Berechnung, die Section gewechselt hat, muss noch anhand der Physiksensoren dies überprüft werden.
@@ -117,30 +109,6 @@ public class PositionTracker {
 
     private int getTrackSectionId(int velocityPositionId) {
         return track.getSections().indexOf(track.getCheckpoints().get(velocityPositionId).getSection());
-    }
-
-    public static abstract class UpdateCallback {
-        public abstract void onUpdate(int sectionIndex, long offset, double percentage);
-    }
-
-    public static abstract class SectionChangeCallback {
-        public abstract void onUpdate(int sectionIndex, TrackSection section);
-    }
-
-    public static abstract class NewRoundCallback {
-        public abstract void onUpdate(long roundtime);
-    }
-
-    public void setOnNewRound(NewRoundCallback onNewRound) {
-        this.onNewRound = onNewRound;
-    }
-
-    public void setOnSectionChange(SectionChangeCallback onSectionChange) {
-        this.onSectionChange = onSectionChange;
-    }
-
-    public void setOnUpdate(UpdateCallback onUpdate) {
-        this.onUpdate = onUpdate;
     }
 
     public void setPower(int power) {
