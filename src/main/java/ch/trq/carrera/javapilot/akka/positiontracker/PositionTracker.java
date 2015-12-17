@@ -156,11 +156,10 @@ public class PositionTracker {
     }
 
     public boolean isTurn() {
-        return carPosition.getSection().getDirection().equals(Direction.TURN);
+        return carPosition.getSection().getDirection().equals(Direction.LEFT) || carPosition.getSection().getDirection().equals(Direction.RIGHT);
     }
 
     public double getPercentageDistance() {
-        // TODO SOME MORE LOGICs
         return carPosition.getPercentage();
     }
 }
