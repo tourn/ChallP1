@@ -9,9 +9,9 @@ public class SectionUpdate {
     private TrackSection section;
     private int sectionIndex;
 
-    public SectionUpdate(TrackSection section, int sectionIndex) {
+    public SectionUpdate(TrackSection section) {
         this.section = section;
-        this.sectionIndex = sectionIndex;
+        this.sectionIndex = section.getId();
     }
 
     public TrackSection getSection() {

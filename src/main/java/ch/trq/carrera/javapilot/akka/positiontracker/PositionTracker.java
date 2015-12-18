@@ -1,11 +1,12 @@
 package ch.trq.carrera.javapilot.akka.positiontracker;
 
+import akka.actor.ActorRef;
+import akka.actor.UntypedActor;
 import ch.trq.carrera.javapilot.akka.SpeedOptimizer;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Direction;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
 import ch.trq.carrera.javapilot.math.PhysicModel;
-import com.zuehlke.carrera.relayapi.messages.RoundTimeMessage;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
 import com.zuehlke.carrera.timeseries.FloatingHistory;
@@ -17,10 +18,11 @@ import java.util.Observable;
 /**
  * Created by tourn on 22.10.15.
  */
-public class PositionTracker extends Observable {
+public class PositionTracker {
     private final Track track;
     private final SpeedOptimizer speedOptimizer;
     private long tLastUpdate = -1;
+    private ActorRef pilot;
 
     private Track.Position carPosition;
     private FloatingHistory gyroZ = new FloatingHistory(8);
@@ -28,18 +30,22 @@ public class PositionTracker extends Observable {
     private final Logger LOGGER = LoggerFactory.getLogger(PositionTracker.class);
     private int power = 0;
 
+    private long sectionStartTime;
+
     private int velocityPositionId;
 
     private PhysicModel physicModel = null;
 
-    public PositionTracker(Track track, PhysicModel physicModel, SpeedOptimizer speedOptimizer) {
+    public PositionTracker(ActorRef pilot, Track track, PhysicModel physicModel, SpeedOptimizer speedOptimizer) {
         this.speedOptimizer = speedOptimizer;
         this.track = track;
+        this.pilot = pilot;
         carPosition = track.getCarPosition();
         this.physicModel = physicModel;
         int sectionIndex = carPosition.getSection().getId();
         velocityPositionId = getNextVelocityPositionId(sectionIndex);
         carPosition.setVelocity(track.getCheckpoints().get(velocityPositionId).getVelocity());
+        sectionStartTime = System.currentTimeMillis();
     }
 
     private int getNextVelocityPositionId(int trackSectionId) {
@@ -71,7 +77,11 @@ public class PositionTracker extends Observable {
         carPosition.setDistanceOffset(carPosition.getDistanceOffset() + calculateDistance(timeOffset));
         if (sectionChanged()){
             //FIXME tell this over akka so we don't need reference to speed optimizer
-            speedOptimizer.update(this, carPosition.getSection());
+            long sectionEndTime = System.currentTimeMillis();
+            carPosition.getSection().setDuration(sectionEndTime - sectionStartTime);
+            speedOptimizer.update(carPosition.getSection());
+            speedOptimizer.updateSection(new SectionUpdate(carPosition.getSection()));
+            sectionStartTime = sectionEndTime;
             carPosition.setSection(getNextTrackSection(carPosition.getSection()));
             carPosition.setPercentage(0);
             carPosition.setDistanceOffset(0);
@@ -104,14 +114,17 @@ public class PositionTracker extends Observable {
 
         LOGGER.info("Sind an Position: " + velocityPositionId);
         if (carPosition.getSection().getId() != getTrackSectionId(velocityPositionId)){
-            speedOptimizer.update(this, carPosition.getSection());
+            long sectionEndTime = System.currentTimeMillis();
+            carPosition.getSection().setDuration(sectionEndTime - sectionStartTime);
+            speedOptimizer.update(carPosition.getSection());
+            speedOptimizer.updateSection(new SectionUpdate(carPosition.getSection()));
+            sectionStartTime = sectionEndTime;
             carPosition.setSection(getTrackSection(velocityPositionId));
             carPosition.setPercentage(0);
             carPosition.setDistanceOffset(0);
         } else {
             carPosition.setPercentage(track.getCheckpoints().get(velocityPositionId).getPercentage());
             carPosition.setDistanceOffset(track.getCheckpoints().get(velocityPositionId).getDistanceOffset());
-            carPosition.setDurationOffset(track.getCheckpoints().get(velocityPositionId).getDurationOffset());
         }
 
         velocityPositionId = (++velocityPositionId) % track.getCheckpoints().size();
@@ -144,4 +157,5 @@ public class PositionTracker extends Observable {
     public double getPercentageDistance() {
         return carPosition.getPercentage();
     }
+
 }

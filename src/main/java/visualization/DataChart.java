@@ -66,9 +66,13 @@ public class DataChart extends ApplicationFrame {
         //speed not shown at the moment
         datasetSpeed = new XYSeriesCollection(this.speedSeries);
 
-        chart = createChart(datasetGyroZ);
         trackframe = new JFrame();
         trackframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        trackframe.setResizable(false);
+
+        //temporary disabled
+        this.setVisible(false);
+        chart = createChart(datasetGyroZ);
 
         final ChartPanel chartPanelModel = new ChartPanel(chart);
 
