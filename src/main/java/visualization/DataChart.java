@@ -7,7 +7,9 @@ import java.util.*;
 import java.util.List;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 
 import ch.trq.carrera.javapilot.akka.positiontracker.NewRoundUpdate;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
@@ -119,42 +121,53 @@ public class DataChart extends ApplicationFrame {
         this.track = track;
         model = new DefaultTableModel();
         holeduration = 0;
-        Object[] objects = new Object[track.getSections().size()];
+        Object[] objects = new Object[track.getSections().size() + 1];
         for (int i = 0; i < track.getSections().size(); i++) {
             model.addColumn(i + ": " + Math.round(track.getSections().get(i).getDistance()) + " - " + track.getSections().get(i).getDirection());
             objects[i] = track.getSections().get(i).getDuration();
             holeduration += track.getSections().get(i).getDuration();
         }
+        model.addColumn("RoundTime");
+
+        objects[track.getSections().size()] = holeduration;
         table = new JTable(model);
         resizeTableColumn();
         panel2.add(table, BorderLayout.CENTER);
         panel2.add(table.getTableHeader(), BorderLayout.NORTH);
         model.addRow(objects);
         insertCheckpoints();
+        DefaultTableCellRenderer colorColumn = new DefaultTableCellRenderer();
+        colorColumn.setBackground(Color.GREEN);
+        table.getColumnModel().getColumn(model.getColumnCount()-1).setCellRenderer(colorColumn);
         setFramesVisible();
         panel2.repaint();
     }
 
-    private void setFramesVisible(){
-        setVisible(true);
+    private void setFramesVisible() {
         trackframe.setVisible(true);
     }
 
     public void resizeTableColumn() {
         double durationWidth;
         table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        for (int i = 0; i < model.getColumnCount(); i++) {
+        for (int i = 0; i < model.getColumnCount() - 1; i++) {
             durationWidth = (double) track.getSections().get(i).getDuration() / holeduration;
-            int columnwidth = (int) ((double) panel2.getWidth() * durationWidth);
+            int columnwidth = (int) ((double) (panel2.getWidth() - 100) * durationWidth);
             table.getColumnModel().getColumn(i).setMinWidth(columnwidth);
         }
+        table.getColumnModel().getColumn(track.getSections().size()).setMinWidth(100);
     }
 
     public void updateDataTable(int sectionIndex, TrackSection section) {
         if (sectionIndex == 0) {
+            if (model.getValueAt(0, model.getColumnCount() - 1) == null) {
+                model.setValueAt(holeduration, 0, model.getColumnCount() - 1);
+            }
             Object[] objects = {section.getDuration()};
             model.insertRow(0, objects);
+            holeduration = 0;
         } else {
+            holeduration += section.getDuration();
             model.setValueAt(section.getDuration(), 0, sectionIndex);
         }
     }
@@ -194,7 +207,7 @@ public class DataChart extends ApplicationFrame {
         int xtable = table.getX();
         int ytable = table.getY();
         double xrectl = 0;
-        double xrectr = 10;
+        double xrectr = 6;
         int sectionwidth = 0;
         List<Track.Position> checkpoints = track.getCheckpoints();
 
@@ -211,7 +224,7 @@ public class DataChart extends ApplicationFrame {
         for (Track.Position p : checkpoints) {
             sectionwidth = table.getColumnModel().getColumn(track.getSections().indexOf(p.getSection())).getMinWidth();
             xrectl = xtable + sectionbegins[track.getSections().indexOf(p.getSection())] + p.getPercentage() * sectionwidth;
-            this.checkpoints.add(new Rectangle2D.Double(xrectl, ytable - 30, xrectr, ytable + 50));
+            this.checkpoints.add(new Rectangle2D.Double(xrectl-5, ytable - 30, xrectr, ytable + 70));
         }
     }
 

@@ -174,6 +174,10 @@ public class SpeedOptimizer extends UntypedActor{
         return params;
     }
 
+    private void getMaxPower(){
+
+    }
+
     public void updateSection(SectionUpdate sectionUpdate) {
         pilot.tell(sectionUpdate, getSelf());
     }
