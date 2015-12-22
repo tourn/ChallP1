@@ -105,3 +105,7 @@ permalink: /report/
 * SpeedOptimizer Strategie konzipiert 
 * TrackHistory implementiert
 * Strategie implementiert
+
+### 21.12.15
+* show RoundTime in DataChart
+* insert max speed for straights (WIP)
