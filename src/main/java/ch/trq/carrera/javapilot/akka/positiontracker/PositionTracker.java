@@ -79,8 +79,8 @@ public class PositionTracker {
             //FIXME tell this over akka so we don't need reference to speed optimizer
             long sectionEndTime = System.currentTimeMillis();
             carPosition.getSection().setDuration(sectionEndTime - sectionStartTime);
-            speedOptimizer.update(carPosition.getSection());
             speedOptimizer.updateSection(new SectionUpdate(carPosition.getSection()));
+            speedOptimizer.update(carPosition.getSection());
             sectionStartTime = sectionEndTime;
             carPosition.setSection(getNextTrackSection(carPosition.getSection()));
             carPosition.setPercentage(0);
@@ -116,8 +116,8 @@ public class PositionTracker {
         if (carPosition.getSection().getId() != getTrackSectionId(velocityPositionId)){
             long sectionEndTime = System.currentTimeMillis();
             carPosition.getSection().setDuration(sectionEndTime - sectionStartTime);
-            speedOptimizer.update(carPosition.getSection());
             speedOptimizer.updateSection(new SectionUpdate(carPosition.getSection()));
+            speedOptimizer.update(carPosition.getSection());
             sectionStartTime = sectionEndTime;
             carPosition.setSection(getTrackSection(velocityPositionId));
             carPosition.setPercentage(0);

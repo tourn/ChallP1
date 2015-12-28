@@ -7,11 +7,11 @@ import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
  */
 public class SectionUpdate {
     private TrackSection section;
-    private int sectionIndex;
+    private int powerInSection;
+    private boolean penaltyOccured;
 
     public SectionUpdate(TrackSection section) {
         this.section = section;
-        this.sectionIndex = section.getId();
     }
 
     public TrackSection getSection() {
@@ -23,10 +23,22 @@ public class SectionUpdate {
     }
 
     public int getSectionIndex() {
-        return sectionIndex;
+        return section.getId();
     }
 
-    public void setSectionIndex(int sectionIndex) {
-        this.sectionIndex = sectionIndex;
+    public int getPowerInSection() {
+        return powerInSection;
+    }
+
+    public void setPowerInSection(int powerInSection) {
+        this.powerInSection = powerInSection;
+    }
+
+    public boolean isPenaltyOccured() {
+        return penaltyOccured;
+    }
+
+    public void setPenaltyOccured(boolean penaltyOccured) {
+        this.penaltyOccured = penaltyOccured;
     }
 }

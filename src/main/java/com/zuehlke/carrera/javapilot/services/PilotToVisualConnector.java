@@ -1,6 +1,7 @@
 package com.zuehlke.carrera.javapilot.services;
 
 import ch.trq.carrera.javapilot.akka.positiontracker.NewRoundUpdate;
+import ch.trq.carrera.javapilot.akka.positiontracker.SectionUpdate;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
@@ -34,8 +35,8 @@ public class PilotToVisualConnector implements PilotToVisualConnection{
     }
 
     @Override
-    public void sectionUpdate(int index, TrackSection section) {
-        dataChart.updateDataTable(index, section);
+    public void sectionUpdate(SectionUpdate update) {
+        dataChart.updateDataTable(update);
     }
 
 

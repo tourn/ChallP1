@@ -9,9 +9,9 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
 
 import ch.trq.carrera.javapilot.akka.positiontracker.NewRoundUpdate;
+import ch.trq.carrera.javapilot.akka.positiontracker.SectionUpdate;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
@@ -50,7 +50,7 @@ public class DataChart extends ApplicationFrame {
 
     private Rectangle2D.Float rect = new Rectangle2D.Float(0, 0, 0, 0);
     private ArrayList<Rectangle2D.Double> checkpoints = new ArrayList<>();
-    private double holeduration = 0;
+    private double totalduration = 0;
     private boolean trackanalyzerphase = true;
     private StandardXYItemRenderer renderer;
     private int[] sectionbegins;
@@ -120,16 +120,16 @@ public class DataChart extends ApplicationFrame {
     public void initDataTable(Track track) {
         this.track = track;
         model = new DefaultTableModel();
-        holeduration = 0;
+        totalduration = 0;
         Object[] objects = new Object[track.getSections().size() + 1];
         for (int i = 0; i < track.getSections().size(); i++) {
             model.addColumn(i + ": " + Math.round(track.getSections().get(i).getDistance()) + " - " + track.getSections().get(i).getDirection());
             objects[i] = track.getSections().get(i).getDuration();
-            holeduration += track.getSections().get(i).getDuration();
+            totalduration += track.getSections().get(i).getDuration();
         }
         model.addColumn("RoundTime");
 
-        objects[track.getSections().size()] = holeduration;
+        objects[track.getSections().size()] = totalduration;
         table = new JTable(model);
         resizeTableColumn();
         panel2.add(table, BorderLayout.CENTER);
@@ -138,7 +138,7 @@ public class DataChart extends ApplicationFrame {
         insertCheckpoints();
         DefaultTableCellRenderer colorColumn = new DefaultTableCellRenderer();
         colorColumn.setBackground(Color.GREEN);
-        table.getColumnModel().getColumn(model.getColumnCount()-1).setCellRenderer(colorColumn);
+        table.getColumnModel().getColumn(model.getColumnCount() - 1).setCellRenderer(colorColumn);
         setFramesVisible();
         panel2.repaint();
     }
@@ -151,25 +151,36 @@ public class DataChart extends ApplicationFrame {
         double durationWidth;
         table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         for (int i = 0; i < model.getColumnCount() - 1; i++) {
-            durationWidth = (double) track.getSections().get(i).getDuration() / holeduration;
+            durationWidth = (double) track.getSections().get(i).getDuration() / totalduration;
             int columnwidth = (int) ((double) (panel2.getWidth() - 100) * durationWidth);
             table.getColumnModel().getColumn(i).setMinWidth(columnwidth);
         }
         table.getColumnModel().getColumn(track.getSections().size()).setMinWidth(100);
     }
 
-    public void updateDataTable(int sectionIndex, TrackSection section) {
+    public void updateDataTable(SectionUpdate update) {
+        int sectionIndex = update.getSectionIndex();
+        TrackSection section = update.getSection();
         if (sectionIndex == 0) {
             if (model.getValueAt(0, model.getColumnCount() - 1) == null) {
-                model.setValueAt(holeduration, 0, model.getColumnCount() - 1);
+                model.setValueAt(totalduration, 0, model.getColumnCount() - 1);
             }
-            Object[] objects = {section.getDuration()};
+            Object[] objects = {formatSectionUpdate(update)};
             model.insertRow(0, objects);
-            holeduration = 0;
+            totalduration = 0;
         } else {
-            holeduration += section.getDuration();
-            model.setValueAt(section.getDuration(), 0, sectionIndex);
+            totalduration += section.getDuration();
+            model.setValueAt(formatSectionUpdate(update), 0, sectionIndex);
         }
+    }
+
+    private String formatSectionUpdate(SectionUpdate update) {
+        TrackSection section = update.getSection();
+        String cellInput = section.getDuration() + "@ " + update.getPowerInSection();
+        if (update.isPenaltyOccured()) {
+            cellInput += "!!!";
+        }
+        return cellInput;
     }
 
     public void resetDataChart() {
@@ -224,7 +235,7 @@ public class DataChart extends ApplicationFrame {
         for (Track.Position p : checkpoints) {
             sectionwidth = table.getColumnModel().getColumn(track.getSections().indexOf(p.getSection())).getMinWidth();
             xrectl = xtable + sectionbegins[track.getSections().indexOf(p.getSection())] + p.getPercentage() * sectionwidth;
-            this.checkpoints.add(new Rectangle2D.Double(xrectl-5, ytable - 30, xrectr, ytable + 70));
+            this.checkpoints.add(new Rectangle2D.Double(xrectl - 5, ytable - 30, xrectr, ytable + 70));
         }
     }
 

@@ -101,7 +101,7 @@ public class JavaPilotActor extends UntypedActor {
                 visualConnection.carUpdate(update.getTrackIndex(), update.getPercentage());
             } else if (message instanceof SectionUpdate){
                 SectionUpdate update = (SectionUpdate) message;
-                visualConnection.sectionUpdate(update.getSectionIndex(), update.getSection());
+                visualConnection.sectionUpdate(update);
             }else if(message instanceof NewRoundUpdate){
                 this.visualConnection.newRoundMessage((NewRoundUpdate)message);
             } else if (message instanceof LogMessage){

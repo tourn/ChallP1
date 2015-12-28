@@ -12,7 +12,7 @@ public class StrategyParameters {
     private int power;
     private boolean penaltyOccurred = false;
     private boolean valid = true;
-    private boolean powerIncreaseFrozen = false;
+    private int powerIncrement = 10;
 
     public TrackSection getSection() {
         return section;
@@ -62,11 +62,11 @@ public class StrategyParameters {
         this.valid = valid;
     }
 
-    public boolean isPowerIncreaseFrozen() {
-        return powerIncreaseFrozen;
+    public int getPowerIncrement() {
+        return powerIncrement;
     }
 
-    public void setPowerIncreaseFrozen(boolean powerIncreaseFrozen) {
-        this.powerIncreaseFrozen = powerIncreaseFrozen;
+    public void setPowerIncrement(int powerIncrement) {
+        this.powerIncrement = powerIncrement;
     }
 }

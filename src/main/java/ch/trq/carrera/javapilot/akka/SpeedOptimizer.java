@@ -120,7 +120,6 @@ public class SpeedOptimizer extends UntypedActor{
         reciveLastPenaltyMessageTime = System.currentTimeMillis();
         hasPenalty = true;
         recoveringFromPenalty = true;
-        currentStrategyParams.setPowerIncreaseFrozen(true);
         currentStrategyParams.setPenaltyOccurred(true);
     }
 
@@ -153,16 +152,17 @@ public class SpeedOptimizer extends UntypedActor{
     private StrategyParameters createStrategyParams(StrategyParameters previous){
         StrategyParameters params = new StrategyParameters();
 
-        params.setPowerIncreaseFrozen(previous.isPowerIncreaseFrozen());
+        params.setPowerIncrement(previous.getPowerIncrement());
         params.setBrakePercentage(previous.getBrakePercentage());
         params.setSection(previous.getSection());
 
         int power = previous.getPower();
         if(previous.isPenaltyOccurred()){
-            power -= 10;
-        } else if(!previous.isPowerIncreaseFrozen()){
+            power -= params.getPowerIncrement();
+            params.setPowerIncrement((int) (params.getPowerIncrement()*0.5));
+        } else{
             if(power<maxPower){
-                power += 10;
+                power += params.getPowerIncrement();
             }
         }
         params.setPower(power);
@@ -174,11 +174,9 @@ public class SpeedOptimizer extends UntypedActor{
         return params;
     }
 
-    private void getMaxPower(){
-
-    }
-
     public void updateSection(SectionUpdate sectionUpdate) {
+        sectionUpdate.setPenaltyOccured(currentStrategyParams.isPenaltyOccurred());
+        sectionUpdate.setPowerInSection(currentStrategyParams.getPower());
         pilot.tell(sectionUpdate, getSelf());
     }
 }
