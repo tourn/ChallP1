@@ -109,3 +109,7 @@ permalink: /report/
 ### 21.12.15
 * show RoundTime in DataChart
 * insert max speed for straights (WIP)
+
+### 28.12.15
+* Visualisierung verbessert
+* Max Power einpendeln
