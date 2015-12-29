@@ -168,6 +168,8 @@ public class DataChart extends ApplicationFrame {
                 }else{
                     c.setBackground(new java.awt.Color(214, 245, 245));
                 }
+            }else{
+                c.setBackground(new java.awt.Color(214, 245, 245));
             }
 
             return c;
