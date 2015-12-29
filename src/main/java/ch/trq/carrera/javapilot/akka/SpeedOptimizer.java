@@ -176,7 +176,11 @@ public class SpeedOptimizer extends UntypedActor{
 
     public void updateSection(SectionUpdate sectionUpdate) {
         sectionUpdate.setPenaltyOccured(currentStrategyParams.isPenaltyOccurred());
-        sectionUpdate.setPowerInSection(currentStrategyParams.getPower());
+        if(positionTracker.isTurn()){
+            sectionUpdate.setPowerInSection(positionTracker.getPower());
+        }else{
+            sectionUpdate.setPowerInSection(currentStrategyParams.getPower());
+        }
         pilot.tell(sectionUpdate, getSelf());
     }
 }

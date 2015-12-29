@@ -50,7 +50,7 @@ public class DataChart extends ApplicationFrame {
 
     private Rectangle2D.Float rect = new Rectangle2D.Float(0, 0, 0, 0);
     private ArrayList<Rectangle2D.Double> checkpoints = new ArrayList<>();
-    private double totalduration = 0;
+    private double totalDuration = 0;
     private boolean trackanalyzerphase = true;
     private StandardXYItemRenderer renderer;
     private int[] sectionbegins;
@@ -120,21 +120,19 @@ public class DataChart extends ApplicationFrame {
     public void initDataTable(Track track) {
         this.track = track;
         model = new DefaultTableModel();
-        totalduration = 0;
+        totalDuration = 0;
         Object[] objects = new Object[track.getSections().size() + 1];
         for (int i = 0; i < track.getSections().size(); i++) {
             model.addColumn(i + ": " + Math.round(track.getSections().get(i).getDistance()) + " - " + track.getSections().get(i).getDirection());
-            objects[i] = track.getSections().get(i).getDuration();
-            totalduration += track.getSections().get(i).getDuration();
+            totalDuration += track.getSections().get(i).getDuration();
         }
         model.addColumn("RoundTime");
-
-        objects[track.getSections().size()] = totalduration;
         table = new JTable(model);
+        model.addRow(objects);
+        table.setDefaultRenderer(Object.class, new CustomRenderer());
         resizeTableColumn();
         panel2.add(table, BorderLayout.CENTER);
         panel2.add(table.getTableHeader(), BorderLayout.NORTH);
-        model.addRow(objects);
         insertCheckpoints();
         DefaultTableCellRenderer colorColumn = new DefaultTableCellRenderer();
         colorColumn.setBackground(Color.GREEN);
@@ -151,11 +149,29 @@ public class DataChart extends ApplicationFrame {
         double durationWidth;
         table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         for (int i = 0; i < model.getColumnCount() - 1; i++) {
-            durationWidth = (double) track.getSections().get(i).getDuration() / totalduration;
+            durationWidth = (double) track.getSections().get(i).getDuration() / totalDuration;
             int columnwidth = (int) ((double) (panel2.getWidth() - 100) * durationWidth);
             table.getColumnModel().getColumn(i).setMinWidth(columnwidth);
         }
         table.getColumnModel().getColumn(track.getSections().size()).setMinWidth(100);
+    }
+
+    class CustomRenderer extends DefaultTableCellRenderer {
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                                                       boolean isSelected, boolean hasFocus,
+                                                       int row, int column) {
+            Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+            if (value != null) {
+                if (value.toString().contains("!")) {
+                    c.setBackground(new java.awt.Color(255, 72, 72));
+                }else{
+                    c.setBackground(new java.awt.Color(214, 245, 245));
+                }
+            }
+
+            return c;
+        }
     }
 
     public void updateDataTable(SectionUpdate update) {
@@ -163,22 +179,22 @@ public class DataChart extends ApplicationFrame {
         TrackSection section = update.getSection();
         if (sectionIndex == 0) {
             if (model.getValueAt(0, model.getColumnCount() - 1) == null) {
-                model.setValueAt(totalduration, 0, model.getColumnCount() - 1);
+                model.setValueAt(totalDuration, 0, model.getColumnCount() - 1);
             }
             Object[] objects = {formatSectionUpdate(update)};
             model.insertRow(0, objects);
-            totalduration = 0;
+            totalDuration = 0;
         } else {
-            totalduration += section.getDuration();
+            totalDuration += section.getDuration();
             model.setValueAt(formatSectionUpdate(update), 0, sectionIndex);
         }
     }
 
     private String formatSectionUpdate(SectionUpdate update) {
         TrackSection section = update.getSection();
-        String cellInput = section.getDuration() + "@ " + update.getPowerInSection();
+        String cellInput = section.getDuration() + " @ " + update.getPowerInSection();
         if (update.isPenaltyOccured()) {
-            cellInput += "!!!";
+            cellInput += "!";
         }
         return cellInput;
     }
