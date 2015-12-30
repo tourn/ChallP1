@@ -66,7 +66,7 @@ public class TrackHistory {
         return entry;
     }
 
-    //FIXME is this supposed to be in a _HISTORY_ ?
+    //FIXME is this supposed to happen in a _HISTORY_ ?
     private double calculateBreakPercentage(TrackSection section) {
         return 0.7;
     }

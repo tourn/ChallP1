@@ -75,24 +75,4 @@ public class PhysicModel {
         return power*power*e/((v0)*startPower);
     }
 
-
-
-    /**
-     * TODO may nod be used
-     *
-     * @param v0 the speed at the beginning of the period in cm/s
-     * @param trackSection the TrackSection
-     * @param power  the digital power value at the start of the period
-     * @param time timespan in ms
-     * @return the Distance over the period
-     */
-    public double getDistance(double v0, TrackSection trackSection, int power, long time){
-        double distance = 0;
-        for(int i = 0; i < time; i++){
-            //v0 = ...
-            distance += v0*1/1000;
-        }
-        return distance;
-    }
-
 }

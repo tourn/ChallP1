@@ -96,7 +96,6 @@ public class PositionTracker {
 
 
     private boolean sectionChanged() {
-        // TODO: Wenn sich laut (Physik)-Berechnung, die Section gewechselt hat, muss noch anhand der Physiksensoren dies überprüft werden.
         if(carPosition.getSection().getDistance() < carPosition.getDistanceOffset()){
             if(carPosition.getSection().getId() != track.getCheckpoints().get(velocityPositionId).getSection().getId()){
                 if(carPosition.getSection().getId()+1 != track.getCheckpoints().get(velocityPositionId).getSection().getId() ||

@@ -74,7 +74,6 @@ public class TrackLearner extends UntypedActor {
         if(!trackRecognitionFinished){
             trackAnalyzer.addTrackVelocity(message.getVelocity(),message.getTimeStamp());
         }else{
-            //TODO
             physicLearnHelper.handleVelocityMessage(message.getTimeStamp());
             switch(physicLearnHelper.state){
                 case MOVE_TO_CHECKPOINTDESTINATION:
@@ -122,7 +121,7 @@ public class TrackLearner extends UntypedActor {
                 onTrackRecognized(trackAnalyzer.buildTrack());
             }
         }else{
-            //TODO: could we already calculate friction on a straight with 3 velocity sensors? If no, use Frank's strategy:
+            //could we already calculate friction on a straight with 3 velocity sensors? If no, use Frank's strategy:
             //stop in a straight with 2 sensors and start again.
             physicLearnHelper.handleTrackSectionMessage(event.getTimeStamp());
             switch(physicLearnHelper.state){

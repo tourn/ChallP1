@@ -49,7 +49,7 @@ public class SpeedOptimizer extends UntypedActor{
     public SpeedOptimizer(ActorRef pilot, TrackAndPhysicModelStorage storage) {
         this.pilot = pilot;
         this.track = storage.getTrack();
-        //TODO instanciate as akka actor
+        //TODO make positionTracker an actor, so we don't have to pass the speedOptimizer as parameter
         positionTracker = new PositionTracker(pilot, storage.getTrack(), storage.getPhysicModel(), this);
 
         history = new TrackHistory(track);
@@ -67,7 +67,6 @@ public class SpeedOptimizer extends UntypedActor{
 
     @Override
     public void onReceive(Object message) throws Exception {
-        //TODO send updates for completed tracksection, position update
         if (message instanceof SensorEvent) {
             handleSensorEvent((SensorEvent) message);
         } else if (message instanceof VelocityMessage) {
