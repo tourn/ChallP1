@@ -40,7 +40,6 @@ public class SpeedOptimizer extends UntypedActor {
     private final int maxTurnPower = 150;
     private int maxPower = 200;
     private PositionTracker positionTracker;
-    private String actorDescription;
     private final TrackHistory history;
     private StrategyParameters currentStrategyParams;
     private boolean recoveringFromPenalty = false;
@@ -64,12 +63,17 @@ public class SpeedOptimizer extends UntypedActor {
 
         tellChangePower(maxTurnPower);
 
-        actorDescription = getActorDescription();
     }
 
     private void onSectionChanged(TrackSection section) {
         tellSectionUpdate(section);
         updateHistory(section);
+        final int currentSectionId = positionTracker.getCarPosition().getSection().getId();
+        if(positionTracker.isTurn()){
+            currentStrategyParams = createTurnStrategyParams(history.getValidHistory(currentSectionId));
+        }else {
+            currentStrategyParams = createStrategyParams(history.getValidHistory(currentSectionId));
+        }
     }
 
     public static Props props(ActorRef pilot, TrackAndPhysicModelStorage storage) {
@@ -142,10 +146,6 @@ public class SpeedOptimizer extends UntypedActor {
         currentStrategyParams.setPenaltyOccurred(true);
     }
 
-    public String getActorDescription() {
-        return "SpeedOptimizer";
-    }
-
     private void tellChangePower(int power) {
         pilot.tell(new PowerAction(power), getSelf());
         positionTracker.setPower(power);
@@ -154,11 +154,6 @@ public class SpeedOptimizer extends UntypedActor {
     private void updateHistory(TrackSection section) {
         currentStrategyParams.setDuration(section.getDuration()); //FIXME: duration is currently not set in the section
         history.addEntry(currentStrategyParams);
-        if(!section.isTurn()){
-            currentStrategyParams = createTurnStrategyParams(history.getValidHistory(positionTracker.getCarPosition().getSection().getId()));
-        }else {
-            currentStrategyParams = createStrategyParams(history.getValidHistory(positionTracker.getCarPosition().getSection().getId()));
-        }
     }
 
     private StrategyParameters createStrategyParams(StrategyParameters previous) {
