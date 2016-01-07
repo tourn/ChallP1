@@ -75,4 +75,12 @@ public class PhysicModel {
         return power*power*e/((v0)*startPower);
     }
 
+    /**
+     * @param targetVelocity the speed (in cm/s) which is the target.
+     * @param trackSection the TrackSection
+     * @return the power which will be used for the targetSpeed
+     */
+    public int getPowerForVelocity(double targetVelocity, TrackSection trackSection){
+        return (int)Math.sqrt(targetVelocity*trackSection.getFriction()*g*startPower/e);
+    }
 }
