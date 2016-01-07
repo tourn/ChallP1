@@ -5,7 +5,6 @@ import akka.actor.Props;
 import akka.actor.UntypedActor;
 import ch.trq.carrera.javapilot.akka.history.StrategyParameters;
 import ch.trq.carrera.javapilot.akka.history.TrackHistory;
-import ch.trq.carrera.javapilot.akka.log.LogMessage;
 import ch.trq.carrera.javapilot.akka.positiontracker.CarUpdate;
 import ch.trq.carrera.javapilot.akka.positiontracker.PositionTracker;
 import ch.trq.carrera.javapilot.akka.positiontracker.SectionUpdate;
@@ -17,8 +16,6 @@ import com.zuehlke.carrera.relayapi.messages.PenaltyMessage;
 import com.zuehlke.carrera.relayapi.messages.RoundTimeMessage;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SpeedOptimizer extends UntypedActor {
 
@@ -30,7 +27,6 @@ public class SpeedOptimizer extends UntypedActor {
     private boolean hasPenalty = false;
     private long reciveLastPenaltyMessageTime = 0; // Computer-System-Time... CARE
 
-    private final Logger LOGGER = LoggerFactory.getLogger(SpeedOptimizer.class);
     private ActorRef pilot;
     private final Track track;
     private final int minPower = 120;
@@ -58,7 +54,7 @@ public class SpeedOptimizer extends UntypedActor {
         actorDescription = getActorDescription();
     }
 
-    private void onSectionChanged(TrackSection section){
+    private void onSectionChanged(TrackSection section) {
         tellSectionUpdate(section);
         updateHistory(section);
     }
@@ -94,7 +90,6 @@ public class SpeedOptimizer extends UntypedActor {
     }
 
     private void handleSensorEvent(SensorEvent event) {
-        LogMessage log = new LogMessage(event, System.currentTimeMillis());
         positionTracker.sensorUpdate(event);
         if (hasPenalty) {
             tellChangePower(ZERO_POWER);
@@ -117,10 +112,8 @@ public class SpeedOptimizer extends UntypedActor {
                 }
             }
         }
-        popluateLog(log);
         Track.Position carPosition = positionTracker.getCarPosition();
         pilot.tell(new CarUpdate(carPosition.getSection().getId(), carPosition.getDurationOffset(), carPosition.getPercentage()), getSelf());
-        pilot.tell(log, getSelf());
     }
 
     private void handlePenaltyMessage(PenaltyMessage message) {
@@ -129,13 +122,6 @@ public class SpeedOptimizer extends UntypedActor {
         hasPenalty = true;
         recoveringFromPenalty = true;
         currentStrategyParams.setPenaltyOccurred(true);
-    }
-
-    private void popluateLog(LogMessage log) {
-        log.setPower(positionTracker.getPower());
-        log.setActorDescription(actorDescription);
-        log.setPositionRelative(positionTracker.getCarPosition().getDistanceOffset());
-        log.settAfterCalculation(System.currentTimeMillis());
     }
 
     public String getActorDescription() {
@@ -147,7 +133,7 @@ public class SpeedOptimizer extends UntypedActor {
         positionTracker.setPower(power);
     }
 
-    private void updateHistory(TrackSection section){
+    private void updateHistory(TrackSection section) {
         currentStrategyParams.setDuration(section.getDuration()); //FIXME: duration is currently not set in the section
         history.addEntry(currentStrategyParams);
         currentStrategyParams = createStrategyParams(history.getValidHistory(positionTracker.getCarPosition().getSection().getId()));
