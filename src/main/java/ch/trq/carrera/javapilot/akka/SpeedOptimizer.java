@@ -17,6 +17,9 @@ import com.zuehlke.carrera.relayapi.messages.PenaltyMessage;
 import com.zuehlke.carrera.relayapi.messages.RoundTimeMessage;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +47,7 @@ public class SpeedOptimizer extends UntypedActor {
     private double maxVelocityForTurn = 0;
     private PhysicModel physicModel;
     private MinVelocityHistory minVelocityHistory;
+    private final Logger LOGGER = LoggerFactory.getLogger(TrackLearner.class);
 
     public SpeedOptimizer(ActorRef pilot, TrackAndPhysicModelStorage storage) {
         this.pilot = pilot;
@@ -150,7 +154,11 @@ public class SpeedOptimizer extends UntypedActor {
     private void updateHistory(TrackSection section) {
         currentStrategyParams.setDuration(section.getDuration()); //FIXME: duration is currently not set in the section
         history.addEntry(currentStrategyParams);
-        currentStrategyParams = createStrategyParams(history.getValidHistory(positionTracker.getCarPosition().getSection().getId()));
+        if(!section.isTurn()){
+            currentStrategyParams = createTurnStrategyParams(history.getValidHistory(positionTracker.getCarPosition().getSection().getId()));
+        }else {
+            currentStrategyParams = createStrategyParams(history.getValidHistory(positionTracker.getCarPosition().getSection().getId()));
+        }
     }
 
     private StrategyParameters createStrategyParams(StrategyParameters previous) {
@@ -177,12 +185,14 @@ public class SpeedOptimizer extends UntypedActor {
         return params;
     }
 
-    private StrategyParameters createTurnStrategyParams(StrategyParameters previous){
+    private StrategyParameters createTurnStrategyParams(StrategyParameters paramsFromPreviousRound){
         StrategyParameters params = new StrategyParameters();
-        params.setSection(previous.getSection());
-        int power = previous.getPower();
+        params.setSection(paramsFromPreviousRound.getSection());
+        int power = paramsFromPreviousRound.getPower();
         if(maxVelocityForTurn != 0){
             power = physicModel.getPowerForVelocity(maxVelocityForTurn,params.getSection());
+            LOGGER.info("mVFT: "+maxVelocityForTurn);
+            LOGGER.info("p: "+ power);
         }
         params.setPower(power);
         return params;
