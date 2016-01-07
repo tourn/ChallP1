@@ -45,16 +45,22 @@ public class SpeedOptimizer extends UntypedActor {
     public SpeedOptimizer(ActorRef pilot, TrackAndPhysicModelStorage storage) {
         this.pilot = pilot;
         this.track = storage.getTrack();
-        //TODO make positionTracker an actor, so we don't have to pass the speedOptimizer as parameter
-        positionTracker = new PositionTracker(pilot, storage.getTrack(), storage.getPhysicModel(), this);
+
+        positionTracker = new PositionTracker(storage.getTrack(), storage.getPhysicModel());
+        positionTracker.setOnSectionChanged(this::onSectionChanged);
 
         history = new TrackHistory(track);
         TrackSection currentSection = positionTracker.getCarPosition().getSection();
         currentStrategyParams = createStrategyParams(history.getValidHistory(currentSection.getId()));
 
-        changePower(maxTurnPower);
+        tellChangePower(maxTurnPower);
 
         actorDescription = getActorDescription();
+    }
+
+    private void onSectionChanged(TrackSection section){
+        tellSectionUpdate(section);
+        updateHistory(section);
     }
 
     public static Props props(ActorRef pilot, TrackAndPhysicModelStorage storage) {
@@ -89,25 +95,25 @@ public class SpeedOptimizer extends UntypedActor {
 
     private void handleSensorEvent(SensorEvent event) {
         LogMessage log = new LogMessage(event, System.currentTimeMillis());
-        positionTracker.update(event);
+        positionTracker.sensorUpdate(event);
         if (hasPenalty) {
-            changePower(ZERO_POWER);
+            tellChangePower(ZERO_POWER);
             if (System.currentTimeMillis() - reciveLastPenaltyMessageTime > WAIT_TIME_FOR_PENALTY) {
                 hasPenalty = false;
             }
         } else {
             if (recoveringFromPenalty) {
-                changePower(maxTurnPower);
+                tellChangePower(maxTurnPower);
             } else {
 
                 if (!positionTracker.isTurn()) {
                     if (positionTracker.getPercentageDistance() > currentStrategyParams.getBrakePercentage()) {
-                        changePower(minPower);
+                        tellChangePower(minPower);
                     } else {
-                        changePower(currentStrategyParams.getPower());
+                        tellChangePower(currentStrategyParams.getPower());
                     }
                 } else {
-                    changePower(maxTurnPower);
+                    tellChangePower(maxTurnPower);
                 }
             }
         }
@@ -118,7 +124,7 @@ public class SpeedOptimizer extends UntypedActor {
     }
 
     private void handlePenaltyMessage(PenaltyMessage message) {
-        changePower(ZERO_POWER);
+        tellChangePower(ZERO_POWER);
         reciveLastPenaltyMessageTime = System.currentTimeMillis();
         hasPenalty = true;
         recoveringFromPenalty = true;
@@ -136,16 +142,12 @@ public class SpeedOptimizer extends UntypedActor {
         return "SpeedOptimizer";
     }
 
-    private void changePower(int power) {
+    private void tellChangePower(int power) {
         pilot.tell(new PowerAction(power), getSelf());
         positionTracker.setPower(power);
     }
 
-    public void update(Object arg) {
-        updateHistory((TrackSection) arg);
-    }
-
-    private void updateHistory(TrackSection section) {
+    private void updateHistory(TrackSection section){
         currentStrategyParams.setDuration(section.getDuration()); //FIXME: duration is currently not set in the section
         history.addEntry(currentStrategyParams);
         currentStrategyParams = createStrategyParams(history.getValidHistory(positionTracker.getCarPosition().getSection().getId()));
@@ -175,7 +177,8 @@ public class SpeedOptimizer extends UntypedActor {
         return params;
     }
 
-    public void updateSection(SectionUpdate sectionUpdate) {
+    public void tellSectionUpdate(TrackSection section) {
+        SectionUpdate sectionUpdate = new SectionUpdate(section);
         sectionUpdate.setPenaltyOccured(currentStrategyParams.isPenaltyOccurred());
         if (positionTracker.isTurn()) {
             sectionUpdate.setPowerInSection(positionTracker.getPower());

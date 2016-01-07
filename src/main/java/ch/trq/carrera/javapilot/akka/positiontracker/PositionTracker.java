@@ -14,15 +14,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Observable;
+import java.util.function.Consumer;
 
 /**
  * Created by tourn on 22.10.15.
  */
 public class PositionTracker {
     private final Track track;
-    private final SpeedOptimizer speedOptimizer;
     private long tLastUpdate = -1;
-    private ActorRef pilot;
 
     private Track.Position carPosition;
     private FloatingHistory gyroZ = new FloatingHistory(8);
@@ -36,16 +35,20 @@ public class PositionTracker {
 
     private PhysicModel physicModel = null;
 
-    public PositionTracker(ActorRef pilot, Track track, PhysicModel physicModel, SpeedOptimizer speedOptimizer) {
-        this.speedOptimizer = speedOptimizer;
+    private Consumer<TrackSection> onSectionChanged;
+
+    public PositionTracker(Track track, PhysicModel physicModel) {
         this.track = track;
-        this.pilot = pilot;
         carPosition = track.getCarPosition();
         this.physicModel = physicModel;
         int sectionIndex = carPosition.getSection().getId();
         velocityPositionId = getNextVelocityPositionId(sectionIndex);
         carPosition.setVelocity(track.getCheckpoints().get(velocityPositionId).getVelocity());
         sectionStartTime = System.currentTimeMillis();
+    }
+
+    public void setOnSectionChanged(Consumer<TrackSection> onSectionChanged) {
+        this.onSectionChanged = onSectionChanged;
     }
 
     private int getNextVelocityPositionId(int trackSectionId) {
@@ -67,7 +70,19 @@ public class PositionTracker {
         return distance;
     }
 
-    public void update(SensorEvent e) {
+    private void changeSection(TrackSection newSection){
+        long sectionEndTime = System.currentTimeMillis();
+        carPosition.getSection().setDuration(sectionEndTime - sectionStartTime);
+        if(onSectionChanged != null) {
+            onSectionChanged.accept(carPosition.getSection());
+        }
+        sectionStartTime = sectionEndTime;
+        carPosition.setSection(getNextTrackSection(carPosition.getSection()));
+        carPosition.setPercentage(0);
+        carPosition.setDistanceOffset(0);
+    }
+
+    public void sensorUpdate(SensorEvent e) {
         if (tLastUpdate == -1) {
             tLastUpdate = e.getTimeStamp();
             return;
@@ -76,15 +91,7 @@ public class PositionTracker {
         tLastUpdate = e.getTimeStamp();
         carPosition.setDistanceOffset(carPosition.getDistanceOffset() + calculateDistance(timeOffset));
         if (sectionChanged()){
-            //FIXME tell this over akka so we don't need reference to speed optimizer
-            long sectionEndTime = System.currentTimeMillis();
-            carPosition.getSection().setDuration(sectionEndTime - sectionStartTime);
-            speedOptimizer.updateSection(new SectionUpdate(carPosition.getSection()));
-            speedOptimizer.update(carPosition.getSection());
-            sectionStartTime = sectionEndTime;
-            carPosition.setSection(getNextTrackSection(carPosition.getSection()));
-            carPosition.setPercentage(0);
-            carPosition.setDistanceOffset(0);
+            changeSection(getNextTrackSection(carPosition.getSection()));
         }else{
            carPosition.setPercentage(Math.min(carPosition.getDistanceOffset() / carPosition.getSection().getDistance(),1.0));
         }
@@ -113,14 +120,7 @@ public class PositionTracker {
 
         LOGGER.info("Sind an Position: " + velocityPositionId);
         if (carPosition.getSection().getId() != getTrackSectionId(velocityPositionId)){
-            long sectionEndTime = System.currentTimeMillis();
-            carPosition.getSection().setDuration(sectionEndTime - sectionStartTime);
-            speedOptimizer.updateSection(new SectionUpdate(carPosition.getSection()));
-            speedOptimizer.update(carPosition.getSection());
-            sectionStartTime = sectionEndTime;
-            carPosition.setSection(getTrackSection(velocityPositionId));
-            carPosition.setPercentage(0);
-            carPosition.setDistanceOffset(0);
+            changeSection(getTrackSection(velocityPositionId));
         } else {
             carPosition.setPercentage(track.getCheckpoints().get(velocityPositionId).getPercentage());
             carPosition.setDistanceOffset(track.getCheckpoints().get(velocityPositionId).getDistanceOffset());
