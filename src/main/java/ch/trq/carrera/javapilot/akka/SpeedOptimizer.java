@@ -30,6 +30,7 @@ public class SpeedOptimizer extends UntypedActor{
 
     private final int ZERO_POWER = 0;
     private final long WAIT_TIME_FOR_PENALTY = 3000;
+    private static final int MIN_DECREMENT = 2;
 
     private boolean hasPenalty = false;
     private long reciveLastPenaltyMessageTime = 0; // Computer-System-Time... CARE
@@ -157,7 +158,7 @@ public class SpeedOptimizer extends UntypedActor{
 
         int power = previous.getPower();
         if(previous.isPenaltyOccurred()){
-            power -= params.getPowerIncrement();
+            power -= Math.max(MIN_DECREMENT, params.getPowerIncrement());
             params.setPowerIncrement((int) (params.getPowerIncrement()*0.5));
         } else{
             if(power<maxPower){
