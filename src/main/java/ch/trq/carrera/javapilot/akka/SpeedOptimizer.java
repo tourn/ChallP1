@@ -11,11 +11,14 @@ import ch.trq.carrera.javapilot.akka.positiontracker.SectionUpdate;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackAndPhysicModelStorage;
 import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
+import ch.trq.carrera.javapilot.math.PhysicModel;
 import com.zuehlke.carrera.javapilot.akka.PowerAction;
 import com.zuehlke.carrera.relayapi.messages.PenaltyMessage;
 import com.zuehlke.carrera.relayapi.messages.RoundTimeMessage;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SpeedOptimizer extends UntypedActor {
 
@@ -24,6 +27,7 @@ public class SpeedOptimizer extends UntypedActor {
     private final long WAIT_TIME_FOR_PENALTY = 3000;
     private static final int MIN_DECREMENT = 2;
 
+    private int numberOfPenalties = 0;
     private boolean hasPenalty = false;
     private long reciveLastPenaltyMessageTime = 0; // Computer-System-Time... CARE
 
@@ -37,6 +41,9 @@ public class SpeedOptimizer extends UntypedActor {
     private final TrackHistory history;
     private StrategyParameters currentStrategyParams;
     private boolean recoveringFromPenalty = false;
+    private double maxVelocityForTurn = 0;
+    private PhysicModel physicModel;
+    private MinVelocityHistory minVelocityHistory;
 
     public SpeedOptimizer(ActorRef pilot, TrackAndPhysicModelStorage storage) {
         this.pilot = pilot;
@@ -44,7 +51,9 @@ public class SpeedOptimizer extends UntypedActor {
 
         positionTracker = new PositionTracker(storage.getTrack(), storage.getPhysicModel());
         positionTracker.setOnSectionChanged(this::onSectionChanged);
+        this.physicModel = storage.getPhysicModel();
 
+        minVelocityHistory = new MinVelocityHistory(track.getCheckpoints().size());
         history = new TrackHistory(track);
         TrackSection currentSection = positionTracker.getCarPosition().getSection();
         currentStrategyParams = createStrategyParams(history.getValidHistory(currentSection.getId()));
@@ -86,6 +95,10 @@ public class SpeedOptimizer extends UntypedActor {
         if (System.currentTimeMillis() - reciveLastPenaltyMessageTime > (WAIT_TIME_FOR_RECOVERY + WAIT_TIME_FOR_PENALTY)) {
             recoveringFromPenalty = false;
         }
+        if(numberOfPenalties==0) {
+            minVelocityHistory.Shift(message.getVelocity());
+            maxVelocityForTurn = minVelocityHistory.getMinValue();
+        }
         positionTracker.velocityUpdate(message);
     }
 
@@ -108,7 +121,7 @@ public class SpeedOptimizer extends UntypedActor {
                         tellChangePower(currentStrategyParams.getPower());
                     }
                 } else {
-                    tellChangePower(maxTurnPower);
+                    tellChangePower(currentStrategyParams.getPower());
                 }
             }
         }
@@ -118,6 +131,7 @@ public class SpeedOptimizer extends UntypedActor {
 
     private void handlePenaltyMessage(PenaltyMessage message) {
         tellChangePower(ZERO_POWER);
+        numberOfPenalties++;
         reciveLastPenaltyMessageTime = System.currentTimeMillis();
         hasPenalty = true;
         recoveringFromPenalty = true;
@@ -163,6 +177,17 @@ public class SpeedOptimizer extends UntypedActor {
         return params;
     }
 
+    private StrategyParameters createTurnStrategyParams(StrategyParameters previous){
+        StrategyParameters params = new StrategyParameters();
+        params.setSection(previous.getSection());
+        int power = previous.getPower();
+        if(maxVelocityForTurn != 0){
+            power = physicModel.getPowerForVelocity(maxVelocityForTurn,params.getSection());
+        }
+        params.setPower(power);
+        return params;
+    }
+
     public void tellSectionUpdate(TrackSection section) {
         SectionUpdate sectionUpdate = new SectionUpdate(section);
         sectionUpdate.setPenaltyOccured(currentStrategyParams.isPenaltyOccurred());
@@ -172,5 +197,35 @@ public class SpeedOptimizer extends UntypedActor {
             sectionUpdate.setPowerInSection(currentStrategyParams.getPower());
         }
         pilot.tell(sectionUpdate, getSelf());
+    }
+
+    public class MinVelocityHistory{
+        private List<Double> values;
+        private int size;
+
+        // Size have to be bigger than zero
+        public MinVelocityHistory(int size) {
+           this.size = size;
+            values = new ArrayList<>();
+        }
+
+        public void Shift(double velocity){
+            values.add(velocity);
+            if(values.size()>size){
+                values.remove(0);
+            }
+        }
+        public double getMinValue(){
+            double minV = Double.MAX_VALUE;
+            for(double v : values){
+                if(v<minV){
+                    minV=v;
+                }
+            }
+            if(minV==Double.MAX_VALUE){
+                return 0;
+            }
+            return minV;
+        }
     }
 }
