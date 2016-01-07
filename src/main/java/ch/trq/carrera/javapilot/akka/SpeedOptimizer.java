@@ -20,8 +20,9 @@ import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SpeedOptimizer extends UntypedActor{
+public class SpeedOptimizer extends UntypedActor {
 
+    private final int WAIT_TIME_FOR_RECOVERY = 3000;
     private final int ZERO_POWER = 0;
     private final long WAIT_TIME_FOR_PENALTY = 3000;
     private static final int MIN_DECREMENT = 2;
@@ -68,7 +69,7 @@ public class SpeedOptimizer extends UntypedActor{
             handleVelocityMessage((VelocityMessage) message);
         } else if (message instanceof RoundTimeMessage) {
             handleRoundTimeMessage((RoundTimeMessage) message);
-        } else if (message instanceof PenaltyMessage){
+        } else if (message instanceof PenaltyMessage) {
             handlePenaltyMessage((PenaltyMessage) message);
         } else {
             unhandled(message);
@@ -80,27 +81,34 @@ public class SpeedOptimizer extends UntypedActor{
     }
 
     private void handleVelocityMessage(VelocityMessage message) {
-        recoveringFromPenalty = false;
+        if (System.currentTimeMillis() - reciveLastPenaltyMessageTime > (WAIT_TIME_FOR_RECOVERY + WAIT_TIME_FOR_PENALTY)) {
+            recoveringFromPenalty = false;
+        }
         positionTracker.velocityUpdate(message);
     }
 
     private void handleSensorEvent(SensorEvent event) {
         LogMessage log = new LogMessage(event, System.currentTimeMillis());
         positionTracker.update(event);
-        if(hasPenalty){
+        if (hasPenalty) {
             changePower(ZERO_POWER);
-            if(System.currentTimeMillis() - reciveLastPenaltyMessageTime > WAIT_TIME_FOR_PENALTY){
+            if (System.currentTimeMillis() - reciveLastPenaltyMessageTime > WAIT_TIME_FOR_PENALTY) {
                 hasPenalty = false;
             }
-        }else {
-            if (!positionTracker.isTurn()) {
-                if (positionTracker.getPercentageDistance() > currentStrategyParams.getBrakePercentage()) {
-                    changePower(minPower);
-                } else {
-                    changePower(currentStrategyParams.getPower());
-                }
-            } else {
+        } else {
+            if (recoveringFromPenalty) {
                 changePower(maxTurnPower);
+            } else {
+
+                if (!positionTracker.isTurn()) {
+                    if (positionTracker.getPercentageDistance() > currentStrategyParams.getBrakePercentage()) {
+                        changePower(minPower);
+                    } else {
+                        changePower(currentStrategyParams.getPower());
+                    }
+                } else {
+                    changePower(maxTurnPower);
+                }
             }
         }
         popluateLog(log);
@@ -117,14 +125,14 @@ public class SpeedOptimizer extends UntypedActor{
         currentStrategyParams.setPenaltyOccurred(true);
     }
 
-    private void popluateLog(LogMessage log){
+    private void popluateLog(LogMessage log) {
         log.setPower(positionTracker.getPower());
         log.setActorDescription(actorDescription);
         log.setPositionRelative(positionTracker.getCarPosition().getDistanceOffset());
         log.settAfterCalculation(System.currentTimeMillis());
     }
 
-    public String getActorDescription(){
+    public String getActorDescription() {
         return "SpeedOptimizer";
     }
 
@@ -137,13 +145,13 @@ public class SpeedOptimizer extends UntypedActor{
         updateHistory((TrackSection) arg);
     }
 
-    private void updateHistory(TrackSection section){
+    private void updateHistory(TrackSection section) {
         currentStrategyParams.setDuration(section.getDuration()); //FIXME: duration is currently not set in the section
         history.addEntry(currentStrategyParams);
         currentStrategyParams = createStrategyParams(history.getValidHistory(positionTracker.getCarPosition().getSection().getId()));
     }
 
-    private StrategyParameters createStrategyParams(StrategyParameters previous){
+    private StrategyParameters createStrategyParams(StrategyParameters previous) {
         StrategyParameters params = new StrategyParameters();
 
         params.setPowerIncrement(previous.getPowerIncrement());
@@ -151,18 +159,17 @@ public class SpeedOptimizer extends UntypedActor{
         params.setSection(previous.getSection());
 
         int power = previous.getPower();
-        if(previous.isPenaltyOccurred()){
+        if (previous.isPenaltyOccurred()) {
             power -= Math.max(MIN_DECREMENT, params.getPowerIncrement());
-            params.setPowerIncrement((int) (params.getPowerIncrement()*0.5));
-        } else{
-            if(power+params.getPowerIncrement()<maxPower){
+            params.setPowerIncrement((int) (params.getPowerIncrement() * 0.5));
+        } else {
+            if (power + params.getPowerIncrement() < maxPower) {
                 power += params.getPowerIncrement();
             }
         }
         params.setPower(power);
 
-        if(recoveringFromPenalty){
-            params.setPower(maxTurnPower);
+        if (recoveringFromPenalty) {
             params.setValid(false);
         }
         return params;
@@ -170,9 +177,9 @@ public class SpeedOptimizer extends UntypedActor{
 
     public void updateSection(SectionUpdate sectionUpdate) {
         sectionUpdate.setPenaltyOccured(currentStrategyParams.isPenaltyOccurred());
-        if(positionTracker.isTurn()){
+        if (positionTracker.isTurn()) {
             sectionUpdate.setPowerInSection(positionTracker.getPower());
-        }else{
+        } else {
             sectionUpdate.setPowerInSection(currentStrategyParams.getPower());
         }
         pilot.tell(sectionUpdate, getSelf());
