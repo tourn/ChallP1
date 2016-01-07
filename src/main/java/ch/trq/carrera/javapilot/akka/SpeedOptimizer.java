@@ -20,12 +20,6 @@ import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Observable;
-import java.util.Observer;
-
-/**
- * Currently not optimizing anything, merely a placeholder.
- */
 public class SpeedOptimizer extends UntypedActor{
 
     private final int ZERO_POWER = 0;
@@ -39,8 +33,8 @@ public class SpeedOptimizer extends UntypedActor{
     private ActorRef pilot;
     private final Track track;
     private final int minPower = 120;
-    private final int maxTurnPower = 140;
-    private final int maxPower = 200;
+    private final int maxTurnPower = 150;
+    private int maxPower = 200;
     private PositionTracker positionTracker;
     private String actorDescription;
     private final TrackHistory history;
@@ -161,16 +155,16 @@ public class SpeedOptimizer extends UntypedActor{
             power -= Math.max(MIN_DECREMENT, params.getPowerIncrement());
             params.setPowerIncrement((int) (params.getPowerIncrement()*0.5));
         } else{
-            if(power<maxPower){
+            if(power+params.getPowerIncrement()<maxPower){
                 power += params.getPowerIncrement();
             }
         }
         params.setPower(power);
 
         if(recoveringFromPenalty){
+            params.setPower(maxTurnPower);
             params.setValid(false);
         }
-
         return params;
     }
 
