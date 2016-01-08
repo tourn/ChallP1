@@ -1,7 +1,7 @@
-package ch.trq.carrera.javapilot.akka.history;
+package ch.trq.carrera.javapilot.history;
 
-import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
-import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
+import ch.trq.carrera.javapilot.trackanalyzer.Track;
+import ch.trq.carrera.javapilot.trackanalyzer.TrackSection;
 
 import java.util.ArrayList;
 import java.util.List;

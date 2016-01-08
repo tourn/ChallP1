@@ -1,8 +1,8 @@
 package ch.trq.carrera.javapilot.math;
 
-import ch.trq.carrera.javapilot.akka.trackanalyzer.Direction;
-import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
-import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
+import ch.trq.carrera.javapilot.trackanalyzer.Direction;
+import ch.trq.carrera.javapilot.trackanalyzer.Track;
+import ch.trq.carrera.javapilot.trackanalyzer.TrackSection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

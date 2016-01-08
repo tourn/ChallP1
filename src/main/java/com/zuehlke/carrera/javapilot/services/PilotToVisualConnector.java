@@ -1,12 +1,11 @@
 package com.zuehlke.carrera.javapilot.services;
 
-import ch.trq.carrera.javapilot.akka.positiontracker.NewRoundUpdate;
-import ch.trq.carrera.javapilot.akka.positiontracker.SectionUpdate;
-import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
-import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
+import ch.trq.carrera.javapilot.akka.messages.NewRoundUpdate;
+import ch.trq.carrera.javapilot.positiontracker.SectionUpdate;
+import ch.trq.carrera.javapilot.trackanalyzer.Track;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
-import visualization.DataChart;
+import ch.trq.carrera.javapilot.visualization.DataChart;
 
 /**
  * Created by mario on 08.10.15.

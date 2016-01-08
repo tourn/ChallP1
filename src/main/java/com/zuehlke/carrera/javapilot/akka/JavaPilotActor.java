@@ -6,29 +6,21 @@ import akka.actor.UntypedActor;
 import akka.japi.Creator;
 import ch.trq.carrera.javapilot.akka.SpeedOptimizer;
 import ch.trq.carrera.javapilot.akka.TrackLearner;
-import ch.trq.carrera.javapilot.akka.log.LogMessage;
-import ch.trq.carrera.javapilot.akka.log.LogWriter;
-import ch.trq.carrera.javapilot.akka.positiontracker.CarUpdate;
-import ch.trq.carrera.javapilot.akka.positiontracker.NewRoundUpdate;
-import ch.trq.carrera.javapilot.akka.positiontracker.SectionUpdate;
-import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
-import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackAndPhysicModelStorage;
-import com.google.gson.Gson;
+import ch.trq.carrera.javapilot.log.LogMessage;
+import ch.trq.carrera.javapilot.log.LogWriter;
+import ch.trq.carrera.javapilot.akka.messages.CarUpdate;
+import ch.trq.carrera.javapilot.akka.messages.NewRoundUpdate;
+import ch.trq.carrera.javapilot.positiontracker.SectionUpdate;
+import ch.trq.carrera.javapilot.trackanalyzer.TrackAndPhysicModelStorage;
 import com.zuehlke.carrera.javapilot.akka.experimental.ThresholdConfiguration;
 import com.zuehlke.carrera.javapilot.config.PilotProperties;
 import com.zuehlke.carrera.javapilot.services.EndpointAnnouncement;
 import com.zuehlke.carrera.javapilot.services.PilotToRelayConnection;
 import com.zuehlke.carrera.javapilot.services.PilotToVisualConnection;
 import com.zuehlke.carrera.relayapi.messages.*;
-import org.jfree.ui.RefineryUtilities;
-import org.jfree.util.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import visualization.DataChart;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Map;
 
 /**

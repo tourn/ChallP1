@@ -1,11 +1,4 @@
-package ch.trq.carrera.javapilot.akka.trackanalyzer;
-
-import org.junit.*;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.*;
+package ch.trq.carrera.javapilot.trackanalyzer;
 
 /**
  * Created by Frank on 03.11.2015.

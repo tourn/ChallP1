@@ -1,16 +1,10 @@
 package com.zuehlke.carrera.javapilot.services;
 
-import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import org.jfree.ui.RefineryUtilities;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
-import visualization.DataChart;
-
-import javax.annotation.PostConstruct;
-import javax.xml.crypto.Data;
-import java.net.ServerSocket;
+import ch.trq.carrera.javapilot.visualization.DataChart;
 
 /**
  * Manages Data Visualization instance

@@ -1,11 +1,8 @@
-package ch.trq.carrera.javapilot.akka.positiontracker;
+package ch.trq.carrera.javapilot.positiontracker;
 
-import akka.actor.ActorRef;
-import akka.actor.UntypedActor;
-import ch.trq.carrera.javapilot.akka.SpeedOptimizer;
-import ch.trq.carrera.javapilot.akka.trackanalyzer.Direction;
-import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
-import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
+import ch.trq.carrera.javapilot.trackanalyzer.Direction;
+import ch.trq.carrera.javapilot.trackanalyzer.Track;
+import ch.trq.carrera.javapilot.trackanalyzer.TrackSection;
 import ch.trq.carrera.javapilot.math.PhysicModel;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
@@ -15,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Observable;
 import java.util.function.Consumer;
 
 /**

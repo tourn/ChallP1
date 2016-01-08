@@ -1,4 +1,4 @@
-package ch.trq.carrera.javapilot.akka.trackanalyzer;
+package ch.trq.carrera.javapilot.trackanalyzer;
 
 import java.util.ArrayList;
 import java.util.Collection;

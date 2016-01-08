@@ -1,4 +1,4 @@
-package ch.trq.carrera.javapilot.akka.positiontracker;
+package ch.trq.carrera.javapilot.akka.messages;
 
 /**
  * Created by mario on 09.11.15.

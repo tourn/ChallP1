@@ -1,4 +1,4 @@
-package ch.trq.carrera.javapilot.akka.log;
+package ch.trq.carrera.javapilot.log;
 
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 

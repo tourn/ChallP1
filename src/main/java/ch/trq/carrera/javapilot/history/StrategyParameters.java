@@ -1,6 +1,6 @@
-package ch.trq.carrera.javapilot.akka.history;
+package ch.trq.carrera.javapilot.history;
 
-import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
+import ch.trq.carrera.javapilot.trackanalyzer.TrackSection;
 
 /**
  * Created by tourn on 17.12.15.

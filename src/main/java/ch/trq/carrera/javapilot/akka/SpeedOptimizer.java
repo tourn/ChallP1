@@ -3,14 +3,14 @@ package ch.trq.carrera.javapilot.akka;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
-import ch.trq.carrera.javapilot.akka.history.StrategyParameters;
-import ch.trq.carrera.javapilot.akka.history.TrackHistory;
-import ch.trq.carrera.javapilot.akka.positiontracker.CarUpdate;
-import ch.trq.carrera.javapilot.akka.positiontracker.PositionTracker;
-import ch.trq.carrera.javapilot.akka.positiontracker.SectionUpdate;
-import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
-import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackAndPhysicModelStorage;
-import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
+import ch.trq.carrera.javapilot.history.StrategyParameters;
+import ch.trq.carrera.javapilot.history.TrackHistory;
+import ch.trq.carrera.javapilot.akka.messages.CarUpdate;
+import ch.trq.carrera.javapilot.positiontracker.PositionTracker;
+import ch.trq.carrera.javapilot.positiontracker.SectionUpdate;
+import ch.trq.carrera.javapilot.trackanalyzer.Track;
+import ch.trq.carrera.javapilot.trackanalyzer.TrackAndPhysicModelStorage;
+import ch.trq.carrera.javapilot.trackanalyzer.TrackSection;
 import ch.trq.carrera.javapilot.math.PhysicModel;
 import com.zuehlke.carrera.javapilot.akka.PowerAction;
 import com.zuehlke.carrera.relayapi.messages.PenaltyMessage;
@@ -19,9 +19,6 @@ import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class SpeedOptimizer extends UntypedActor {
 

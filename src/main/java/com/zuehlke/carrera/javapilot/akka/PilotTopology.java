@@ -3,9 +3,6 @@ package com.zuehlke.carrera.javapilot.akka;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
-import akka.actor.UntypedActor;
-import ch.trq.carrera.javapilot.akka.TrackLearner;
-import visualization.DataChart;
 
 import java.util.HashMap;
 import java.util.Map;

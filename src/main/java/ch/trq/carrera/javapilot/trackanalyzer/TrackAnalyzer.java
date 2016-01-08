@@ -1,4 +1,4 @@
-package ch.trq.carrera.javapilot.akka.trackanalyzer;
+package ch.trq.carrera.javapilot.trackanalyzer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

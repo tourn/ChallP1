@@ -1,4 +1,4 @@
-package visualization;
+package ch.trq.carrera.javapilot.visualization;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
@@ -10,10 +10,10 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
-import ch.trq.carrera.javapilot.akka.positiontracker.NewRoundUpdate;
-import ch.trq.carrera.javapilot.akka.positiontracker.SectionUpdate;
-import ch.trq.carrera.javapilot.akka.trackanalyzer.Track;
-import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
+import ch.trq.carrera.javapilot.akka.messages.NewRoundUpdate;
+import ch.trq.carrera.javapilot.positiontracker.SectionUpdate;
+import ch.trq.carrera.javapilot.trackanalyzer.Track;
+import ch.trq.carrera.javapilot.trackanalyzer.TrackSection;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import com.zuehlke.carrera.relayapi.messages.VelocityMessage;
 import org.jfree.chart.ChartFactory;

@@ -1,4 +1,4 @@
-package ch.trq.carrera.javapilot.akka.trackanalyzer;
+package ch.trq.carrera.javapilot.trackanalyzer;
 
 /**
  * Created by Frank on 22.09.2015.

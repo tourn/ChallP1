@@ -1,6 +1,6 @@
-package ch.trq.carrera.javapilot.akka.positiontracker;
+package ch.trq.carrera.javapilot.positiontracker;
 
-import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
+import ch.trq.carrera.javapilot.trackanalyzer.TrackSection;
 
 /**
  * Created by tourn on 22.10.15.

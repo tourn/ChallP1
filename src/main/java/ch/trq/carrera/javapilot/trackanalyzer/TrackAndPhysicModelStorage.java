@@ -1,4 +1,4 @@
-package ch.trq.carrera.javapilot.akka.trackanalyzer;
+package ch.trq.carrera.javapilot.trackanalyzer;
 
 import ch.trq.carrera.javapilot.math.PhysicModel;
 

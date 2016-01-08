@@ -1,7 +1,7 @@
-package ch.trq.carrera.javapilot.akka.trackanalyzer;
+package ch.trq.carrera.javapilot.trackanalyzer;
 
-import ch.trq.carrera.javapilot.akka.log.LogMessage;
-import ch.trq.carrera.javapilot.akka.log.LogWriter;
+import ch.trq.carrera.javapilot.log.LogMessage;
+import ch.trq.carrera.javapilot.log.LogWriter;
 import com.zuehlke.carrera.relayapi.messages.SensorEvent;
 import org.junit.Test;
 

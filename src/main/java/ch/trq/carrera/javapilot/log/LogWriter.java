@@ -1,4 +1,4 @@
-package ch.trq.carrera.javapilot.akka.log;
+package ch.trq.carrera.javapilot.log;
 
 import com.google.gson.Gson;
 import org.slf4j.Logger;
