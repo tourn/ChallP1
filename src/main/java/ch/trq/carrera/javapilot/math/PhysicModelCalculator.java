@@ -100,7 +100,7 @@ public class PhysicModelCalculator {
     private double calcFriction(double v0, double v1, long t){
         double dv = v1-v0;
         double v = v0+dv;
-        int p = track.getPower();
+        int p = track.getLearningPower();
         double e = physicModel.getE();
         return ((p/v)*e*t-dv)/(physicModel.getG()*t);
     }
@@ -163,13 +163,13 @@ public class PhysicModelCalculator {
             double v0 = list.get(0).getVelocity();
             double v1 = list.get(1).getVelocity();
             long t = list.get(1).getDurationOffset()-list.get(0).getDurationOffset();
-            LOGGER.info("v0: " + v0 + "cm/s, v1: " + v1 + "cm/s, t: " + t + "ms, Power: " + track.getPower());
+            LOGGER.info("v0: " + v0 + "cm/s, v1: " + v1 + "cm/s, t: " + t + "ms, Power: " + track.getLearningPower());
         }else{
             String s = "";
             for(int i = 0; i < list.size();i++){
                 s+="v"+i+": "+list.get(i).getVelocity()+"cm/s ("+list.get(i).getDurationOffset()+"ms), ";
             }
-            s+="Power: "+track.getPower();
+            s+="Power: "+track.getLearningPower();
             LOGGER.info(s);
             if(list.size()==3){
                 calcConstEForPhysicModel(list);
@@ -184,7 +184,7 @@ public class PhysicModelCalculator {
         double t2 = (double)(list.get(2).getDurationOffset()-list.get(1).getDurationOffset())/1000.0;
         double v1 = list.get(0).getVelocity()+dv1/2;
         double v2 = list.get(1).getVelocity()+dv2/2;
-        double p = (double)track.getPower();
+        double p = (double)track.getLearningPower();
 
         calcConstE(v1,dv1,t1,v2,dv2,t2,p);
 
@@ -198,7 +198,7 @@ public class PhysicModelCalculator {
     }
 
     private void showTurnBetweenToVelocitySensors(double v0, double v1, long t){
-        LOGGER.info("v0: " + v0 + "cm/s, v1: " + v1 + "cm/s, t: " + t + "ms, Power: " + track.getPower());
+        LOGGER.info("v0: " + v0 + "cm/s, v1: " + v1 + "cm/s, t: " + t + "ms, Power: " + track.getLearningPower());
     }
 
     private DistanceCalculator distanceCalculator;
@@ -251,7 +251,7 @@ public class PhysicModelCalculator {
         private double calculateSubsection(long t_from, long t_to, TrackSection section) {
             double distance = 0;
             for (long t = t_from; t < t_to; t++) {
-                v = physicModel.getVelocity(v, section, track.getPower(), 1);
+                v = physicModel.getVelocity(v, section, track.getLearningPower(), 1);
                 distance += v * 1.0 / 1000.0;
             }
             return distance;

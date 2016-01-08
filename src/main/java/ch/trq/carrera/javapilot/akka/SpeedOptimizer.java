@@ -36,8 +36,7 @@ public class SpeedOptimizer extends UntypedActor {
 
     private ActorRef pilot;
     private final Track track;
-    private final int minPower = 120;
-    private final int maxTurnPower = 150;
+    private final int slowDownPower = 120;
     private int maxPower = 200;
     private PositionTracker positionTracker;
     private final TrackHistory history;
@@ -60,8 +59,6 @@ public class SpeedOptimizer extends UntypedActor {
         history = new TrackHistory(track);
         TrackSection currentSection = positionTracker.getCarPosition().getSection();
         currentStrategyParams = createStrategyParams(history.getValidHistory(currentSection.getId()));
-
-        tellChangePower(maxTurnPower);
 
     }
 
@@ -120,12 +117,12 @@ public class SpeedOptimizer extends UntypedActor {
             }
         } else {
             if (recoveringFromPenalty) {
-                tellChangePower(maxTurnPower);
+                tellChangePower(track.getLearningPower());
             } else {
 
                 if (!positionTracker.isTurn()) {
                     if (positionTracker.getPercentageDistance() > currentStrategyParams.getBrakePercentage()) {
-                        tellChangePower(minPower);
+                        tellChangePower(slowDownPower);
                     } else {
                         tellChangePower(currentStrategyParams.getPower());
                     }

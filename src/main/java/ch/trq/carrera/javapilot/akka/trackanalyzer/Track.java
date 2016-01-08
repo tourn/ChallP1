@@ -13,7 +13,7 @@ public class Track {
     private Position car = null;
     private int power;
 
-    public int getPower() {
+    public int getLearningPower() {
         return power;
     }
 

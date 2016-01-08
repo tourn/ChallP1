@@ -5,7 +5,6 @@ import ch.trq.carrera.javapilot.akka.trackanalyzer.TrackSection;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Created by tourn on 17.12.15.
@@ -21,7 +20,7 @@ public class TrackHistory {
         history.add(0, new StrategyParameters[sectionCount]);
         history.add(1, new StrategyParameters[sectionCount]);
 
-        final int initialPower = initialTrack.getPower();
+        final int initialPower = initialTrack.getLearningPower();
         for(int i = 0; i < initialTrack.getSections().size(); i++){
             final TrackSection trackSection = initialTrack.getSections().get(i);
             history.get(0)[i] = createInitialEntry(trackSection, initialPower);
