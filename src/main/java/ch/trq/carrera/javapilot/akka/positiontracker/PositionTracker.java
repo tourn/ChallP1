@@ -73,13 +73,15 @@ public class PositionTracker {
     private void changeSection(TrackSection newSection){
         long sectionEndTime = System.currentTimeMillis();
         carPosition.getSection().setDuration(sectionEndTime - sectionStartTime);
-        if(onSectionChanged != null) {
-            onSectionChanged.accept(carPosition.getSection());
-        }
+        TrackSection completedSection = carPosition.getSection();
         sectionStartTime = sectionEndTime;
-        carPosition.setSection(getNextTrackSection(carPosition.getSection()));
+        carPosition.setSection(newSection);
         carPosition.setPercentage(0);
         carPosition.setDistanceOffset(0);
+
+        if(onSectionChanged != null) {
+            onSectionChanged.accept(completedSection);
+        }
     }
 
     public void sensorUpdate(SensorEvent e) {

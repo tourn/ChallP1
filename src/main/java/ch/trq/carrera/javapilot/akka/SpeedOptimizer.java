@@ -65,14 +65,15 @@ public class SpeedOptimizer extends UntypedActor {
 
     }
 
-    private void onSectionChanged(TrackSection section) {
-        tellSectionUpdate(section);
-        updateHistory(section);
+    private void onSectionChanged(TrackSection completedSection) {
+        tellSectionUpdate(completedSection);
+        updateHistory(completedSection);
         final int currentSectionId = positionTracker.getCarPosition().getSection().getId();
+        final StrategyParameters paramsFromLastRound = history.getValidHistory(currentSectionId);
         if(positionTracker.isTurn()){
-            currentStrategyParams = createTurnStrategyParams(history.getValidHistory(currentSectionId));
+            currentStrategyParams = createTurnStrategyParams(paramsFromLastRound);
         }else {
-            currentStrategyParams = createStrategyParams(history.getValidHistory(currentSectionId));
+            currentStrategyParams = createStrategyParams(paramsFromLastRound);
         }
     }
 
@@ -156,15 +157,15 @@ public class SpeedOptimizer extends UntypedActor {
         history.addEntry(currentStrategyParams);
     }
 
-    private StrategyParameters createStrategyParams(StrategyParameters previous) {
+    private StrategyParameters createStrategyParams(StrategyParameters paramsFromPreviousRound) {
         StrategyParameters params = new StrategyParameters();
 
-        params.setPowerIncrement(previous.getPowerIncrement());
-        params.setBrakePercentage(previous.getBrakePercentage());
-        params.setSection(previous.getSection());
+        params.setPowerIncrement(paramsFromPreviousRound.getPowerIncrement());
+        params.setBrakePercentage(paramsFromPreviousRound.getBrakePercentage());
+        params.setSection(paramsFromPreviousRound.getSection());
 
-        int power = previous.getPower();
-        if (previous.isPenaltyOccurred()) {
+        int power = paramsFromPreviousRound.getPower();
+        if (paramsFromPreviousRound.isPenaltyOccurred()) {
             power -= Math.max(MIN_DECREMENT, params.getPowerIncrement());
             params.setPowerIncrement((int) (params.getPowerIncrement() * 0.5));
         } else {
@@ -196,11 +197,7 @@ public class SpeedOptimizer extends UntypedActor {
     public void tellSectionUpdate(TrackSection section) {
         SectionUpdate sectionUpdate = new SectionUpdate(section);
         sectionUpdate.setPenaltyOccured(currentStrategyParams.isPenaltyOccurred());
-        if (positionTracker.isTurn()) {
-            sectionUpdate.setPowerInSection(positionTracker.getPower());
-        } else {
-            sectionUpdate.setPowerInSection(currentStrategyParams.getPower());
-        }
+        sectionUpdate.setPowerInSection(currentStrategyParams.getPower());
         pilot.tell(sectionUpdate, getSelf());
     }
 
