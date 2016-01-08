@@ -13,6 +13,8 @@ import com.zuehlke.carrera.timeseries.FloatingHistory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 import java.util.function.Consumer;
 
@@ -37,6 +39,8 @@ public class PositionTracker {
 
     private Consumer<TrackSection> onSectionChanged;
 
+    private MinVelocityHistory minVelocityHistory;
+
     public PositionTracker(Track track, PhysicModel physicModel) {
         this.track = track;
         carPosition = track.getCarPosition();
@@ -45,6 +49,7 @@ public class PositionTracker {
         velocityPositionId = getNextVelocityPositionId(sectionIndex);
         carPosition.setVelocity(track.getCheckpoints().get(velocityPositionId).getVelocity());
         sectionStartTime = System.currentTimeMillis();
+        minVelocityHistory = new MinVelocityHistory(getCountOfEndOfTrackSectionCheckpoint());
     }
 
     public void setOnSectionChanged(Consumer<TrackSection> onSectionChanged) {
@@ -58,6 +63,15 @@ public class PositionTracker {
         return 0;
     }
 
+    private int getCountOfEndOfTrackSectionCheckpoint() {
+        int count = 0;
+        for(int i = 0; i<track.getCheckpoints().size();i++) {
+            if(isStraightEndVelocity(i)){
+                count++;
+            }
+        }
+        return count;
+    }
 
     private double calculateDistance(long dtime) {
         double distance = 0;
@@ -128,7 +142,20 @@ public class PositionTracker {
             carPosition.setDistanceOffset(track.getCheckpoints().get(velocityPositionId).getDistanceOffset());
         }
 
+        if(isStraightEndVelocity(velocityPositionId)){
+            minVelocityHistory.Shift(message.getVelocity());
+        }
+
         velocityPositionId = (++velocityPositionId) % track.getCheckpoints().size();
+    }
+
+    public double getMaxTurnVelocity(){
+        return minVelocityHistory.getMinValue();
+    }
+
+    private boolean isStraightEndVelocity(int velocityPositionId){
+        return track.getCheckpoints().get(velocityPositionId).getDistanceOffset()
+                == track.getCheckpoints().get(velocityPositionId).getSection().getDistance();
     }
 
     private int getTrackSectionId(int velocityPositionId) {
@@ -157,6 +184,36 @@ public class PositionTracker {
 
     public double getPercentageDistance() {
         return carPosition.getPercentage();
+    }
+
+    public class MinVelocityHistory {
+        private List<Double> values;
+        private int size;
+
+        // Size have to be bigger than zero
+        public MinVelocityHistory(int size) {
+            this.size = size;
+            values = new ArrayList<>();
+        }
+
+        public void Shift(double velocity){
+            values.add(velocity);
+            if(values.size()>size){
+                values.remove(0);
+            }
+        }
+        public double getMinValue(){
+            double minV = Double.MAX_VALUE;
+            for(double v : values){
+                if(v<minV){
+                    minV=v;
+                }
+            }
+            if(minV==Double.MAX_VALUE){
+                return 0;
+            }
+            return minV;
+        }
     }
 
 }

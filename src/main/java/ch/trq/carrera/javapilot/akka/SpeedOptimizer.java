@@ -44,7 +44,6 @@ public class SpeedOptimizer extends UntypedActor {
     private boolean recoveringFromPenalty = false;
     private double maxVelocityForTurn = 0;
     private PhysicModel physicModel;
-    private MinVelocityHistory minVelocityHistory;
     private final Logger LOGGER = LoggerFactory.getLogger(TrackLearner.class);
 
     public SpeedOptimizer(ActorRef pilot, TrackAndPhysicModelStorage storage) {
@@ -55,7 +54,6 @@ public class SpeedOptimizer extends UntypedActor {
         positionTracker.setOnSectionChanged(this::onSectionChanged);
         this.physicModel = storage.getPhysicModel();
 
-        minVelocityHistory = new MinVelocityHistory(track.getCheckpoints().size());
         history = new TrackHistory(track);
         TrackSection currentSection = positionTracker.getCarPosition().getSection();
         currentStrategyParams = createStrategyParams(history.getValidHistory(currentSection.getId()));
@@ -102,8 +100,7 @@ public class SpeedOptimizer extends UntypedActor {
             recoveringFromPenalty = false;
         }
         if(numberOfPenalties==0) {
-            minVelocityHistory.Shift(message.getVelocity());
-            maxVelocityForTurn = minVelocityHistory.getMinValue();
+            maxVelocityForTurn = positionTracker.getMaxTurnVelocity();
         }
         positionTracker.velocityUpdate(message);
     }
@@ -196,35 +193,5 @@ public class SpeedOptimizer extends UntypedActor {
         sectionUpdate.setPenaltyOccured(currentStrategyParams.isPenaltyOccurred());
         sectionUpdate.setPowerInSection(currentStrategyParams.getPower());
         pilot.tell(sectionUpdate, getSelf());
-    }
-
-    public class MinVelocityHistory{
-        private List<Double> values;
-        private int size;
-
-        // Size have to be bigger than zero
-        public MinVelocityHistory(int size) {
-           this.size = size;
-            values = new ArrayList<>();
-        }
-
-        public void Shift(double velocity){
-            values.add(velocity);
-            if(values.size()>size){
-                values.remove(0);
-            }
-        }
-        public double getMinValue(){
-            double minV = Double.MAX_VALUE;
-            for(double v : values){
-                if(v<minV){
-                    minV=v;
-                }
-            }
-            if(minV==Double.MAX_VALUE){
-                return 0;
-            }
-            return minV;
-        }
     }
 }

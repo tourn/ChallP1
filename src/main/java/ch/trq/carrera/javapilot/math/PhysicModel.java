@@ -81,6 +81,8 @@ public class PhysicModel {
      * @return the power which will be used for the targetSpeed
      */
     public int getPowerForVelocity(double targetVelocity, TrackSection trackSection){
+        //If car crashes, use this alternative (old) calculation
+        //int a = (int)(targetVelocity*trackSection.getFriction()*g/e);
         return (int)Math.sqrt(targetVelocity*trackSection.getFriction()*g*startPower/e);
     }
 }
