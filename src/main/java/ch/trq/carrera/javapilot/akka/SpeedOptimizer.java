@@ -62,9 +62,9 @@ public class SpeedOptimizer extends UntypedActor {
         updateHistory(completedSection);
         final int currentSectionId = positionTracker.getCarPosition().getSection().getId();
         final StrategyParameters paramsFromLastRound = history.getValidHistory(currentSectionId);
-        if(positionTracker.isTurn()){
+        if (positionTracker.isTurn()) {
             currentStrategyParams = createTurnStrategyParams(paramsFromLastRound);
-        }else {
+        } else {
             currentStrategyParams = createStrategyParams(paramsFromLastRound);
         }
     }
@@ -96,7 +96,7 @@ public class SpeedOptimizer extends UntypedActor {
         if (System.currentTimeMillis() - reciveLastPenaltyMessageTime > (WAIT_TIME_FOR_RECOVERY + WAIT_TIME_FOR_PENALTY)) {
             recoveringFromPenalty = false;
         }
-        if(numberOfPenalties==0) {
+        if (numberOfPenalties == 0) {
             maxVelocityForTurn = positionTracker.getMaxTurnVelocity();
         }
         positionTracker.velocityUpdate(message);
@@ -111,7 +111,7 @@ public class SpeedOptimizer extends UntypedActor {
             }
         } else {
             if (recoveringFromPenalty) {
-                tellChangePower(track.getLearningPower());
+                tellChangePower(track.getLearningPower() + 5);
             } else {
 
                 if (!positionTracker.isTurn()) {
@@ -131,6 +131,7 @@ public class SpeedOptimizer extends UntypedActor {
 
     private void handlePenaltyMessage(PenaltyMessage message) {
         tellChangePower(ZERO_POWER);
+        maxPower = currentStrategyParams.getPower();
         numberOfPenalties++;
         reciveLastPenaltyMessageTime = System.currentTimeMillis();
         hasPenalty = true;
@@ -148,6 +149,15 @@ public class SpeedOptimizer extends UntypedActor {
         history.addEntry(currentStrategyParams);
     }
 
+    private boolean hasCheckpointAtTheEnd(TrackSection section) {
+        for (Track.Position checkpoint : track.getCheckpoints()) {
+            if (checkpoint.getSection().getId() == section.getId() && checkpoint.getPercentage() == 1) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private StrategyParameters createStrategyParams(StrategyParameters paramsFromPreviousRound) {
         StrategyParameters params = new StrategyParameters();
 
@@ -160,7 +170,9 @@ public class SpeedOptimizer extends UntypedActor {
             power -= Math.max(MIN_DECREMENT, params.getPowerIncrement());
             params.setPowerIncrement((int) (params.getPowerIncrement() * 0.5));
         } else {
-            if (power + params.getPowerIncrement() < maxPower) {
+            if(hasCheckpointAtTheEnd(params.getSection())){
+                power += params.getPowerIncrement();
+            }else if (power + params.getPowerIncrement() < maxPower) {
                 power += params.getPowerIncrement();
             }
         }
@@ -172,14 +184,14 @@ public class SpeedOptimizer extends UntypedActor {
         return params;
     }
 
-    private StrategyParameters createTurnStrategyParams(StrategyParameters paramsFromPreviousRound){
+    private StrategyParameters createTurnStrategyParams(StrategyParameters paramsFromPreviousRound) {
         StrategyParameters params = new StrategyParameters();
         params.setSection(paramsFromPreviousRound.getSection());
         int power = paramsFromPreviousRound.getPower();
-        if(maxVelocityForTurn != 0){
-            power = physicModel.getPowerForVelocity(maxVelocityForTurn,params.getSection());
-            LOGGER.info("mVFT: "+maxVelocityForTurn);
-            LOGGER.info("p: "+ power);
+        if (maxVelocityForTurn != 0) {
+            power = physicModel.getPowerForVelocity(maxVelocityForTurn, params.getSection());
+            LOGGER.info("mVFT: " + maxVelocityForTurn);
+            LOGGER.info("p: " + power);
         }
         params.setPower(power);
         return params;
