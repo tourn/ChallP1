@@ -144,7 +144,7 @@ public class SpeedOptimizer extends UntypedActor {
     }
 
     private void updateHistory(TrackSection section) {
-        currentStrategyParams.setDuration(section.getDuration()); //FIXME: duration is currently not set in the section
+        currentStrategyParams.setDuration(section.getDuration());
         history.addEntry(currentStrategyParams);
     }
 

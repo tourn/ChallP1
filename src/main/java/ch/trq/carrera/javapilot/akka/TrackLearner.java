@@ -96,7 +96,6 @@ public class TrackLearner extends UntypedActor {
                     physicModelCalculator.calcFrictions();
                     physicModelCalculator.calculateDistances();
                     Track track = physicModelCalculator.getTrack();
-                    //TODO: Carposition setzen? PhysikModel mitsenden bzw. nur der E wert
                     track.setCar(physicLearnHelper.GetCarPositionOnTrack());
                     track.getCarPosition().setVelocity(dv1);
                     TrackAndPhysicModelStorage storage = new TrackAndPhysicModelStorage(track,physicModel);

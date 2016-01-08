@@ -263,7 +263,7 @@ public class PhysicModelCalculator {
                     return checkpoint;
                 }
             }
-            //FIXME: the current calculation can't handle this. This could be fixed by calculating backwards in a tracksection
+            //the current calculation can't handle this. This could be fixed by calculating backwards in a tracksection
             return null;
         }
     }
