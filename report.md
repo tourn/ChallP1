@@ -92,24 +92,31 @@ permalink: /report/
 * Berechnung der Distanzen aufgrund des Physikmodells
 
 ### 27.11.15
-* Anhalte-Technik zur Komplettierung des Gleichungssystem [Physikmodell](http://tourn.github.io/ChallP1/2015/11/11/AdvancedPhysicsModel/)
+* Anhalte-Technik zur Komplettierung des Gleichungssystem [Physikmodell](http://tourn.github.io/ChallP1/2015/11/11/AdvancedPhysicsModel/) (4h f)
 
 ### 3.12.15
 * Refactoring (3h dfm)
 
 ### 10.12.15
-* Neues Phyikmodel in Speedoptimizer eingebracht
-* PositionTracker neu aufgebaut, damit er mit dem neuen Physikmodel arbeitet 
+* Neues Phyikmodel in Speedoptimizer eingebracht (3h dm)
+* PositionTracker neu aufgebaut, damit er mit dem neuen Physikmodel arbeitet (3h f)
 
 ### 17.12.15
-* SpeedOptimizer Strategie konzipiert 
-* TrackHistory implementiert
-* Strategie implementiert
+* SpeedOptimizer Strategie konzipieren  (2h dfm)
+* Historie implementieren (2h dm)
+* Strategie implementieren (2h f)
 
 ### 21.12.15
-* show RoundTime in DataChart
-* insert max speed for straights (WIP)
+* Rundenzeit in Visualisierung anzeigen (1h m)
+* Speedoptimizer Strategie implementieren (2h df)
 
 ### 28.12.15
-* Visualisierung verbessert
-* Max Power einpendeln
+* Visualisierung verbessert (4h m)
+* Max Power einpendeln (4h df)
+
+### 7.1.16
+* Speedoptimierung in Kurven (4h dfm)
+* Visualisierung verbessern (2h m)
+
+### 8.1.16
+* Speedoptimierung in Kurven (2h dfm)
